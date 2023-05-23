@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">SlowMotionApp</string>
+    <string name="background">Background</string>
+    <string name="slow_motion_video_maker">Slow-Motion Video Maker</string>
+</resources>
