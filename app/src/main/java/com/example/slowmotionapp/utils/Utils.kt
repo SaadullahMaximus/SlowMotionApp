@@ -14,7 +14,8 @@ object Utils {
             Date()
         )
         val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
-        val storageDir: File = context.getExternalFilesDir(Environment.DIRECTORY_MOVIES)!!
+        val filepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
+        val storageDir = File(filepath.absolutePath + "/samplevideofolder/")
         if (!storageDir.exists()) storageDir.mkdirs()
         return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, storageDir)
     }

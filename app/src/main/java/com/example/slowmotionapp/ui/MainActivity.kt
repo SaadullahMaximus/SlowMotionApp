@@ -15,10 +15,12 @@ import android.util.Log
 import android.view.View
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.example.slowmotionapp.EditorActivity
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.ActivityMainBinding
 import com.example.slowmotionapp.utils.Utils
@@ -159,6 +161,18 @@ class MainActivity : AppCompatActivity() {
         intent.data = uri
         startActivityForResult(intent, 300)
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Toast.makeText(this, "Test is going to Start", Toast.LENGTH_SHORT).show()
+        super.onActivityResult(requestCode, resultCode, data)
+//        if (requestCode == Constants.RECORD_VIDEO && resultCode == Activity.RESULT_OK) {
+            // Start the new activity
+            val intent = Intent(this, EditorActivity::class.java)
+            intent.putExtra("VideoUri", videoUri.toString())
+            startActivity(intent)
+//        }
+    }
+
 
 
 }
