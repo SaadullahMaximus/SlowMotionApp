@@ -82,7 +82,7 @@
 
         <LinearLayout
             android:id="@+id/captureVideoBtn"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
@@ -93,7 +93,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/fredoka_one"
-                android:text="Saved"
+                android:text="Record"
                 android:layout_marginBottom="4dp"
                 android:textColor="@color/white" />
 
@@ -108,7 +108,7 @@
 
         <LinearLayout
             android:id="@+id/selectVideoBtn"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
@@ -119,7 +119,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/fredoka_one"
-                android:text="Saved"
+                android:text="Pick Video"
                 android:layout_marginBottom="4dp"
                 android:textColor="@color/white" />
 

@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="30dp"
         android:fontFamily="@font/fredoka_one"
-        android:text="Trim Video"
+        android:text="@string/trim_video"
         android:textColor="@color/white"
         android:textSize="17sp"
         app:layout_constraintStart_toEndOf="@+id/backBtn"
