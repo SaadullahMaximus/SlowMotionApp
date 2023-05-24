@@ -1,0 +1,24 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background line -->
+    <item android:id="@android:id/background">
+        <shape android:shape="line">
+            <stroke
+                android:width="2dp"
+                android:color="#CAC1A6" /> <!-- Set the desired background color here -->
+        </shape>
+    </item>
+
+    <!-- Progress line -->
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape android:shape="line">
+                <stroke
+                    android:width="2dp"
+                    android:color="#FDC005" /> <!-- Set the desired progress color here -->
+                <size
+                    android:top="1dp"
+                    android:bottom="1dp" /> <!-- Adjust the top and bottom values to change the height -->
+            </shape>
+        </clip>
+    </item>
+</layer-list>
