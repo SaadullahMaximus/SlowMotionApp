@@ -45,7 +45,9 @@ class TrimVideoFragment : Fragment() {
             binding.seekBar.max = totalDuration
             binding.totalDurationTextView.text = formatDuration(totalDuration)
             progressDialog.dismiss()
+            it.start()
 
+            binding.trimVideoView.pause()
 
             it.setOnCompletionListener {
                 binding.seekBar.progress = totalDuration
