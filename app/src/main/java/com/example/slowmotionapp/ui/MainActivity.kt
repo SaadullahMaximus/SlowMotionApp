@@ -24,6 +24,9 @@ import com.example.slowmotionapp.EditorActivity
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.ActivityMainBinding
 import com.example.slowmotionapp.utils.Utils
+import com.github.hiteshsondhi88.libffmpeg.FFmpeg
+import com.github.hiteshsondhi88.libffmpeg.FFmpegLoadBinaryResponseHandler
+import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
@@ -50,6 +53,31 @@ class MainActivity : AppCompatActivity() {
                 "android.permission.READ_MEDIA_AUDIO"
             ), 101
         )
+
+        //load FFmpeg
+        try {
+            FFmpeg.getInstance(this).loadBinary(object : FFmpegLoadBinaryResponseHandler {
+                override fun onFailure() {
+                    Log.v("FFMpeg", "Failed to load FFMpeg library.")
+                }
+
+                override fun onSuccess() {
+                    Log.v("FFMpeg", "FFMpeg Library loaded!")
+                }
+
+                override fun onStart() {
+                    Log.v("FFMpeg", "FFMpeg Started")
+                }
+
+                override fun onFinish() {
+                    Log.v("FFMpeg", "FFMpeg Stopped")
+                }
+            })
+        } catch (e: FFmpegNotSupportedException) {
+            e.printStackTrace()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
         binding.fabCreate.setOnClickListener {
             if (isExpanded) {

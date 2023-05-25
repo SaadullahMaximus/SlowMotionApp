@@ -1,6 +1,5 @@
 package com.example.slowmotionapp
 
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -11,7 +10,7 @@ import com.example.slowmotionapp.ui.VideoCheckFragment
 
 class EditorActivity : AppCompatActivity() {
 
-    private var videoUri: Uri? = null
+    private var videoUri: String? = null
     private lateinit var binding: ActivityEditorBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,12 +24,12 @@ class EditorActivity : AppCompatActivity() {
 
 
         // Fetch the videoUri from the intent
-        videoUri = intent.getStringExtra("VideoUri")?.let { Uri.parse(it) }
+        videoUri = intent.getStringExtra("VideoUri")
         Log.d("MaximusTech", "onCreate: $videoUri")
 
     }
 
-    fun getVideoUri(): Uri? {
+    fun getVideoUri(): String? {
         // Return the video URI
         return videoUri
     }

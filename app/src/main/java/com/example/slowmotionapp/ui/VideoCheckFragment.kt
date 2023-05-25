@@ -27,11 +27,11 @@ class VideoCheckFragment : Fragment() {
         _binding = FragmentVideoCheckBinding.inflate(inflater, container, false)
 
 
-        val videoUri: Uri = (activity as EditorActivity?)!!.getVideoUri()!!
+        val videoUri: String = (activity as EditorActivity?)!!.getVideoUri()!!
 
         Log.d("MaximusFragment", "onCreateView:1 $videoUri")
 
-        binding.checkVideoView.setVideoURI(videoUri)
+        binding.checkVideoView.setVideoURI(Uri.parse(videoUri))
 
         val progressDialog = ProgressDialog(requireContext())
         progressDialog.setMessage("Preparing Video to Play...")

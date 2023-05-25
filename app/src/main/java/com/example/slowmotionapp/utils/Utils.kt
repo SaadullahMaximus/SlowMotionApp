@@ -1,11 +1,15 @@
 package com.example.slowmotionapp.utils
 
+import android.content.ContentResolver
 import android.content.Context
+import android.net.Uri
 import android.os.Environment
+import android.provider.MediaStore
 import com.example.slowmotionapp.constants.Constants
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 object Utils {
 
@@ -29,6 +33,12 @@ object Utils {
         val storageDir = File("$filepath/Trimmed/")
         if (!storageDir.exists()) storageDir.mkdirs()
         return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, storageDir)
+    }
+
+    fun convertContentUriToFilePath(contentUriString: String): String {
+        val startIndex = contentUriString.lastIndexOf("/") + 1
+        val endIndex = contentUriString.length
+        return "/storage/emulated/0/Movies/SlowMotionApp/Recordings/${contentUriString.substring(startIndex, endIndex)}"
     }
 
 }
