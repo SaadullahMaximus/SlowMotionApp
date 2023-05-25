@@ -7,4 +7,9 @@
     <string name="drag_slider_for_trimming">Drag slider for trimming</string>
     <string name="done">Done</string>
     <string name="trim_video">Trim Video</string>
+
+    <string name="video_length_validation">Video should be of minimum 3 seconds</string>
+    <string name="save">Save</string>
+
+
 </resources>
