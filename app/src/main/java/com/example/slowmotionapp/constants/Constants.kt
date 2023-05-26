@@ -18,8 +18,20 @@ class Constants {
             )
         }
 
+        val PERMISSION_GALLERY = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            arrayOf(
+                Manifest.permission.READ_MEDIA_VIDEO
+            )
+        } else {
+            arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            )
+        }
+
         const val provider = "com.example.slowmotionapp.provider"
         const val APP_NAME = "SlowMotionApp"
+
+        const val TYPE = "TYPE"
 
         const val VIDEO_FLIRT = 1
         const val VIDEO_TRIM = 2

@@ -40,8 +40,10 @@ class TrimVideoFragment : Fragment(), View.OnClickListener, FFMpegCallback {
     private var mDurationWithoutEdit = 0
 
     private lateinit var videoUri: String
+    private var type: Int = 0
 
-    private lateinit var dstFile: String
+    private lateinit var file: File
+
     private lateinit var outputFile: File
 
     private val mHandler = Handler()
@@ -53,8 +55,7 @@ class TrimVideoFragment : Fragment(), View.OnClickListener, FFMpegCallback {
         _binding = FragmentTrimVideoBinding.inflate(inflater, container, false)
 
         videoUri = (activity as EditorActivity?)!!.getVideoUri()!!
-
-        dstFile = Utils.createTrimmedFile(requireContext()).toString()
+        type = (activity as EditorActivity?)!!.getType()
 
         binding.backBtn.setOnClickListener {
             requireActivity().finish()
@@ -182,11 +183,18 @@ class TrimVideoFragment : Fragment(), View.OnClickListener, FFMpegCallback {
                 Toast.makeText(requireContext(), "Trimming", Toast.LENGTH_SHORT).show()
                 val mediaMetadataRetriever = MediaMetadataRetriever()
                 mediaMetadataRetriever.setDataSource(requireContext(), Uri.parse(videoUri))
-                val file = File(Utils.convertContentUriToFilePath(videoUri))
+                file = if (type == Constants.RECORD_VIDEO) {
+                    File(Utils.convertContentUriToFilePath(videoUri))
+                } else {
+                    File(videoUri)
+                }
 
                 try {
                     //output file is generated and send to video processing
                     outputFile = Utils.createTrimmedFile(requireContext())
+
+                    Log.d("GGG", "onClick: input$file")
+                    Log.d("GGG", "onClick: input$outputFile")
 
                     VideoEditor.with(requireContext())
                         .setType(Constants.VIDEO_TRIM)
@@ -376,7 +384,6 @@ class TrimVideoFragment : Fragment(), View.OnClickListener, FFMpegCallback {
 
     override fun onFailure(error: Exception) {
         Log.d("TrimFFMPEG", "onFailure() " + error.localizedMessage)
-        Toast.makeText(requireContext(), "Video processing failed", Toast.LENGTH_LONG).show()
     }
 
     override fun onNotAvailable(error: Exception) {

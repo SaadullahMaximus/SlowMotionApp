@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.ActivityEditorBinding
 import com.example.slowmotionapp.ui.VideoCheckFragment
 import java.io.File
@@ -12,6 +13,7 @@ import java.io.File
 class EditorActivity : AppCompatActivity() {
 
     private var videoUri: String? = null
+    private var type: Int = 0
     private lateinit var binding: ActivityEditorBinding
     private lateinit var trimmedVideoPath: String
 
@@ -27,6 +29,7 @@ class EditorActivity : AppCompatActivity() {
 
         // Fetch the videoUri from the intent
         videoUri = intent.getStringExtra("VideoUri")
+        type = intent.getIntExtra(Constants.TYPE, 0)
         Log.d("MaximusTech", "onCreate: $videoUri")
 
     }
@@ -34,6 +37,10 @@ class EditorActivity : AppCompatActivity() {
     fun getVideoUri(): String? {
         // Return the video URI
         return videoUri
+    }
+
+    fun getType(): Int{
+        return type
     }
 
     fun setTrimVideoPath(outputFile: File) {

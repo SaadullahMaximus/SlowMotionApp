@@ -1,14 +1,16 @@
 package com.example.slowmotionapp.utils
 
-import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
+import android.media.MediaMetadataRetriever
+import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Environment
-import android.provider.MediaStore
 import com.example.slowmotionapp.constants.Constants
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 
 object Utils {
@@ -39,6 +41,42 @@ object Utils {
         val startIndex = contentUriString.lastIndexOf("/") + 1
         val endIndex = contentUriString.length
         return "/storage/emulated/0/Movies/SlowMotionApp/Recordings/${contentUriString.substring(startIndex, endIndex)}"
+    }
+
+    fun refreshGalleryAlone(context: Context) {
+        try {
+            val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+            context.sendBroadcast(mediaScanIntent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun getFileExtension(filePath: String): String? {
+        return filePath.substring(filePath.lastIndexOf("."))
+    }
+
+    fun getVideoDuration(context: Context, file: File): Long{
+        val retriever = MediaMetadataRetriever()
+        retriever.setDataSource(context, Uri.fromFile(file))
+        val time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+        val timeInMillis = time!!.toLong()
+        retriever.release()
+        return timeInMillis
+    }
+
+    fun convertDurationInMin(duration: Long): Long {
+        val minutes = TimeUnit.MILLISECONDS.toMinutes(duration)
+        return if (minutes > 0) {
+            minutes
+        } else {
+            0
+        }
+    }
+
+    fun getMediaDuration(context: Context?, uriOfFile: Uri?): Int {
+        val mp = MediaPlayer.create(context, uriOfFile)
+        return mp.duration
     }
 
 }
