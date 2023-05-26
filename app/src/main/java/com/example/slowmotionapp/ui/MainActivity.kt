@@ -54,7 +54,6 @@ class MainActivity : AppCompatActivity() {
             ), 101
         )
 
-        //load FFmpeg
         try {
             FFmpeg.getInstance(this).loadBinary(object : FFmpegLoadBinaryResponseHandler {
                 override fun onFailure() {

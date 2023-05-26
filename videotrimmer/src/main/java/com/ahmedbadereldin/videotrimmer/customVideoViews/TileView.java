@@ -20,6 +20,7 @@ import com.ahmedbadereldin.videotrimmer.R;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class TileView extends View {
 
@@ -27,7 +28,6 @@ public class TileView extends View {
     private int mHeightView;
     private LongSparseArray<Bitmap> mBitmapList = null;
     private int viewWidth = 0;
-    private int viewHeight = 0;
 
     public TileView(@NonNull Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -57,7 +57,6 @@ public class TileView extends View {
     protected void onSizeChanged(final int w, int h, final int oldW, int oldH) {
         super.onSizeChanged(w, h, oldW, oldH);
         viewWidth = w;
-        viewHeight = h;
         if (w != oldW) {
             if (mVideoUri != null)
                 getBitmap();
@@ -75,10 +74,8 @@ public class TileView extends View {
                                      MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
                                      mediaMetadataRetriever.setDataSource(getContext(), mVideoUri);
 
-                                     // Retrieve media data
                                      long videoLengthInMs = Integer.parseInt(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)) * 1000;
 
-                                     // Set thumbnail properties (Thumbs are squares)
                                      final int thumbWidth = mHeightView;
                                      final int thumbHeight = mHeightView;
 
@@ -88,7 +85,6 @@ public class TileView extends View {
 
                                      for (int i = 0; i < numThumbs; ++i) {
                                          Bitmap bitmap = mediaMetadataRetriever.getFrameAtTime(i * interval, MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
-                                         // TODO: bitmap might be null here, hence throwing NullPointerException. You were right
                                          try {
                                              bitmap = Bitmap.createScaledBitmap(bitmap, thumbWidth, thumbHeight, false);
                                          } catch (Exception e) {
@@ -100,7 +96,7 @@ public class TileView extends View {
                                      mediaMetadataRetriever.release();
                                      returnBitmaps(thumbnailList);
                                  } catch (final Throwable e) {
-                                     Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
+                                     Objects.requireNonNull(Thread.getDefaultUncaughtExceptionHandler()).uncaughtException(Thread.currentThread(), e);
                                  }
                              }
                          }
@@ -108,13 +104,10 @@ public class TileView extends View {
     }
 
     private void returnBitmaps(final LongSparseArray<Bitmap> thumbnailList) {
-        new MainThreadExecutor().runTask("", new Runnable() {
-                    @Override
-                    public void run() {
-                        mBitmapList = thumbnailList;
-                        invalidate();
-                    }
-                }
+        new MainThreadExecutor().runTask("", () -> {
+            mBitmapList = thumbnailList;
+            invalidate();
+        }
                 , 0L);
     }
 
@@ -142,7 +135,7 @@ public class TileView extends View {
         getBitmap();
     }
 
-    public final class MainThreadExecutor {
+    public static final class MainThreadExecutor {
 
         private final Handler HANDLER = new Handler(Looper.getMainLooper()) {
             @Override
@@ -159,18 +152,8 @@ public class TileView extends View {
 
         private final Map<String, Token> TOKENS = new HashMap<>();
 
-        private MainThreadExecutor() {
-            // should not be instantiated
-        }
+        private MainThreadExecutor() {}
 
-        /**
-         * Store a new task in the map for providing cancellation. This method is
-         * used by AndroidAnnotations and not intended to be called by clients.
-         *
-         * @param id    the identifier of the task
-         * @param task  the task itself
-         * @param delay the delay or zero to run immediately
-         */
         public void runTask(String id, Runnable task, long delay) {
             if ("".equals(id)) {
                 HANDLER.postDelayed(task, delay);
@@ -184,47 +167,28 @@ public class TileView extends View {
             synchronized (TOKENS) {
                 Token token = TOKENS.get(id);
                 if (token == null) {
-                    token = new MainThreadExecutor.Token(id);
+                    token = new Token(id);
                     TOKENS.put(id, token);
                 }
-                token.runnablesCount++;
+                token.runCount++;
                 return token;
             }
         }
 
         private void decrementToken(Token token) {
             synchronized (TOKENS) {
-                if (--token.runnablesCount == 0) {
+                if (--token.runCount == 0) {
                     String id = token.id;
                     Token old = TOKENS.remove(id);
                     if (old != token) {
-                        // a runnable finished after cancelling, we just removed a
-                        // wrong token, lets put it back
                         TOKENS.put(id, old);
                     }
                 }
             }
         }
 
-        /**
-         * Cancel all tasks having the specified <code>id</code>.
-         *
-         * @param id the cancellation identifier
-         */
-        public void cancelAll(String id) {
-            Token token;
-            synchronized (TOKENS) {
-                token = TOKENS.remove(id);
-            }
-            if (token == null) {
-                // nothing to cancel
-                return;
-            }
-            HANDLER.removeCallbacksAndMessages(token);
-        }
-
-        private final class Token {
-            int runnablesCount = 0;
+        private static final class Token {
+            int runCount = 0;
             final String id;
 
             private Token(String id) {

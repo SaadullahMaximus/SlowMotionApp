@@ -11,7 +11,6 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
-
 import com.ahmedbadereldin.videotrimmer.R;
 
 import java.util.ArrayList;
@@ -96,7 +95,6 @@ public class CustomRangeSeekBar extends View {
                 th.setVal(mScaleRangeMax * i);
                 th.setPos(mPixelRangeMax * i);
             }
-            // Fire listener callback
             onCreate(this, currentThumb, getThumbValue(currentThumb));
             mFirstRun = false;
         }
@@ -121,7 +119,6 @@ public class CustomRangeSeekBar extends View {
 
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
-                // Remember where we started
                 currentThumb = getClosestThumb(coordinate);
 
                 if (currentThumb == -1) {
@@ -147,7 +144,6 @@ public class CustomRangeSeekBar extends View {
             case MotionEvent.ACTION_MOVE: {
                 mBarThumb = mBarThumbs.get(currentThumb);
                 mBarThumb2 = mBarThumbs.get(currentThumb == 0 ? 1 : 0);
-                // Calculate the distance moved
                 final float dx = coordinate - mBarThumb.getLastTouchX();
                 final float newX = mBarThumb.getPos() + dx;
 
@@ -162,16 +158,12 @@ public class CustomRangeSeekBar extends View {
                             setThumbPos(1, mBarThumb2.getPos());
                         }
                     } else {
-                        //Check if thumb is not out of max width
-//                        checkPositionThumb(mBarThumb, mBarThumb2, dx, true, coordinate);
                         if ((mBarThumb2.getPos() - (mBarThumb.getPos() + dx)) > mMaxWidth) {
                             mBarThumb2.setPos(mBarThumb.getPos() + dx + mMaxWidth);
                             setThumbPos(1, mBarThumb2.getPos());
                         }
-                        // Move the object
                         mBarThumb.setPos(mBarThumb.getPos() + dx);
 
-                        // Remember this touch position for the next move event
                         mBarThumb.setLastTouchX(coordinate);
                     }
 
@@ -185,43 +177,21 @@ public class CustomRangeSeekBar extends View {
                             setThumbPos(0, mBarThumb2.getPos());
                         }
                     } else {
-                        //Check if thumb is not out of max width
-//                        checkPositionThumb(mBarThumb2, mBarThumb, dx, false, coordinate);
                         if (((mBarThumb.getPos() + dx) - mBarThumb2.getPos()) > mMaxWidth) {
                             mBarThumb2.setPos(mBarThumb.getPos() + dx - mMaxWidth);
                             setThumbPos(0, mBarThumb2.getPos());
                         }
-                        // Move the object
                         mBarThumb.setPos(mBarThumb.getPos() + dx);
-                        // Remember this touch position for the next move event
                         mBarThumb.setLastTouchX(coordinate);
                     }
                 }
 
                 setThumbPos(currentThumb, mBarThumb.getPos());
-
-                // Invalidate to request a redraw
                 invalidate();
                 return true;
             }
         }
         return false;
-    }
-
-    private void checkPositionThumb(@NonNull BarThumb mBarThumbLeft, @NonNull BarThumb mBarThumbRight, float dx, boolean isLeftMove, float coordinate) {
-
-        if (isLeftMove && dx < 0) {
-            if ((mBarThumbRight.getPos() - (mBarThumbLeft.getPos() + dx)) > mMaxWidth) {
-                mBarThumbRight.setPos(mBarThumbLeft.getPos() + dx + mMaxWidth);
-                setThumbPos(1, mBarThumbRight.getPos());
-            }
-        } else if (!isLeftMove && dx > 0) {
-            if (((mBarThumbRight.getPos() + dx) - mBarThumbLeft.getPos()) > mMaxWidth) {
-                mBarThumbLeft.setPos(mBarThumbRight.getPos() + dx - mMaxWidth);
-                setThumbPos(0, mBarThumbLeft.getPos());
-            }
-        }
-
     }
 
 
@@ -269,14 +239,12 @@ public class CustomRangeSeekBar extends View {
     public void setThumbValue(int index, float value) {
         mBarThumbs.get(index).setVal(value);
         calculateThumbPos(index);
-        // Tell the view we want a complete redraw
         invalidate();
     }
 
     private void setThumbPos(int index, float pos) {
         mBarThumbs.get(index).setPos(pos);
         calculateThumbValue(index);
-        // Tell the view we want a complete redraw
         invalidate();
     }
 
@@ -284,9 +252,8 @@ public class CustomRangeSeekBar extends View {
         int closest = -1;
         if (!mBarThumbs.isEmpty()) {
             for (int i = 0; i < mBarThumbs.size(); i++) {
-                // Find thumb closest to x coordinate
-                final float tcoordinate = mBarThumbs.get(i).getPos() + mThumbWidth;
-                if (coordinate >= mBarThumbs.get(i).getPos() && coordinate <= tcoordinate) {
+                final float v = mBarThumbs.get(i).getPos() + mThumbWidth;
+                if (coordinate >= mBarThumbs.get(i).getPos() && coordinate <= v) {
                     closest = mBarThumbs.get(i).getIndex();
                 }
             }
@@ -297,16 +264,15 @@ public class CustomRangeSeekBar extends View {
     private void drawShadow(@NonNull Canvas canvas) {
         if (!mBarThumbs.isEmpty()) {
 
-            for (BarThumb th : mBarThumbs) {
-                if (th.getIndex() == 0) {
-                    final float x = th.getPos();
+            for (BarThumb barThumb : mBarThumbs) {
+                final float x = barThumb.getPos();
+                if (barThumb.getIndex() == 0) {
                     if (x > mPixelRangeMin) {
                         Rect mRect = new Rect(0, (int) (mThumbHeight - mHeightTimeLine) / 2,
                                 (int) (x + (mThumbWidth / 2)), mHeightTimeLine + (int) (mThumbHeight - mHeightTimeLine) / 2);
                         canvas.drawRect(mRect, mShadow);
                     }
                 } else {
-                    final float x = th.getPos();
                     if (x < mPixelRangeMax) {
                         Rect mRect = new Rect((int) (x + (mThumbWidth / 2)), (int) (mThumbHeight - mHeightTimeLine) / 2,
                                 (mViewWidth), mHeightTimeLine + (int) (mThumbHeight - mHeightTimeLine) / 2);
@@ -375,7 +341,4 @@ public class CustomRangeSeekBar extends View {
         }
     }
 
-    public List<BarThumb> getThumbs() {
-        return mBarThumbs;
-    }
 }

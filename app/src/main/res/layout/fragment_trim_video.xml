@@ -67,6 +67,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/seekBar"
         android:layout_margin="20dp"
+        android:text="00:00"
         android:textColor="@color/white"
         app:layout_constraintBottom_toTopOf="@+id/sliderTV"
         app:layout_constraintEnd_toEndOf="parent" />

@@ -6,12 +6,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.slowmotionapp.databinding.ActivityEditorBinding
 import com.example.slowmotionapp.ui.VideoCheckFragment
+import java.io.File
 
 
 class EditorActivity : AppCompatActivity() {
 
     private var videoUri: String? = null
     private lateinit var binding: ActivityEditorBinding
+    private lateinit var trimmedVideoPath: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +34,14 @@ class EditorActivity : AppCompatActivity() {
     fun getVideoUri(): String? {
         // Return the video URI
         return videoUri
+    }
+
+    fun setTrimVideoPath(outputFile: File) {
+        trimmedVideoPath = outputFile.toString()
+    }
+
+    fun getTrimmedPath(): String{
+        return trimmedVideoPath
     }
 
 

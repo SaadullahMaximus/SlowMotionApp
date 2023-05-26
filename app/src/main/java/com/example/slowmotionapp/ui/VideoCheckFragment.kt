@@ -54,16 +54,14 @@ class VideoCheckFragment : Fragment() {
         }
 
         binding.checkNo.setOnClickListener {
-            deleteVideo(videoUri.toString())
+            deleteVideo(videoUri)
             requireActivity().finish()
         }
-
-
 
         return binding.root
     }
 
-    fun deleteVideo(videoFilePath: String): Boolean {
+    private fun deleteVideo(videoFilePath: String): Boolean {
         val videoFile = File(videoFilePath)
 
         if (videoFile.exists()) {

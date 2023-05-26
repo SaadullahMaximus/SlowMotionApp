@@ -2,14 +2,15 @@
     <string name="app_name">SlowMotionApp</string>
     <string name="background">Background</string>
     <string name="slow_motion_video_maker">Slow-Motion Video Maker</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
     <string name="drag_slider_for_trimming">Drag slider for trimming</string>
     <string name="done">Done</string>
     <string name="trim_video">Trim Video</string>
 
     <string name="video_length_validation">Video should be of minimum 3 seconds</string>
     <string name="save">Save</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 
 </resources>
