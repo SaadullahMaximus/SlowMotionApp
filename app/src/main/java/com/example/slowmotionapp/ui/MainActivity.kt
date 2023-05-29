@@ -31,6 +31,7 @@ import com.example.slowmotionapp.utils.VideoEditor
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg
 import com.github.hiteshsondhi88.libffmpeg.FFmpegLoadBinaryResponseHandler
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException
+
 import java.io.File
 
 class MainActivity : AppCompatActivity(), FFMpegCallback {
@@ -63,6 +64,7 @@ class MainActivity : AppCompatActivity(), FFMpegCallback {
         )
 
         try {
+
             FFmpeg.getInstance(this).loadBinary(object : FFmpegLoadBinaryResponseHandler {
                 override fun onFailure() {
                     Log.v("FFMpeg", "Failed to load FFMpeg library.")
