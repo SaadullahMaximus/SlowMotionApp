@@ -6,6 +6,7 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -14,20 +15,17 @@ import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import com.ahmedbadereldin.videotrimmer.customVideoViews.*
-import com.example.slowmotionapp.CropSpeedFragment
 import com.example.slowmotionapp.EditorActivity
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.FragmentTrimVideoBinding
-import com.example.slowmotionapp.utils.FFMpegCallback
 import com.example.slowmotionapp.utils.Utils
 import com.example.slowmotionapp.utils.VideoEditor
 import java.io.File
 import java.util.*
 
-class TrimVideoFragment : Fragment(), View.OnClickListener, FFMpegCallback {
+class TrimVideoFragment : Fragment(), View.OnClickListener {
 
     private var _binding: FragmentTrimVideoBinding? = null
     private val binding get() = _binding!!
@@ -46,7 +44,7 @@ class TrimVideoFragment : Fragment(), View.OnClickListener, FFMpegCallback {
 
     private lateinit var outputFile: File
 
-    private val mHandler = Handler()
+    private val mHandler = Handler(Looper.getMainLooper())
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -180,7 +178,6 @@ class TrimVideoFragment : Fragment(), View.OnClickListener, FFMpegCallback {
                     Toast.LENGTH_LONG
                 ).show()
             } else {
-                Toast.makeText(requireContext(), "Trimming", Toast.LENGTH_SHORT).show()
                 val mediaMetadataRetriever = MediaMetadataRetriever()
                 mediaMetadataRetriever.setDataSource(requireContext(), Uri.parse(videoUri))
                 file = if (type == Constants.RECORD_VIDEO) {
@@ -191,19 +188,26 @@ class TrimVideoFragment : Fragment(), View.OnClickListener, FFMpegCallback {
 
                 try {
                     //output file is generated and send to video processing
-                    outputFile = Utils.createTrimmedFile(requireContext())
+                    outputFile = Utils.createTrimmedFile()
 
-                    Log.d("GGG", "onClick: input$file")
-                    Log.d("GGG", "onClick: input$outputFile")
+                    VideoEditor.trimVideo(
+                        requireContext(),
+                        arrayOf(
+                            "-ss",
+                            mStartPosition.toString(),
+                            "-y",
+                            "-i",
+                            file.toString(),
+                            "-t",
+                            mEndPosition.toString(),
+                            "-c:v",
+                            "copy",
+                            "-c:a",
+                            "copy",
+                            outputFile.toString()
+                        ), outputFile.toString()
+                    )
 
-                    VideoEditor.with(requireContext())
-                        .setType(Constants.VIDEO_TRIM)
-                        .setFile(file)
-                        .setOutputPath(outputFile.toString())
-                        .setStartTime(mStartPosition.toString())
-                        .setEndTime(mEndPosition.toString())
-                        .setCallback(this@TrimVideoFragment)
-                        .main()
                 } catch (e: Throwable) {
                     Objects.requireNonNull(Thread.getDefaultUncaughtExceptionHandler())
                         .uncaughtException(
@@ -366,34 +370,34 @@ class TrimVideoFragment : Fragment(), View.OnClickListener, FFMpegCallback {
 
     }
 
-    override fun onProgress(progress: String) {
-        Log.d("TrimFFMPEG", "onProgress() $progress")
-    }
-
-    override fun onSuccess(convertedFile: File, type: String) {
-        Log.d("TrimFFMPEG", "onSuccess()")
-        val fragment1 = TrimVideoFragment()
-        val fragment2 = CropSpeedFragment()
-        val transaction: FragmentTransaction = parentFragmentManager.beginTransaction()
-        transaction.replace(R.id.fragment_container, fragment2)
-        transaction.addToBackStack(null)
-        transaction.remove(fragment1).commit()
-        (activity as EditorActivity?)!!.setTrimVideoPath(outputFile)
-
-    }
-
-    override fun onFailure(error: Exception) {
-        Log.d("TrimFFMPEG", "onFailure() " + error.localizedMessage)
-    }
-
-    override fun onNotAvailable(error: Exception) {
-        Log.d("TrimFFMPEG", "onNotAvailable() " + error.message)
-        Log.v("TrimFFMPEG", "Exception: ${error.localizedMessage}")
-    }
-
-    override fun onFinish() {
-        Log.d("TrimFFMPEG", "onFinish()")
-    }
+//    override fun onProgress(progress: String) {
+//        Log.d("TrimFFMPEG", "onProgress() $progress")
+//    }
+//
+//    override fun onSuccess(convertedFile: File, type: String) {
+//        Log.d("TrimFFMPEG", "onSuccess()")
+//        val fragment1 = TrimVideoFragment()
+//        val fragment2 = CropSpeedFragment()
+//        val transaction: FragmentTransaction = parentFragmentManager.beginTransaction()
+//        transaction.replace(R.id.fragment_container, fragment2)
+//        transaction.addToBackStack(null)
+//        transaction.remove(fragment1).commit()
+//        (activity as EditorActivity?)!!.setTrimVideoPath(outputFile)
+//
+//    }
+//
+//    override fun onFailure(error: Exception) {
+//        Log.d("TrimFFMPEG", "onFailure() " + error.localizedMessage)
+//    }
+//
+//    override fun onNotAvailable(error: Exception) {
+//        Log.d("TrimFFMPEG", "onNotAvailable() " + error.message)
+//        Log.v("TrimFFMPEG", "Exception: ${error.localizedMessage}")
+//    }
+//
+//    override fun onFinish() {
+//        Log.d("TrimFFMPEG", "onFinish()")
+//    }
 
 
 }

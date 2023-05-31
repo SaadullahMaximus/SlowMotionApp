@@ -1,16 +1,22 @@
 package com.example.slowmotionapp.utils
 
+import android.app.ProgressDialog
+import android.content.ContentResolver
+import android.content.ContentUris
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.provider.MediaStore.Images
 import android.util.Log
+import android.widget.Toast
+import com.arthenica.mobileffmpeg.Config
+import com.arthenica.mobileffmpeg.FFmpeg
+import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
-import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler
-import com.github.hiteshsondhi88.libffmpeg.FFmpeg
-import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException
-
 import java.io.File
 import java.io.IOException
 
-class VideoEditor private constructor(private val context: Context) {
+class VideoEditor private constructor() {
 
     private var tagName: String = VideoEditor::class.java.simpleName
     private var videoFile: File? = null
@@ -45,8 +51,101 @@ class VideoEditor private constructor(private val context: Context) {
     private var filterCommand: String? = null
 
     companion object {
+        fun trimVideo(context: Context, strArr: Array<String>, str: String) {
+            val progressDialog = ProgressDialog(context, R.style.CustomDialog)
+            progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
+            progressDialog.isIndeterminate = true
+            progressDialog.setCancelable(false)
+            progressDialog.setMessage("Please Wait")
+            progressDialog.show()
+            val ffmpegCommand: String = Utils.commandsGenerator(strArr)!!
+            FFmpeg.executeAsync(
+                ffmpegCommand
+            ) { _, returnCode ->
+                Log.d(
+                    "TAG",
+                    String.format("FFMPEG process exited with rc %d.", returnCode)
+                )
+                Log.d("TAG", "FFMPEG process output:")
+                Config.printLastCommandOutput(Log.INFO)
+                progressDialog.dismiss()
+                when (returnCode) {
+                    Config.RETURN_CODE_SUCCESS -> {
+                        progressDialog.dismiss()
+                        Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
+
+                    }
+                    Config.RETURN_CODE_CANCEL -> {
+                        Log.d("FFMPEFailure", str)
+                        try {
+                            File(str).delete()
+                            deleteFromGallery(str, context)
+                            Toast.makeText(context, "Error Creating Video", Toast.LENGTH_SHORT)
+                                .show()
+                        } catch (th: Throwable) {
+                            th.printStackTrace()
+                        }
+                        Log.i(
+                            Config.TAG,
+                            "Async command execution cancelled by user."
+                        )
+                    }
+                    else -> {
+                        try {
+                            File(str).delete()
+                            deleteFromGallery(str, context)
+                            Toast.makeText(context, "Error Creating Video", Toast.LENGTH_SHORT)
+                                .show()
+                        } catch (th: Throwable) {
+                            th.printStackTrace()
+                        }
+                        Log.i(
+                            Config.TAG,
+                            String.format("Async command execution failed with rc=%d.", returnCode)
+                        )
+                    }
+                }
+            }
+        }
+
+        private fun deleteFromGallery(str: String, context: Context) {
+            val strArr = arrayOf("_id")
+            val strArr2 = arrayOf(str)
+            val uri = Images.Media.EXTERNAL_CONTENT_URI
+            val contentResolver: ContentResolver = context.contentResolver
+            val query = contentResolver.query(uri, strArr, "_data = ?", strArr2, null)
+            if (query!!.moveToFirst()) {
+                try {
+                    contentResolver.delete(
+                        ContentUris.withAppendedId(
+                            Images.Media.EXTERNAL_CONTENT_URI, query.getLong(
+                                query.getColumnIndexOrThrow("_id")
+                            )
+                        ), null, null
+                    )
+                } catch (e2: IllegalArgumentException) {
+                    e2.printStackTrace()
+                }
+            } else {
+                try {
+                    File(str).delete()
+                    refreshGallery(str, context)
+                } catch (e3: Exception) {
+                    e3.printStackTrace()
+                }
+            }
+            query.close()
+        }
+
+        private fun refreshGallery(str: String?, context: Context) {
+            val intent = Intent("android.intent.action.MEDIA_SCANNER_SCAN_FILE")
+            intent.data = Uri.fromFile(File(str))
+            context.sendBroadcast(intent)
+        }
+
+
         fun with(context: Context): VideoEditor {
-            return VideoEditor(context)
+            return VideoEditor()
         }
 
         //for adding text
@@ -160,7 +259,7 @@ class VideoEditor private constructor(private val context: Context) {
         return this
     }
 
-    fun main() {
+    fun mainCmd() {
         if (type == Constants.AUDIO_TRIM) {
             if (audioFile == null || !audioFile!!.exists()) {
                 callback!!.onFailure(IOException("File not exists"))
@@ -356,35 +455,5 @@ class VideoEditor private constructor(private val context: Context) {
             }
         }
 
-        try {
-            FFmpeg.getInstance(context).execute(cmd, object : ExecuteBinaryResponseHandler() {
-                override fun onStart() {
-
-                }
-
-                override fun onProgress(message: String?) {
-                    callback!!.onProgress(message!!)
-                }
-
-                override fun onSuccess(message: String?) {
-                    callback!!.onSuccess(outputFile, OutputType.TYPE_VIDEO)
-                }
-
-                override fun onFailure(message: String?) {
-                    if (outputFile.exists()) {
-                        outputFile.delete()
-                    }
-                    callback!!.onFailure(IOException(message))
-                }
-
-                override fun onFinish() {
-                    callback!!.onFinish()
-                }
-            })
-        } catch (e: Exception) {
-            callback!!.onFailure(e)
-        } catch (e2: FFmpegCommandAlreadyRunningException) {
-            callback!!.onNotAvailable(e2)
-        }
     }
 }

@@ -15,23 +15,25 @@ import java.util.concurrent.TimeUnit
 
 object Utils {
 
-    fun createVideoFile(context: Context): File {
+    fun createVideoFile(): File {
         val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
             Date()
         )
         val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
-        val filepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES).toString() + "/SlowMotionApp/"
+        val filepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
+            .toString() + "/SlowMotionApp/"
         val storageDir = File("$filepath/Recordings/")
         if (!storageDir.exists()) storageDir.mkdirs()
         return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, storageDir)
     }
 
-    fun createTrimmedFile(context: Context): File {
+    fun createTrimmedFile(): File {
         val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
             Date()
         )
         val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
-        val filepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES).toString() + "/SlowMotionApp/"
+        val filepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
+            .toString() + "/SlowMotionApp/"
         val storageDir = File("$filepath/Trimmed/")
         if (!storageDir.exists()) storageDir.mkdirs()
         return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, storageDir)
@@ -40,7 +42,12 @@ object Utils {
     fun convertContentUriToFilePath(contentUriString: String): String {
         val startIndex = contentUriString.lastIndexOf("/") + 1
         val endIndex = contentUriString.length
-        return "/storage/emulated/0/Movies/SlowMotionApp/Recordings/${contentUriString.substring(startIndex, endIndex)}"
+        return "/storage/emulated/0/Movies/SlowMotionApp/Recordings/${
+            contentUriString.substring(
+                startIndex,
+                endIndex
+            )
+        }"
     }
 
     fun refreshGalleryAlone(context: Context) {
@@ -52,11 +59,11 @@ object Utils {
         }
     }
 
-    fun getFileExtension(filePath: String): String? {
+    fun getFileExtension(filePath: String): String {
         return filePath.substring(filePath.lastIndexOf("."))
     }
 
-    fun getVideoDuration(context: Context, file: File): Long{
+    fun getVideoDuration(context: Context, file: File): Long {
         val retriever = MediaMetadataRetriever()
         retriever.setDataSource(context, Uri.fromFile(file))
         val time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
@@ -77,6 +84,24 @@ object Utils {
     fun getMediaDuration(context: Context?, uriOfFile: Uri?): Int {
         val mp = MediaPlayer.create(context, uriOfFile)
         return mp.duration
+    }
+
+    fun commandsGenerator(args: Array<String>): String {
+        val sb = StringBuffer()
+        for (i in args.indices) {
+            if (i == (args.size - 1)) {
+                sb.append("\"")
+                sb.append(args[i])
+                sb.append("\"")
+            } else {
+                sb.append("\"")
+                sb.append(args[i])
+                sb.append("\" ")
+            }
+        }
+        val str = sb.toString()
+        println(str)
+        return str
     }
 
 }

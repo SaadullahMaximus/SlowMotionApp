@@ -3,7 +3,6 @@ package com.example.slowmotionapp.ui
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -25,16 +24,10 @@ import com.example.slowmotionapp.EditorActivity
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.ActivityMainBinding
-import com.example.slowmotionapp.utils.FFMpegCallback
 import com.example.slowmotionapp.utils.Utils
-import com.example.slowmotionapp.utils.VideoEditor
-import com.github.hiteshsondhi88.libffmpeg.FFmpeg
-import com.github.hiteshsondhi88.libffmpeg.FFmpegLoadBinaryResponseHandler
-import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException
-
 import java.io.File
 
-class MainActivity : AppCompatActivity(), FFMpegCallback {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private var isExpanded = false
@@ -63,30 +56,6 @@ class MainActivity : AppCompatActivity(), FFMpegCallback {
             ), 101
         )
 
-        try {
-
-            FFmpeg.getInstance(this).loadBinary(object : FFmpegLoadBinaryResponseHandler {
-                override fun onFailure() {
-                    Log.v("FFMpeg", "Failed to load FFMpeg library.")
-                }
-
-                override fun onSuccess() {
-                    Log.v("FFMpeg", "FFMpeg Library loaded!")
-                }
-
-                override fun onStart() {
-                    Log.v("FFMpeg", "FFMpeg Started")
-                }
-
-                override fun onFinish() {
-                    Log.v("FFMpeg", "FFMpeg Stopped")
-                }
-            })
-        } catch (e: FFmpegNotSupportedException) {
-            e.printStackTrace()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
 
         binding.fabCreate.setOnClickListener {
             if (isExpanded) {
@@ -153,7 +122,7 @@ class MainActivity : AppCompatActivity(), FFMpegCallback {
             Log.d("Maximus", "startCamera: else")
 
             val cameraIntent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
-            videoFile = Utils.createVideoFile(this)
+            videoFile = Utils.createVideoFile()
             Log.v("Maximus", "videoPath1: " + videoFile!!.absolutePath)
             videoUri = FileProvider.getUriForFile(
                 this,
@@ -282,7 +251,7 @@ class MainActivity : AppCompatActivity(), FFMpegCallback {
                         //check if video is more than 4 minutes
                         if (duration < Constants.VIDEO_LIMIT) {
                             //check video format before playing into exoplayer
-                            if(extension == Constants.AVI_FORMAT){
+                            if (extension == Constants.AVI_FORMAT) {
                                 convertAviToMp4() //avi format is not supported in exoplayer
                             } else {
                                 playbackPosition = 0
@@ -290,13 +259,16 @@ class MainActivity : AppCompatActivity(), FFMpegCallback {
                                 val uri = Uri.fromFile(masterVideoFile)
                                 val intent = Intent(this, EditorActivity::class.java)
                                 intent.putExtra("VideoUri", filePath)
-                                intent.putExtra("${Constants.TYPE}", Constants.VIDEO_GALLERY)
+                                intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
                                 intent.putExtra("VideoDuration", Utils.getMediaDuration(this, uri))
                                 startActivity(intent)
-//                                initializePlayer()
                             }
                         } else {
-                            Toast.makeText(this, getString(R.string.error_select_smaller_video), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this,
+                                getString(R.string.error_select_smaller_video),
+                                Toast.LENGTH_SHORT
+                            ).show()
 
                             isLargeVideo = true
                             val uri = Uri.fromFile(masterVideoFile)
@@ -315,71 +287,23 @@ class MainActivity : AppCompatActivity(), FFMpegCallback {
 
     private fun convertAviToMp4() {
 
-        AlertDialog.Builder(this)
-            .setTitle(Constants.APP_NAME)
-            .setMessage(getString(R.string.not_supported_video))
-            .setPositiveButton(getString(R.string.yes)) { dialog, which ->
-                //output file is generated and send to video processing
-                val outputFile = Utils.createVideoFile(this)
-
-                VideoEditor.with(this)
-                    .setType(Constants.CONVERT_AVI_TO_MP4)
-                    .setFile(masterVideoFile!!)
-                    .setOutputPath(outputFile.path)
-                    .setCallback(this)
-                    .main()
-            }
-            .setNegativeButton(R.string.no) { _, _ ->
-            }
-            .show()
+//        AlertDialog.Builder(this)
+//            .setTitle(Constants.APP_NAME)
+//            .setMessage(getString(R.string.not_supported_video))
+//            .setPositiveButton(getString(R.string.yes)) { dialog, which ->
+//                //output file is generated and send to video processing
+//                val outputFile = Utils.createVideoFile()
+//
+//                VideoEditor.with(this)
+//                    .setType(Constants.CONVERT_AVI_TO_MP4)
+//                    .setFile(masterVideoFile!!)
+//                    .setOutputPath(outputFile.path)
+//                    .setCallback(this)
+//                    .mainCmd()
+//            }
+//            .setNegativeButton(R.string.no) { _, _ ->
+//            }
+//            .show()
     }
-
-//    private fun initializePlayer() {
-//        try{
-//            tvInfo!!.visibility= View.GONE
-//
-//            ePlayer?.useController = true
-//            exoPlayer = ExoPlayerFactory.newSimpleInstance(
-//                activity,
-//                DefaultRenderersFactory(activity),
-//                DefaultTrackSelector(), DefaultLoadControl()
-//            )
-//
-//            ePlayer?.player = exoPlayer
-//
-//            exoPlayer?.playWhenReady = false
-//
-//            exoPlayer?.addListener(playerListener)
-//
-//            exoPlayer?.prepare(VideoUtils.buildMediaSource(Uri.fromFile(masterVideoFile), VideoFrom.LOCAL))
-//
-//            exoPlayer?.seekTo(0)
-//
-//            exoPlayer?.seekTo(currentWindow, playbackPosition)
-//        } catch (exception: Exception){
-//            Log.v(tagName, "exception: " + exception.localizedMessage)
-//        }
-//    }
-
-    override fun onProgress(progress: String) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onSuccess(convertedFile: File, type: String) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onFailure(error: Exception) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onNotAvailable(error: Exception) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onFinish() {
-        TODO("Not yet implemented")
-    }
-
 
 }

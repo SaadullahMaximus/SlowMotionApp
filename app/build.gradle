@@ -38,7 +38,7 @@ android {
 
 dependencies {
 
-    implementation fileTree(dir: 'libs', include: '*.aar')
+//    implementation fileTree(dir: 'libs', include: '*.aar')
 
     implementation project(':videotrimmer')
 
@@ -50,8 +50,7 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
-//
-//    //ffmpeg
-//    implementation "com.writingminds:FFmpegAndroid:0.3.2"
-//    implementation "org.jcodec:jcodec-android:0.1.9"
+    // FFMPEG
+    implementation 'com.arthenica:mobile-ffmpeg-full-gpl:4.4'
+    implementation 'com.arthenica:smart-exception-java:0.2.1'
 }

@@ -11,4 +11,11 @@
         <item name="colorOnSecondary">@color/black</item>
 
     </style>
+    <style name="CustomDialog" parent="android:Theme.Material.Dialog" >
+        <item name="android:textColor">@android:color/white</item>
+        <item name="iconTint">@android:color/white</item>
+        <item name="color">@android:color/white</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="colorAccent">@android:color/white</item>
+    </style>
 </resources>
