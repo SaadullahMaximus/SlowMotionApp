@@ -1,6 +1,5 @@
 package com.example.slowmotionapp.utils
 
-import android.app.ProgressDialog
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
@@ -8,10 +7,6 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.MediaStore.Images
 import android.util.Log
-import android.widget.Toast
-import com.arthenica.mobileffmpeg.Config
-import com.arthenica.mobileffmpeg.FFmpeg
-import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import java.io.File
 import java.io.IOException
@@ -51,64 +46,8 @@ class VideoEditor private constructor() {
     private var filterCommand: String? = null
 
     companion object {
-        fun trimVideo(context: Context, strArr: Array<String>, str: String) {
-            val progressDialog = ProgressDialog(context, R.style.CustomDialog)
-            progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
-            progressDialog.isIndeterminate = true
-            progressDialog.setCancelable(false)
-            progressDialog.setMessage("Please Wait")
-            progressDialog.show()
-            val ffmpegCommand: String = Utils.commandsGenerator(strArr)!!
-            FFmpeg.executeAsync(
-                ffmpegCommand
-            ) { _, returnCode ->
-                Log.d(
-                    "TAG",
-                    String.format("FFMPEG process exited with rc %d.", returnCode)
-                )
-                Log.d("TAG", "FFMPEG process output:")
-                Config.printLastCommandOutput(Log.INFO)
-                progressDialog.dismiss()
-                when (returnCode) {
-                    Config.RETURN_CODE_SUCCESS -> {
-                        progressDialog.dismiss()
-                        Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
 
-                    }
-                    Config.RETURN_CODE_CANCEL -> {
-                        Log.d("FFMPEFailure", str)
-                        try {
-                            File(str).delete()
-                            deleteFromGallery(str, context)
-                            Toast.makeText(context, "Error Creating Video", Toast.LENGTH_SHORT)
-                                .show()
-                        } catch (th: Throwable) {
-                            th.printStackTrace()
-                        }
-                        Log.i(
-                            Config.TAG,
-                            "Async command execution cancelled by user."
-                        )
-                    }
-                    else -> {
-                        try {
-                            File(str).delete()
-                            deleteFromGallery(str, context)
-                            Toast.makeText(context, "Error Creating Video", Toast.LENGTH_SHORT)
-                                .show()
-                        } catch (th: Throwable) {
-                            th.printStackTrace()
-                        }
-                        Log.i(
-                            Config.TAG,
-                            String.format("Async command execution failed with rc=%d.", returnCode)
-                        )
-                    }
-                }
-            }
-        }
-
-        private fun deleteFromGallery(str: String, context: Context) {
+        fun deleteFromGallery(str: String, context: Context) {
             val strArr = arrayOf("_id")
             val strArr2 = arrayOf(str)
             val uri = Images.Media.EXTERNAL_CONTENT_URI

@@ -17,6 +17,7 @@
 
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="_00_00">00:00</string>
 
 
 </resources>

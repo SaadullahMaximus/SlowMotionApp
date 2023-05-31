@@ -1,6 +1,8 @@
 package com.example.slowmotionapp.ui
 
 import android.annotation.SuppressLint
+import android.app.ProgressDialog
+import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
@@ -15,7 +17,11 @@ import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
 import com.ahmedbadereldin.videotrimmer.customVideoViews.*
+import com.arthenica.mobileffmpeg.Config
+import com.arthenica.mobileffmpeg.FFmpeg
+import com.example.slowmotionapp.CropSpeedFragment
 import com.example.slowmotionapp.EditorActivity
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
@@ -23,6 +29,7 @@ import com.example.slowmotionapp.databinding.FragmentTrimVideoBinding
 import com.example.slowmotionapp.utils.Utils
 import com.example.slowmotionapp.utils.VideoEditor
 import java.io.File
+import java.text.DecimalFormat
 import java.util.*
 
 class TrimVideoFragment : Fragment(), View.OnClickListener {
@@ -190,7 +197,7 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
                     //output file is generated and send to video processing
                     outputFile = Utils.createTrimmedFile()
 
-                    VideoEditor.trimVideo(
+                    trimVideo(
                         requireContext(),
                         arrayOf(
                             "-ss",
@@ -200,10 +207,16 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
                             file.toString(),
                             "-t",
                             mEndPosition.toString(),
-                            "-c:v",
-                            "copy",
-                            "-c:a",
-                            "copy",
+                            "-vcodec",
+                            "mpeg4",
+                            "-b:v",
+                            "2097152",
+                            "-b:a",
+                            "48000",
+                            "-ac",
+                            "2",
+                            "-ar",
+                            "22050",
                             outputFile.toString()
                         ), outputFile.toString()
                     )
@@ -354,6 +367,7 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
             mEndPosition = mDuration
             mDurationWithoutEdit = mDuration
         }
+        timeLineSet(mDuration)
         mTimeVideo = mDuration
         binding.timeLineBar.initMaxWidth()
         binding.seekBar.max = mDurationWithoutEdit * 1000
@@ -368,6 +382,22 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
         mEnd.toInt() / 60
         mEnd.toInt() % 60
 
+    }
+
+    private fun timeLineSet(mDuration: Int) {
+        binding.endTime.text = milliSecondsToTimer((mDuration * 1000).toLong())
+        timeLineNumbersSet(mDuration)
+
+    }
+
+    private fun timeLineNumbersSet(mDuration: Int) {
+        val parts = mDuration / 6.0
+        val decimalFormat = DecimalFormat("#.00")
+        binding.tv1.text = decimalFormat.format(parts)
+        binding.tv2.text = decimalFormat.format(parts*2)
+        binding.tv3.text = decimalFormat.format(parts*3)
+        binding.tv4.text = decimalFormat.format(parts*4)
+        binding.tv5.text = decimalFormat.format(parts*5)
     }
 
 //    override fun onProgress(progress: String) {
@@ -399,5 +429,72 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
 //        Log.d("TrimFFMPEG", "onFinish()")
 //    }
 
+    private fun trimVideo(context: Context, strArr: Array<String>, str: String) {
+        val progressDialog = ProgressDialog(context, R.style.CustomDialog)
+        progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
+        progressDialog.isIndeterminate = true
+        progressDialog.setCancelable(false)
+        progressDialog.setMessage("Please Wait")
+        progressDialog.show()
+        val ffmpegCommand: String = Utils.commandsGenerator(strArr)!!
+        FFmpeg.executeAsync(
+            ffmpegCommand
+        ) { _, returnCode ->
+            Log.d(
+                "TAG",
+                String.format("FFMPEG process exited with rc %d.", returnCode)
+            )
+            Log.d("TAG", "FFMPEG process output:")
+            Config.printLastCommandOutput(Log.INFO)
+            progressDialog.dismiss()
+            when (returnCode) {
+                Config.RETURN_CODE_SUCCESS -> {
+                    progressDialog.dismiss()
+                    Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
+                    switchFragment()
+                }
+                Config.RETURN_CODE_CANCEL -> {
+                    Log.d("FFMPEFailure", str)
+                    try {
+                        File(str).delete()
+                        VideoEditor.deleteFromGallery(str, context)
+                        Toast.makeText(context, "Error Creating Video", Toast.LENGTH_SHORT)
+                            .show()
+                    } catch (th: Throwable) {
+                        th.printStackTrace()
+                    }
+                    Log.i(
+                        Config.TAG,
+                        "Async command execution cancelled by user."
+                    )
+                }
+                else -> {
+                    try {
+                        File(str).delete()
+                        VideoEditor.deleteFromGallery(str, context)
+                        Toast.makeText(context, "Error Creating Video", Toast.LENGTH_SHORT)
+                            .show()
+                    } catch (th: Throwable) {
+                        th.printStackTrace()
+                    }
+                    Log.i(
+                        Config.TAG,
+                        String.format("Async command execution failed with rc=%d.", returnCode)
+                    )
+                }
+            }
+        }
+    }
+
+    private fun switchFragment() {
+        Log.d("TrimFFMPEG", "onSuccess()")
+        val fragment1 = TrimVideoFragment()
+        val fragment2 = CropSpeedFragment()
+        val transaction: FragmentTransaction = parentFragmentManager.beginTransaction()
+        transaction.replace(R.id.fragment_container, fragment2)
+        transaction.addToBackStack(null)
+        transaction.remove(fragment1).commit()
+        (activity as EditorActivity?)!!.setTrimVideoPath(outputFile)
+    }
 
 }
