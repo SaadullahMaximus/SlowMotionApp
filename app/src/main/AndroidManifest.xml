@@ -20,10 +20,10 @@
         tools:targetApi="31">
 
         <activity
-            android:name=".EditorActivity"
+            android:name=".ui.activities.EditorActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".ui.activities.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

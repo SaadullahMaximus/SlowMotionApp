@@ -1,4 +1,4 @@
-package com.example.slowmotionapp.ui
+package com.example.slowmotionapp.ui.fragments
 
 import android.app.ProgressDialog
 import android.net.Uri
@@ -9,8 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
-import com.example.slowmotionapp.EditorActivity
 import com.example.slowmotionapp.databinding.FragmentVideoCheckBinding
+import com.example.slowmotionapp.ui.activities.EditorActivity
 import java.io.File
 
 

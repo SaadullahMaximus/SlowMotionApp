@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black"
-    tools:context=".ui.TrimVideoFragment">
+    tools:context=".ui.fragments.TrimVideoFragment">
 
 
     <ImageView
@@ -135,7 +135,7 @@
             android:fontFamily="@font/fredoka_one"
             android:gravity="center"
             android:text="0"
-            android:textColor="@color/black" />
+            android:textColor="#918787" />
 
         <TextView
             android:id="@+id/tv2"
@@ -145,7 +145,7 @@
             android:fontFamily="@font/fredoka_one"
             android:gravity="center"
             android:text="0"
-            android:textColor="@color/black" />
+            android:textColor="#918787"/>
 
         <TextView
             android:id="@+id/tv3"
@@ -155,7 +155,7 @@
             android:fontFamily="@font/fredoka_one"
             android:gravity="center"
             android:text="0"
-            android:textColor="@color/black" />
+            android:textColor="#918787" />
 
         <TextView
             android:id="@+id/tv4"
@@ -165,7 +165,7 @@
             android:fontFamily="@font/fredoka_one"
             android:gravity="center"
             android:text="0"
-            android:textColor="@color/black" />
+            android:textColor="#918787"/>
 
         <TextView
             android:id="@+id/tv5"
@@ -175,7 +175,7 @@
             android:fontFamily="@font/fredoka_one"
             android:gravity="center"
             android:text="0"
-            android:textColor="@color/black" />
+            android:textColor="#918787" />
 
     </LinearLayout>
 

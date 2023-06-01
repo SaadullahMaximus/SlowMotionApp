@@ -1,11 +1,14 @@
 package com.example.slowmotionapp.utils
 
+import android.content.ContentResolver
+import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Environment
+import android.provider.MediaStore
 import com.example.slowmotionapp.constants.Constants
 import java.io.File
 import java.text.SimpleDateFormat
@@ -102,6 +105,41 @@ object Utils {
         val str = sb.toString()
         println(str)
         return str
+    }
+
+    fun deleteFromGallery(str: String, context: Context) {
+        val strArr = arrayOf("_id")
+        val strArr2 = arrayOf(str)
+        val uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        val contentResolver: ContentResolver = context.contentResolver
+        val query = contentResolver.query(uri, strArr, "_data = ?", strArr2, null)
+        if (query!!.moveToFirst()) {
+            try {
+                contentResolver.delete(
+                    ContentUris.withAppendedId(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, query.getLong(
+                            query.getColumnIndexOrThrow("_id")
+                        )
+                    ), null, null
+                )
+            } catch (e2: IllegalArgumentException) {
+                e2.printStackTrace()
+            }
+        } else {
+            try {
+                File(str).delete()
+                refreshGallery(str, context)
+            } catch (e3: Exception) {
+                e3.printStackTrace()
+            }
+        }
+        query.close()
+    }
+
+    private fun refreshGallery(str: String?, context: Context) {
+        val intent = Intent("android.intent.action.MEDIA_SCANNER_SCAN_FILE")
+        intent.data = Uri.fromFile(File(str!!))
+        context.sendBroadcast(intent)
     }
 
 }

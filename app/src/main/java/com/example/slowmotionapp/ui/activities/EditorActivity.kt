@@ -1,12 +1,13 @@
-package com.example.slowmotionapp
+package com.example.slowmotionapp.ui.activities
 
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.ActivityEditorBinding
-import com.example.slowmotionapp.ui.VideoCheckFragment
+import com.example.slowmotionapp.ui.fragments.VideoCheckFragment
 import java.io.File
 
 
@@ -39,7 +40,7 @@ class EditorActivity : AppCompatActivity() {
         return videoUri
     }
 
-    fun getType(): Int{
+    fun getType(): Int {
         return type
     }
 
@@ -47,7 +48,7 @@ class EditorActivity : AppCompatActivity() {
         trimmedVideoPath = outputFile.toString()
     }
 
-    fun getTrimmedPath(): String{
+    fun getTrimmedPath(): String {
         return trimmedVideoPath
     }
 

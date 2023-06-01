@@ -1,4 +1,4 @@
-package com.example.slowmotionapp.ui
+package com.example.slowmotionapp.ui.fragments
 
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
@@ -21,13 +21,11 @@ import androidx.fragment.app.FragmentTransaction
 import com.ahmedbadereldin.videotrimmer.customVideoViews.*
 import com.arthenica.mobileffmpeg.Config
 import com.arthenica.mobileffmpeg.FFmpeg
-import com.example.slowmotionapp.CropSpeedFragment
-import com.example.slowmotionapp.EditorActivity
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.FragmentTrimVideoBinding
+import com.example.slowmotionapp.ui.activities.EditorActivity
 import com.example.slowmotionapp.utils.Utils
-import com.example.slowmotionapp.utils.VideoEditor
 import java.io.File
 import java.text.DecimalFormat
 import java.util.*
@@ -436,7 +434,7 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
         progressDialog.setCancelable(false)
         progressDialog.setMessage("Please Wait")
         progressDialog.show()
-        val ffmpegCommand: String = Utils.commandsGenerator(strArr)!!
+        val ffmpegCommand: String = Utils.commandsGenerator(strArr)
         FFmpeg.executeAsync(
             ffmpegCommand
         ) { _, returnCode ->
@@ -457,7 +455,7 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
                     Log.d("FFMPEFailure", str)
                     try {
                         File(str).delete()
-                        VideoEditor.deleteFromGallery(str, context)
+                        Utils.deleteFromGallery(str, context)
                         Toast.makeText(context, "Error Creating Video", Toast.LENGTH_SHORT)
                             .show()
                     } catch (th: Throwable) {
@@ -471,7 +469,7 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
                 else -> {
                     try {
                         File(str).delete()
-                        VideoEditor.deleteFromGallery(str, context)
+                        Utils.deleteFromGallery(str, context)
                         Toast.makeText(context, "Error Creating Video", Toast.LENGTH_SHORT)
                             .show()
                     } catch (th: Throwable) {

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.VideoCheckFragment">
+    tools:context=".ui.fragments.VideoCheckFragment">
 
     <VideoView
         android:id="@+id/checkVideoView"
@@ -25,20 +25,18 @@
 
         <ImageView
             android:id="@+id/checkNo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
             android:padding="5dp"
-            android:layout_marginEnd="100dp"
-            android:background="@drawable/circle_off_white"
-            android:src="@drawable/baseline_add" />
+            android:layout_marginEnd="97dp"
+            android:src="@drawable/cross_check" />
 
         <ImageView
             android:id="@+id/checkYes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
             android:padding="5dp"
-            android:background="@drawable/circle_off_white"
-            android:src="@drawable/baseline_add" />
+            android:src="@drawable/ok_check" />
 
 
     </LinearLayout>

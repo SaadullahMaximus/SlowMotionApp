@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black"
-    tools:context=".ui.MainActivity">
+    tools:context=".ui.activities.MainActivity">
 
     <ImageView
         android:layout_width="match_parent"
@@ -47,15 +47,36 @@
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_create"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:src="@drawable/baseline_add"
-            app:backgroundTint="#FDC005"
-            app:layout_constraintBottom_toTopOf="@+id/textView"
-            app:layout_constraintEnd_toEndOf="parent" />
+        <LinearLayout
+            android:layout_width="75dp"
+            android:layout_height="75dp"
+            android:orientation="horizontal">
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/animationView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:lottie_rawRes="@raw/main_animation"
+                app:lottie_autoPlay="true"
+                app:lottie_loop="true"
+                android:layout_marginBottom="4dp"
+                app:layout_constraintBottom_toTopOf="@+id/textView"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <ImageView
+                android:id="@+id/image_create"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="4dp"
+                android:src="@drawable/add_main"
+                android:visibility="gone"
+                android:padding="5dp"
+                app:backgroundTint="#FDC005"
+                app:layout_constraintBottom_toTopOf="@+id/textView"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </LinearLayout>
+
 
         <TextView
             android:id="@+id/textView"
@@ -100,8 +121,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/background_rounded_corners"
-                android:src="@drawable/baseline_add" />
+                android:src="@drawable/capture_ic" />
 
 
         </LinearLayout>
@@ -118,17 +138,15 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
                 android:fontFamily="@font/fredoka_one"
                 android:text="Pick Video"
-                android:layout_marginBottom="4dp"
                 android:textColor="@color/white" />
 
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/background_rounded_corners"
-                android:src="@drawable/baseline_add" />
-
+                android:src="@drawable/gallery_ic" />
 
         </LinearLayout>
 

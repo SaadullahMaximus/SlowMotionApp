@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CustomSeekBar">
+        <attr name="progressLineDrawable" format="reference" />
+        <attr name="knobDrawable" format="reference" />
+        <attr name="knobRadius" format="dimension" />
+    </declare-styleable>
+</resources>

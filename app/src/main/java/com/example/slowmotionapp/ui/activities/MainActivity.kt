@@ -1,4 +1,4 @@
-package com.example.slowmotionapp.ui
+package com.example.slowmotionapp.ui.activities
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -13,14 +13,11 @@ import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
 import android.view.View
-import android.view.animation.AccelerateInterpolator
-import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import com.example.slowmotionapp.EditorActivity
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.ActivityMainBinding
@@ -56,13 +53,17 @@ class MainActivity : AppCompatActivity() {
             ), 101
         )
 
+        binding.animationView.setOnClickListener {
+            expandButtons()
+            binding.animationView.visibility = View.GONE
+            binding.imageCreate.visibility = View.VISIBLE
+        }
 
-        binding.fabCreate.setOnClickListener {
-            if (isExpanded) {
-                collapseButtons()
-            } else {
-                expandButtons()
-            }
+
+        binding.imageCreate.setOnClickListener {
+            collapseButtons()
+            binding.animationView.visibility = View.VISIBLE
+            binding.imageCreate.visibility = View.GONE
         }
 
         binding.captureVideoBtn.setOnClickListener {
@@ -83,7 +84,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun expandButtons() {
         isExpanded = true
-        binding.fabCreate.animate().rotation(45f).setInterpolator(AccelerateInterpolator()).start()
         binding.expandedButtonsContainer.visibility = View.VISIBLE
         binding.expandedButtonsContainer.alpha = 0f
         binding.expandedButtonsContainer.animate()
@@ -95,7 +95,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun collapseButtons() {
         isExpanded = false
-        binding.fabCreate.animate().rotation(0f).setInterpolator(DecelerateInterpolator()).start()
         binding.expandedButtonsContainer.animate()
             .alpha(0f)
             .setDuration(200)
