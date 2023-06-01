@@ -18,6 +18,15 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="_00_00">00:00</string>
+    <string name="movies">Movies</string>
+    <string name="crop">Crop</string>
+    <string name="trim">Trim</string>
+    <string name="saved">Saved</string>
+    <string name="pick_video">Pick Video</string>
+    <string name="record">Record</string>
+    <string name="create">Create</string>
+    <string name="_00_00_">00:00</string>
+    <string name="_0">0</string>
 
 
 </resources>

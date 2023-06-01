@@ -16,7 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginBottom="40dp"
+        android:layout_marginBottom="@dimen/_60sdp"
         android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="parent"
@@ -25,17 +25,15 @@
 
         <ImageView
             android:id="@+id/checkNo"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
-            android:padding="5dp"
+            android:layout_width="@dimen/_52sdp"
+            android:layout_height="@dimen/_52sdp"
             android:layout_marginEnd="97dp"
             android:src="@drawable/cross_check" />
 
         <ImageView
             android:id="@+id/checkYes"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
-            android:padding="5dp"
+            android:layout_width="@dimen/_52sdp"
+            android:layout_height="@dimen/_52sdp"
             android:src="@drawable/ok_check" />
 
 

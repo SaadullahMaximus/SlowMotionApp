@@ -15,6 +15,19 @@ class KnobView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         fun onKnobPositionChanged(knobValue: Int)
     }
 
+    // Inside KnobView class
+    var knobPositionX: Float
+        get() = knobPosition.x
+        set(value) {
+            val valueInt = (value / 100).toInt()
+            knobValue = valueInt.coerceIn(1, 13)
+            val scaleWidth = width.toFloat() - 2 * knobRadius
+            val positionRatio = (knobValue - 1) / 12f
+            val knobPositionX = knobRadius + positionRatio * scaleWidth
+            knobPosition.x = knobPositionX  // Update the x coordinate only
+            invalidate()
+        }
+
     private val knobRadius = 40f
     private val knobColor = 0xFFE91E63.toInt()
 

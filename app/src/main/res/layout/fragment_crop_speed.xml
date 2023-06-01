@@ -3,33 +3,86 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000000"
-    android:clipToPadding="true"
-    android:clipChildren="true">
+    android:clipChildren="true"
+    android:clipToPadding="true">
 
-    <TextView
-        android:id="@+id/start"
+    <ImageView
+        android:id="@+id/backBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Start"
-        android:textColor="@color/black"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginTop="44dp"
+        android:src="@drawable/baseline_arrow_back"
+        app:layout_constraintEnd_toStartOf="@+id/undoBtn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/end"
+    <ImageView
+        android:id="@+id/undoBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="end"
+        android:layout_marginTop="@dimen/_35sdp"
+        android:src="@drawable/ic_undo"
+        app:layout_constraintEnd_toStartOf="@+id/redoBtn"
+        app:layout_constraintStart_toEndOf="@+id/backBtn"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/redoBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_35sdp"
+        android:src="@drawable/ic_redo"
+        app:layout_constraintEnd_toStartOf="@+id/enhanceBtn"
+        app:layout_constraintStart_toEndOf="@+id/undoBtn"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/saveBtn"
+        style="@style/CustomButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_30sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
+        android:background="@drawable/background_rounded_corners"
+        android:fontFamily="@font/fredokamedium"
+        android:paddingStart="@dimen/_8sdp"
+        android:paddingTop="@dimen/_3sdp"
+        android:paddingEnd="@dimen/_8sdp"
+        android:paddingBottom="@dimen/_3sdp"
+        android:text="Save"
         android:textColor="@color/black"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        android:textSize="@dimen/_13sdp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <Button
+        android:id="@+id/enhanceBtn"
+        style="@style/CustomButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_30sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
+        android:background="@drawable/background_rounded_corners"
+        android:fontFamily="@font/fredokamedium"
+        android:paddingStart="@dimen/_8sdp"
+        android:paddingTop="@dimen/_3sdp"
+        android:paddingEnd="@dimen/_8sdp"
+        android:paddingBottom="@dimen/_3sdp"
+        android:text="Enhance"
+        android:textColor="@color/black"
+        android:textSize="@dimen/_13sdp"
+        app:layout_constraintEnd_toStartOf="@+id/saveBtn"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.example.slowmotionapp.customviews.KnobView
         android:id="@+id/knobView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toStartOf="@id/end"
-        app:layout_constraintStart_toEndOf="@id/start"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_marginBottom="@dimen/_10sdp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
