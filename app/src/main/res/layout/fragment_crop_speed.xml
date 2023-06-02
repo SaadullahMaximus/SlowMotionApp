@@ -1,6 +1,5 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000000"
@@ -34,7 +33,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/_35sdp"
         android:src="@drawable/ic_redo"
-        app:layout_constraintEnd_toStartOf="@+id/enhanceBtn"
+        app:layout_constraintEnd_toStartOf="@+id/linearLayoutBtnContainer"
         app:layout_constraintStart_toEndOf="@+id/undoBtn"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -57,36 +56,52 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-
-    <Button
-        android:id="@+id/enhanceBtn"
-        style="@style/CustomButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <LinearLayout
+        android:id="@+id/linearLayoutBtnContainer"
+        android:layout_width="@dimen/_100sdp"
+        android:layout_height="@dimen/_37sdp"
         android:layout_marginTop="@dimen/_30sdp"
         android:layout_marginEnd="@dimen/_10sdp"
-        android:background="@drawable/background_rounded_corners"
-        android:fontFamily="@font/fredokamedium"
-        android:paddingStart="@dimen/_8sdp"
-        android:paddingTop="@dimen/_3sdp"
-        android:paddingEnd="@dimen/_8sdp"
-        android:paddingBottom="@dimen/_3sdp"
-        android:text="Enhance"
-        android:textColor="@color/black"
-        android:textSize="@dimen/_13sdp"
+        android:orientation="vertical"
         app:layout_constraintEnd_toStartOf="@+id/saveBtn"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+
+        <Button
+            android:id="@+id/enhanceBtn"
+            style="@style/CustomButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/background_rounded_corners"
+            android:fontFamily="@font/fredokamedium"
+            android:text="Enhance"
+            android:textColor="@color/black"
+            android:textSize="@dimen/_13sdp" />
+
+        <Button
+            android:id="@+id/backTextBtn"
+            style="@style/CustomButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:background="@drawable/background_rounded_corners"
+            android:fontFamily="@font/fredokamedium"
+            android:text="Back"
+            android:textColor="@color/black"
+            android:textSize="@dimen/_13sdp" />
+
+    </LinearLayout>
 
     <VideoView
         android:id="@+id/videoView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         android:layout_marginTop="@dimen/_4sdp"
         android:layout_marginBottom="@dimen/_4sdp"
-        app:layout_constraintTop_toBottomOf="@id/enhanceBtn"
-        app:layout_constraintBottom_toTopOf="@id/playPauseButton"/>
+        app:layout_constraintBottom_toTopOf="@id/playPauseButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/linearLayoutBtnContainer" />
 
     <ImageView
         android:id="@+id/playPauseButton"
@@ -103,15 +118,15 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginTop="@dimen/_24sdp"
         android:layout_marginEnd="@dimen/_10sdp"
         android:layout_marginBottom="@dimen/_20sdp"
-        android:layout_marginTop="@dimen/_24sdp"
         android:progressDrawable="@drawable/custom_seekbar_progress"
         android:thumb="@drawable/custom_seekbar_thumb"
-        app:layout_constraintTop_toBottomOf="@id/videoView"
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
         app:layout_constraintEnd_toStartOf="@+id/totalDurationTextView"
-        app:layout_constraintStart_toEndOf="@+id/playPauseButton" />
+        app:layout_constraintStart_toEndOf="@+id/playPauseButton"
+        app:layout_constraintTop_toBottomOf="@id/videoView" />
 
     <TextView
         android:id="@+id/totalDurationTextView"
@@ -123,9 +138,9 @@
         android:text="@string/_00_00_"
         android:textColor="@color/white"
         android:textSize="@dimen/_14sdp"
-        app:layout_constraintTop_toBottomOf="@id/videoView"
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/videoView" />
 
     <FrameLayout
         android:id="@+id/fragment_container_main"
