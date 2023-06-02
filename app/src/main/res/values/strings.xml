@@ -27,6 +27,8 @@
     <string name="create">Create</string>
     <string name="_00_00_">00:00</string>
     <string name="_0">0</string>
+    <string name="speaker">Speaker</string>
+    <string name="move_pointer_to_select_the_speed_of_video">Move pointer to select the speed of video</string>
 
 
 </resources>

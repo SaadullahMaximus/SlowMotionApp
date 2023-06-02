@@ -48,14 +48,15 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
-            android:layout_width="@dimen/_75sdp"
-            android:layout_height="@dimen/_75sdp"
-            android:orientation="horizontal">
+            android:layout_width="@dimen/_70sdp"
+            android:layout_height="@dimen/_70sdp"
+            android:orientation="horizontal"
+            android:gravity="center">
 
             <com.airbnb.lottie.LottieAnimationView
                 android:id="@+id/animationView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="@dimen/_60sdp"
+                android:layout_height="@dimen/_60sdp"
                 app:lottie_rawRes="@raw/main_animation"
                 app:lottie_autoPlay="true"
                 app:lottie_loop="true"
@@ -65,9 +66,8 @@
 
             <ImageView
                 android:id="@+id/image_create"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="@dimen/_4sdp"
+                android:layout_width="@dimen/_50sdp"
+                android:layout_height="@dimen/_50sdp"
                 android:src="@drawable/add_main"
                 android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@+id/textView"

@@ -9,4 +9,5 @@
     <color name="white">#FFFFFFFF</color>
     <!-- Fully transparent, equivalent to 0x00000000 -->
     <color name="transparent">#00000000</color>
+    <color name="baseColor">#FCC203</color>
 </resources>
