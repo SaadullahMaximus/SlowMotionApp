@@ -10,21 +10,28 @@ import android.view.animation.BounceInterpolator
 import androidx.fragment.app.Fragment
 import com.example.slowmotionapp.customviews.KnobView
 import com.example.slowmotionapp.databinding.FragmentSpeedBinding
+import com.example.slowmotionapp.sqlite.DatabaseManager
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.dataBasePosition
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.knobPosition
+import com.example.slowmotionapp.utils.Utils
 
 class SpeedFragment : Fragment() {
 
     private var _binding: FragmentSpeedBinding? = null
     private val binding get() = _binding!!
 
+    private lateinit var databaseManager: DatabaseManager
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        databaseManager = DatabaseManager(requireContext())
         // Inflate the layout for this fragment
         _binding = FragmentSpeedBinding.inflate(inflater, container, false)
 
-        binding.knobView.setInitialKnobValue(6)
-        animateKnob(700F)
+        animateKnob(knobPosition)
 
 
 
@@ -35,6 +42,10 @@ class SpeedFragment : Fragment() {
                 // You can display it in a TextView or perform any other actions
                 Log.d("Knob", "onKnobPositionChanged: $knobValue")
             }
+
+            override fun onKnobStopped(knobValue: Int) {
+                handleKnobStopMoving(knobValue)
+            }
         })
 
 
@@ -42,7 +53,20 @@ class SpeedFragment : Fragment() {
         return binding.root
     }
 
-    fun animateKnob(interval: Float) {
+    private fun handleKnobStopMoving(knobValue: Int) {
+        // Handle the event when the user stops moving the knob
+        Log.d("Saad", "handleKnobStopMoving: Stop Moving")
+        val tempFile = Utils.createCacheTempFile(requireContext())
+        databaseManager.insertData(dataBasePosition, tempFile.toString(), knobValue)
+        dataBasePosition += 1
+        knobPosition = knobValue * 100F
+        Log.d("Saad", "handleKnobStopMoving: FileName $tempFile")
+        Log.d("Saad", "handleKnobStopMoving: KnobValue $knobValue")
+
+    }
+
+
+    private fun animateKnob(interval: Float) {
         val knobAnimator = ValueAnimator.ofFloat(binding.knobView.knobPositionX, interval)
         knobAnimator.addUpdateListener { animator ->
             val animatedValue = animator.animatedValue as Float

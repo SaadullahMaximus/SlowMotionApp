@@ -8,7 +8,7 @@
     tools:context=".ui.fragments.MainFragment">
 
     <ImageView
-        android:id="@+id/playPauseButton"
+        android:id="@+id/speakerButton"
         android:layout_width="@dimen/_20sdp"
         android:layout_height="@dimen/_20sdp"
         android:layout_marginStart="@dimen/_20sdp"
@@ -19,7 +19,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <SeekBar
-        android:id="@+id/seekBar"
+        android:id="@+id/seekBarSpeaker"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -30,7 +30,7 @@
         android:thumb="@drawable/custom_seekbar_thumb"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/playPauseButton"
+        app:layout_constraintStart_toEndOf="@+id/speakerButton"
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.tabs.TabLayout
@@ -43,7 +43,7 @@
         app:layout_constraintBottom_toTopOf="@id/viewpager"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/seekBar"
+        app:layout_constraintTop_toBottomOf="@id/seekBarSpeaker"
         app:tabGravity="fill"
         app:tabMode="fixed" />
 

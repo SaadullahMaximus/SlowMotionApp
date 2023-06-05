@@ -13,6 +13,7 @@ import com.example.slowmotionapp.R
 class KnobView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     interface OnKnobPositionChangeListener {
         fun onKnobPositionChanged(knobValue: Int)
+        fun onKnobStopped(knobValue: Int)
     }
 
     // Inside KnobView class
@@ -131,10 +132,20 @@ class KnobView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                // Handle the knob movement
                 val newX = event.x.coerceIn(knobRadius, width.toFloat() - knobRadius)
                 knobPosition.set(newX, knobPosition.y)
                 knobValue = calculateKnobValue()
                 knobPositionChangeListener?.onKnobPositionChanged(knobValue)
+                invalidate()
+            }
+            MotionEvent.ACTION_UP -> {
+                // Handle the event where the user stops moving
+                val newX = event.x.coerceIn(knobRadius, width.toFloat() - knobRadius)
+                knobPosition.set(newX, knobPosition.y)
+                knobValue = calculateKnobValue()
+                knobPositionChangeListener?.onKnobPositionChanged(knobValue)
+                knobPositionChangeListener?.onKnobStopped(knobValue)
                 invalidate()
             }
         }
@@ -156,15 +167,6 @@ class KnobView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
     fun getKnobValue(): Int {
         return knobValue
-    }
-
-    fun setInitialKnobValue(value: Int) {
-        knobValue = value.coerceIn(1, 13)
-        val scaleWidth = width.toFloat() - 2 * knobRadius
-        val positionRatio = (knobValue - 1) / 12f
-        val knobPositionX = knobRadius + positionRatio * scaleWidth
-        knobPosition.x = knobPositionX  // Update the x coordinate only
-        invalidate()
     }
 
     private fun dpToPx(dp: Int): Float {

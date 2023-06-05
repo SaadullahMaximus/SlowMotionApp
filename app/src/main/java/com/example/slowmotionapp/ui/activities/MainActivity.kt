@@ -21,6 +21,7 @@ import androidx.core.content.FileProvider
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.ActivityMainBinding
+import com.example.slowmotionapp.sqlite.DatabaseManager
 import com.example.slowmotionapp.utils.Utils
 import java.io.File
 
@@ -37,13 +38,26 @@ class MainActivity : AppCompatActivity() {
     private var currentWindow: Int = 0
     private var isLargeVideo: Boolean? = false
 
+    private lateinit var databaseManager: DatabaseManager
+
+
+    companion object {
+        // Define properties and functions here
+        var dataBasePosition: Int = 1
+        var knobPosition: Float = 700F
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        databaseManager = DatabaseManager(this)
+
+
         preferences = this.getSharedPreferences("fetch_permission", Context.MODE_PRIVATE)
+
+        databaseManager.clearTable()
 
         requestPermissions(
             arrayOf(
@@ -75,6 +89,11 @@ class MainActivity : AppCompatActivity() {
 
         }
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        databaseManager.clearTable()
     }
 
     private fun checkPermissionGallery(permissionGallery: Array<String>) {

@@ -15,9 +15,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-
 object Utils {
-
     fun createVideoFile(): File {
         val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
             Date()
@@ -41,6 +39,18 @@ object Utils {
         if (!storageDir.exists()) storageDir.mkdirs()
         return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, storageDir)
     }
+
+    fun createCacheTempFile(context: Context): File {
+        val timeStamp: String =
+            SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(Date())
+        val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
+
+        val storageDir = File(context.cacheDir, "Temp")
+        if (!storageDir.exists()) storageDir.mkdirs()
+
+        return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, storageDir)
+    }
+
 
     fun convertContentUriToFilePath(contentUriString: String): String {
         val startIndex = contentUriString.lastIndexOf("/") + 1
@@ -141,5 +151,17 @@ object Utils {
         intent.data = Uri.fromFile(File(str!!))
         context.sendBroadcast(intent)
     }
+
+    fun deleteAllFilesFromDirectory(directory: File) {
+        if (directory.exists() && directory.isDirectory) {
+            val files = directory.listFiles()
+            if (files != null) {
+                for (file in files) {
+                    file.delete()
+                }
+            }
+        }
+    }
+
 
 }
