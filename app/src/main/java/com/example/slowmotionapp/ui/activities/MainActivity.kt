@@ -286,23 +286,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun convertAviToMp4() {
 
-//        AlertDialog.Builder(this)
-//            .setTitle(Constants.APP_NAME)
-//            .setMessage(getString(R.string.not_supported_video))
-//            .setPositiveButton(getString(R.string.yes)) { dialog, which ->
-//                //output file is generated and send to video processing
-//                val outputFile = Utils.createVideoFile()
-//
-//                VideoEditor.with(this)
-//                    .setType(Constants.CONVERT_AVI_TO_MP4)
-//                    .setFile(masterVideoFile!!)
-//                    .setOutputPath(outputFile.path)
-//                    .setCallback(this)
-//                    .mainCmd()
-//            }
-//            .setNegativeButton(R.string.no) { _, _ ->
-//            }
-//            .show()
     }
 
 }
