@@ -27,8 +27,6 @@ class CropSpeedFragment : Fragment() {
     private var currentChildFragment: Fragment? = null
     private var effectMusicFragment: Fragment? = null
 
-    private lateinit var outputFilePath: String
-
     private var mStartPosition = 0
     private var mDuration = 0
     private var mEndPosition = 0
@@ -39,6 +37,7 @@ class CropSpeedFragment : Fragment() {
     private val mHandler = Handler(Looper.getMainLooper())
 
     private var mediaPlayer: MediaPlayer? = null
+    private lateinit var videoUri: String
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,7 +45,8 @@ class CropSpeedFragment : Fragment() {
     ): View {
         _binding = FragmentCropSpeedBinding.inflate(inflater, container, false)
 
-        val videoUri: String = (activity as EditorActivity?)!!.getTrimmedPath()
+        videoUri = (activity as EditorActivity?)!!.getTrimmedPath()
+
         Log.d("Hello", "onCreateView: $videoUri")
         binding.videoView.setVideoURI(Uri.parse(videoUri))
 
@@ -228,12 +228,6 @@ class CropSpeedFragment : Fragment() {
         return finalTimerString
     }
 
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
     private fun onVideoPrepared() {
         mDuration = binding.videoView.duration / 1000
         setSeekBarPosition()
@@ -262,5 +256,19 @@ class CropSpeedFragment : Fragment() {
         mEnd.toInt() / 60
         mEnd.toInt() % 60
 
+    }
+
+    fun playVideoAgain(path: String){
+        _binding?.let { binding ->
+            Log.d("FinalOutput", "playVideoAgain: $path")
+            binding.videoView.setVideoPath(path)
+            binding.videoView.setOnPreparedListener { mediaPlayer: MediaPlayer? ->
+                mediaPlayer?.let {
+                    this.onVideoPrepared()
+                }
+                this.mediaPlayer = mediaPlayer
+            }
+            binding.videoView.start()
+        }
     }
 }

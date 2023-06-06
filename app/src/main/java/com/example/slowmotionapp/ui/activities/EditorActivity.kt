@@ -7,11 +7,13 @@ import androidx.fragment.app.Fragment
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.ActivityEditorBinding
+import com.example.slowmotionapp.ui.fragments.CropSpeedFragment
+import com.example.slowmotionapp.ui.fragments.SpeedFragment
 import com.example.slowmotionapp.ui.fragments.VideoCheckFragment
 import java.io.File
 
 
-class EditorActivity : AppCompatActivity() {
+class EditorActivity : AppCompatActivity(), SpeedFragment.VideoPathListener {
 
     private var videoUri: String? = null
     private var type: Int = 0
@@ -50,6 +52,14 @@ class EditorActivity : AppCompatActivity() {
 
     fun getTrimmedPath(): String {
         return trimmedVideoPath
+    }
+
+    override fun onVideoPathSelected(videoPath: String) {
+        // Get reference to the first fragment
+        val firstFragment = CropSpeedFragment()
+
+        // Call a method in the first fragment to play the video
+        firstFragment.playVideoAgain(videoPath)
     }
 
 

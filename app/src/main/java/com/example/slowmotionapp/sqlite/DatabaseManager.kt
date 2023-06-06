@@ -85,6 +85,4 @@ class DatabaseManager(context: Context) {
         db.close()
     }
 
-
-
 }
