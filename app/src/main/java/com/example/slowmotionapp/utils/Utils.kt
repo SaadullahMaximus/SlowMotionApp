@@ -10,11 +10,11 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import com.example.slowmotionapp.constants.Constants
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.tempCacheName
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
-
 object Utils {
     fun createVideoFile(): File {
         val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
@@ -40,7 +40,7 @@ object Utils {
         return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, storageDir)
     }
 
-    fun createCacheTempFile(context: Context): File {
+    fun createCacheTempFile(context: Context) {
         val timeStamp: String =
             SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(Date())
 
@@ -49,7 +49,7 @@ object Utils {
         val storageDir = File(context.cacheDir, "Temp")
         if (!storageDir.exists()) storageDir.mkdirs()
 
-        return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, storageDir)
+        tempCacheName = File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, storageDir).toString()
     }
 
     fun convertContentUriToFilePath(contentUriString: String): String {

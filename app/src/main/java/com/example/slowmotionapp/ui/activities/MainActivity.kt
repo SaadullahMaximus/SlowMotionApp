@@ -41,12 +41,15 @@ class MainActivity : AppCompatActivity() {
         // Define properties and functions here
         var dataBasePosition: Int = 1
         var knobPosition: Float = 700F
+        lateinit var tempCacheName: String
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        Utils.createCacheTempFile(this)
 
         preferences = this.getSharedPreferences("fetch_permission", Context.MODE_PRIVATE)
 

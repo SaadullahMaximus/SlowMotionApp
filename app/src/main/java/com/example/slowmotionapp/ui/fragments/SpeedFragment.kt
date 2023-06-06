@@ -22,6 +22,7 @@ import com.example.slowmotionapp.extras.VideoPlayerState
 import com.example.slowmotionapp.ui.activities.EditorActivity
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.dataBasePosition
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.knobPosition
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.tempCacheName
 import com.example.slowmotionapp.utils.Utils
 import com.example.slowmotionapp.viewmodel.SharedViewModel
 import java.io.File
@@ -37,7 +38,8 @@ class SpeedFragment : Fragment() {
     private lateinit var sharedViewModel: SharedViewModel
 
     private lateinit var videoUri: String
-        // Get a reference to the shared ViewModel
+
+    // Get a reference to the shared ViewModel
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
@@ -79,12 +81,12 @@ class SpeedFragment : Fragment() {
     private fun handleKnobStopMoving(knobValue: Int) {
         // Handle the event when the user stops moving the knob
         Log.d("Saad", "handleKnobStopMoving: Stop Moving")
-        val tempFile = Utils.createCacheTempFile(requireContext())
+
         dataBasePosition += 1
         knobPosition = knobValue * 100F
-        Log.d("Saad", "handleKnobStopMoving: FileName $tempFile")
+        Log.d("Saad", "handleKnobStopMoving: FileName $tempCacheName")
         Log.d("Saad", "handleKnobStopMoving: KnobValue $knobValue")
-        videoSpeedChange(tempFile.toString(), knobValue)
+        videoSpeedChange(tempCacheName, knobValue)
     }
 
     private fun videoSpeedChange(tempPath: String, knobValue: Int) {
@@ -225,7 +227,7 @@ class SpeedFragment : Fragment() {
                 requireActivity().finish()
                 return
             }
-            Toast.makeText(requireContext(), "Please select Quality", Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(), "Failed", Toast.LENGTH_LONG).show()
         }
     }
 
