@@ -77,6 +77,7 @@ class CropSpeedFragment : Fragment() {
                 this.onVideoPrepared()
             }
             this.mediaPlayer = mediaPlayer
+            videoPlay()
         }
 
         binding.videoView.setOnCompletionListener { onVideoCompleted() }
@@ -168,22 +169,26 @@ class CropSpeedFragment : Fragment() {
                 binding.videoView.pause()
                 binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
             } else {
-                binding.videoView.start()
-                binding.playPauseButton.setImageResource(R.drawable.baseline_pause)
-                if (binding.seekBar.progress == 0) {
-                    binding.totalDurationTextView.text = "00:00"
-                    updateProgressBar()
-                } else {
-                    binding.totalDurationTextView.text = milliSecondsToTimer(
-                        binding.seekBar.progress.toLong()
-                    ) + ""
-                    updateProgressBar()
-                }
+                videoPlay()
             }
         }
 
 
         return binding.root
+    }
+
+    private fun videoPlay() {
+        binding.videoView.start()
+        binding.playPauseButton.setImageResource(R.drawable.baseline_pause)
+        if (binding.seekBar.progress == 0) {
+            binding.totalDurationTextView.text = "00:00"
+            updateProgressBar()
+        } else {
+            binding.totalDurationTextView.text = milliSecondsToTimer(
+                binding.seekBar.progress.toLong()
+            ) + ""
+            updateProgressBar()
+        }
     }
 
     private fun updateProgressBar() {

@@ -37,8 +37,7 @@ class SpeedFragment : Fragment() {
     private lateinit var sharedViewModel: SharedViewModel
 
     private lateinit var videoUri: String
-
-    // Get a reference to the shared ViewModel
+        // Get a reference to the shared ViewModel
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
@@ -60,6 +59,7 @@ class SpeedFragment : Fragment() {
 
         binding.knobView.setOnKnobPositionChangeListener(object :
             KnobView.OnKnobPositionChangeListener {
+
             override fun onKnobPositionChanged(knobValue: Int) {
                 // Handle the knob value change here
                 // You can display it in a TextView or perform any other actions
