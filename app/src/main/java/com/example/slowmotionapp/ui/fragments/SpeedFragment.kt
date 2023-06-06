@@ -19,7 +19,6 @@ import com.example.slowmotionapp.R
 import com.example.slowmotionapp.customviews.KnobView
 import com.example.slowmotionapp.databinding.FragmentSpeedBinding
 import com.example.slowmotionapp.extras.VideoPlayerState
-import com.example.slowmotionapp.sqlite.DatabaseManager
 import com.example.slowmotionapp.ui.activities.EditorActivity
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.dataBasePosition
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.knobPosition
@@ -32,8 +31,6 @@ class SpeedFragment : Fragment() {
 
     private var _binding: FragmentSpeedBinding? = null
     private val binding get() = _binding!!
-
-    private lateinit var databaseManager: DatabaseManager
 
     private var videoPlayerState: VideoPlayerState = VideoPlayerState()
 
@@ -51,7 +48,6 @@ class SpeedFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        databaseManager = DatabaseManager(requireContext())
         // Inflate the layout for this fragment
         _binding = FragmentSpeedBinding.inflate(inflater, container, false)
 
@@ -84,13 +80,11 @@ class SpeedFragment : Fragment() {
         // Handle the event when the user stops moving the knob
         Log.d("Saad", "handleKnobStopMoving: Stop Moving")
         val tempFile = Utils.createCacheTempFile(requireContext())
-        databaseManager.insertData(dataBasePosition, tempFile.toString(), knobValue)
         dataBasePosition += 1
         knobPosition = knobValue * 100F
         Log.d("Saad", "handleKnobStopMoving: FileName $tempFile")
         Log.d("Saad", "handleKnobStopMoving: KnobValue $knobValue")
         videoSpeedChange(tempFile.toString(), knobValue)
-
     }
 
     private fun videoSpeedChange(tempPath: String, knobValue: Int) {

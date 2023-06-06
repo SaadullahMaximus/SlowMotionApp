@@ -13,7 +13,6 @@ import com.example.slowmotionapp.databinding.FragmentVideoCheckBinding
 import com.example.slowmotionapp.ui.activities.EditorActivity
 import java.io.File
 
-
 class VideoCheckFragment : Fragment() {
 
     private var _binding: FragmentVideoCheckBinding? = null
@@ -75,6 +74,4 @@ class VideoCheckFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-
-
 }

@@ -398,35 +398,6 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
         binding.tv5.text = decimalFormat.format(parts*5)
     }
 
-//    override fun onProgress(progress: String) {
-//        Log.d("TrimFFMPEG", "onProgress() $progress")
-//    }
-//
-//    override fun onSuccess(convertedFile: File, type: String) {
-//        Log.d("TrimFFMPEG", "onSuccess()")
-//        val fragment1 = TrimVideoFragment()
-//        val fragment2 = CropSpeedFragment()
-//        val transaction: FragmentTransaction = parentFragmentManager.beginTransaction()
-//        transaction.replace(R.id.fragment_container, fragment2)
-//        transaction.addToBackStack(null)
-//        transaction.remove(fragment1).commit()
-//        (activity as EditorActivity?)!!.setTrimVideoPath(outputFile)
-//
-//    }
-//
-//    override fun onFailure(error: Exception) {
-//        Log.d("TrimFFMPEG", "onFailure() " + error.localizedMessage)
-//    }
-//
-//    override fun onNotAvailable(error: Exception) {
-//        Log.d("TrimFFMPEG", "onNotAvailable() " + error.message)
-//        Log.v("TrimFFMPEG", "Exception: ${error.localizedMessage}")
-//    }
-//
-//    override fun onFinish() {
-//        Log.d("TrimFFMPEG", "onFinish()")
-//    }
-
     private fun trimVideo(context: Context, strArr: Array<String>, str: String) {
         val progressDialog = ProgressDialog(context, R.style.CustomDialog)
         progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)

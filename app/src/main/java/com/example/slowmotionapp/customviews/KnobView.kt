@@ -62,7 +62,7 @@ class KnobView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         // Load the knob image and dimensions
         knobImage = res.getDrawable(knobImageResId, null)
         knobImageWidth = 140
-        knobImageHeight = 140
+        knobImageHeight = 120
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -124,7 +124,7 @@ class KnobView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         val res = resources
         val scaleImage = res.getDrawable(scaleImageResId, null)
         val scaleTop = bottom + dpToPx(2)
-        val scaleBottom = scaleTop + height
+        scaleTop + height
         scaleImage.setBounds(0, scaleTop.toInt(), width, height)
         scaleImage.draw(canvas)
     }

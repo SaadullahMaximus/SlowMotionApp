@@ -58,7 +58,7 @@
 
     <LinearLayout
         android:id="@+id/linearLayoutBtnContainer"
-        android:layout_width="@dimen/_74sdp"
+        android:layout_width="@dimen/_80sdp"
         android:layout_height="@dimen/_27sdp"
         android:layout_marginTop="@dimen/_30sdp"
         android:layout_marginEnd="@dimen/_10sdp"

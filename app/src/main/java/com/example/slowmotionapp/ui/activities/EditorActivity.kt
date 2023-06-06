@@ -10,7 +10,6 @@ import com.example.slowmotionapp.databinding.ActivityEditorBinding
 import com.example.slowmotionapp.ui.fragments.VideoCheckFragment
 import java.io.File
 
-
 class EditorActivity : AppCompatActivity() {
 
     private var videoUri: String? = null
@@ -32,7 +31,6 @@ class EditorActivity : AppCompatActivity() {
         videoUri = intent.getStringExtra("VideoUri")
         type = intent.getIntExtra(Constants.TYPE, 0)
         Log.d("MaximusTech", "onCreate: $videoUri")
-
     }
 
     fun getVideoUri(): String? {
