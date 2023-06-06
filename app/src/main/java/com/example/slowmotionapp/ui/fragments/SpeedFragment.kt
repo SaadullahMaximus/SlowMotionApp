@@ -2,7 +2,6 @@ package com.example.slowmotionapp.ui.fragments
 
 import android.animation.ValueAnimator
 import android.app.ProgressDialog
-import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
@@ -13,6 +12,7 @@ import android.view.ViewGroup
 import android.view.animation.BounceInterpolator
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.arthenica.mobileffmpeg.Config
 import com.arthenica.mobileffmpeg.FFmpeg
 import com.example.slowmotionapp.R
@@ -24,6 +24,7 @@ import com.example.slowmotionapp.ui.activities.EditorActivity
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.dataBasePosition
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.knobPosition
 import com.example.slowmotionapp.utils.Utils
+import com.example.slowmotionapp.viewmodel.SharedViewModel
 import java.io.File
 
 
@@ -36,23 +37,14 @@ class SpeedFragment : Fragment() {
 
     private var videoPlayerState: VideoPlayerState = VideoPlayerState()
 
+    private lateinit var sharedViewModel: SharedViewModel
+
     private lateinit var videoUri: String
 
-    interface VideoPathListener {
-        fun onVideoPathSelected(videoPath: String)
-    }
-
-    private var videoPathListener: VideoPathListener? = null
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-
-        // Make sure the activity implements the VideoPathListener interface
-        if (context is VideoPathListener) {
-            videoPathListener = context
-        } else {
-            throw RuntimeException("$context must implement VideoPathListener")
-        }
+    // Get a reference to the shared ViewModel
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -159,7 +151,7 @@ class SpeedFragment : Fragment() {
         }
 
         val valueOf2: String = java.lang.String.valueOf(this.videoPlayerState.getDuration() * f2)
-        Log.d("valueOf2", "videoMotionCommand: $valueOf2 value $value" )
+        Log.d("valueOf2", "videoMotionCommand: $valueOf2 value $value")
 
         when (value) {
             1 -> {
@@ -231,7 +223,7 @@ class SpeedFragment : Fragment() {
             )
 
 
-            a(strArr, path)
+            executeFFMPEG(strArr, path)
         } catch (unused: Exception) {
             val file = File(path)
             if (file.exists()) {
@@ -243,7 +235,7 @@ class SpeedFragment : Fragment() {
         }
     }
 
-    private fun a(strArr: Array<String>, str: String) {
+    private fun executeFFMPEG(strArr: Array<String>, str: String) {
         val progressDialog =
             ProgressDialog(requireContext(), R.style.CustomDialog)
         progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
@@ -266,6 +258,7 @@ class SpeedFragment : Fragment() {
                 Config.RETURN_CODE_SUCCESS -> {
                     progressDialog.dismiss()
                     Toast.makeText(requireContext(), "Success", Toast.LENGTH_SHORT).show()
+                    updateVideoUri(Uri.parse(str))
                 }
                 Config.RETURN_CODE_CANCEL -> {
                     Log.d("FFMPEFailure", str)
@@ -327,5 +320,10 @@ class SpeedFragment : Fragment() {
 
         // Convert duration from milliseconds to seconds
         return (duration / 1000).toInt()
+    }
+
+    // Example function to update the video URI
+    private fun updateVideoUri(uri: Uri) {
+        sharedViewModel.setVideoUri(uri)
     }
 }

@@ -11,11 +11,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
+import android.widget.VideoView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.ViewModelProvider
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.databinding.FragmentCropSpeedBinding
 import com.example.slowmotionapp.ui.activities.EditorActivity
+import com.example.slowmotionapp.viewmodel.SharedViewModel
 
 
 class CropSpeedFragment : Fragment() {
@@ -38,6 +41,25 @@ class CropSpeedFragment : Fragment() {
 
     private var mediaPlayer: MediaPlayer? = null
     private lateinit var videoUri: String
+
+    private lateinit var sharedViewModel: SharedViewModel
+    private lateinit var videoView: VideoView
+
+    // Get a reference to the shared ViewModel
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
+
+        // Initialize and setup the VideoView
+        videoView = view.findViewById(R.id.videoView)
+
+        // Observe the video URI LiveData
+        sharedViewModel.videoUri.observe(viewLifecycleOwner) { uri ->
+            uri?.let {
+                videoView.setVideoURI(uri)
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -256,19 +278,5 @@ class CropSpeedFragment : Fragment() {
         mEnd.toInt() / 60
         mEnd.toInt() % 60
 
-    }
-
-    fun playVideoAgain(path: String){
-        _binding?.let { binding ->
-            Log.d("FinalOutput", "playVideoAgain: $path")
-            binding.videoView.setVideoPath(path)
-            binding.videoView.setOnPreparedListener { mediaPlayer: MediaPlayer? ->
-                mediaPlayer?.let {
-                    this.onVideoPrepared()
-                }
-                this.mediaPlayer = mediaPlayer
-            }
-            binding.videoView.start()
-        }
     }
 }

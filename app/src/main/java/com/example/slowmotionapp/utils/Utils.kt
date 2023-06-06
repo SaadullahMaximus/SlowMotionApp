@@ -40,30 +40,17 @@ object Utils {
         return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, storageDir)
     }
 
-//    fun createCacheTempFile(context: Context): File {
-//        val timeStamp: String =
-//            SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(Date())
-//
-//        val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
-//
-//        val storageDir = File(context.cacheDir, "Temp")
-//        if (!storageDir.exists()) storageDir.mkdirs()
-//
-//        return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, storageDir)
-//    }
-
     fun createCacheTempFile(context: Context): File {
-        val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
-            Date()
-        )
+        val timeStamp: String =
+            SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(Date())
+
         val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
-        val filepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
-            .toString() + "/SlowMotionApp/"
-        val storageDir = File("$filepath/Speed/")
+
+        val storageDir = File(context.cacheDir, "Temp")
         if (!storageDir.exists()) storageDir.mkdirs()
+
         return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, storageDir)
     }
-
 
     fun convertContentUriToFilePath(contentUriString: String): String {
         val startIndex = contentUriString.lastIndexOf("/") + 1
@@ -164,54 +151,5 @@ object Utils {
         intent.data = Uri.fromFile(File(str!!))
         context.sendBroadcast(intent)
     }
-
-    fun deleteAllFilesFromDirectory(directory: File) {
-        if (directory.exists() && directory.isDirectory) {
-            val files = directory.listFiles()
-            if (files != null) {
-                for (file in files) {
-                    file.delete()
-                }
-            }
-        }
-    }
-
-//    fun getTargetFileName(context: Context, str: String?): String? {
-//        val name = File(str!!).absoluteFile.name
-//        val sb = StringBuilder()
-//        sb.append(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS))
-//        sb.append("/")
-//        sb.append(context.resources.getString(R.string.MainFolderName))
-//        sb.append("/")
-//        sb.append(context.resources.getString(R.string.SlowMotionVideo))
-//        val absoluteFile = File(sb.toString()).absoluteFile
-//        if (!absoluteFile.isDirectory) {
-//            absoluteFile.mkdirs()
-//        }
-//        val asList: List<*> = Arrays.asList<String>(
-//            *absoluteFile.list(
-//                FileUtils.a(name)
-//            )
-//        )
-//        var i = 0
-//        while (true) {
-//            val sb2 = StringBuilder("slow-")
-//            val i2 = i + 1
-//            sb2.append(String.format("%d", *arrayOf<Any>(i)))
-//            sb2.append(name.substring(name.lastIndexOf(".")))
-//            val sb3 = sb2.toString()
-//            if (!asList.contains(sb3)) {
-//                val sb4 = StringBuilder()
-//                sb4.append(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS))
-//                sb4.append("/")
-//                sb4.append(context.resources.getString(R.string.MainFolderName))
-//                sb4.append("/")
-//                sb4.append(context.resources.getString(R.string.SlowMotionVideo))
-//                return File(sb4.toString(), sb3).path
-//            }
-//            i = i2
-//        }
-//    }
-
 
 }

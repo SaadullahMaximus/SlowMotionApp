@@ -10,7 +10,8 @@
         android:id="@+id/tab_icon"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/_2sdp"
         android:src="@drawable/speed_ic" />
 
     <TextView

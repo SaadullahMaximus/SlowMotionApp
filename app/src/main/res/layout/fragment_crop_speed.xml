@@ -40,26 +40,26 @@
     <Button
         android:id="@+id/saveBtn"
         style="@style/CustomButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/_74sdp"
+        android:layout_height="@dimen/_27sdp"
         android:layout_marginTop="@dimen/_30sdp"
         android:layout_marginEnd="@dimen/_10sdp"
         android:background="@drawable/background_rounded_corners"
         android:fontFamily="@font/fredokamedium"
-        android:paddingStart="@dimen/_8sdp"
+        android:paddingStart="@dimen/_5sdp"
         android:paddingTop="@dimen/_3sdp"
-        android:paddingEnd="@dimen/_8sdp"
+        android:paddingEnd="@dimen/_5sdp"
         android:paddingBottom="@dimen/_3sdp"
         android:text="Save"
         android:textColor="@color/black"
-        android:textSize="@dimen/_13sdp"
+        android:textSize="@dimen/_9sdp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:id="@+id/linearLayoutBtnContainer"
-        android:layout_width="@dimen/_100sdp"
-        android:layout_height="@dimen/_37sdp"
+        android:layout_width="@dimen/_74sdp"
+        android:layout_height="@dimen/_27sdp"
         android:layout_marginTop="@dimen/_30sdp"
         android:layout_marginEnd="@dimen/_10sdp"
         android:orientation="vertical"
@@ -76,7 +76,7 @@
             android:fontFamily="@font/fredokamedium"
             android:text="Enhance"
             android:textColor="@color/black"
-            android:textSize="@dimen/_13sdp" />
+            android:textSize="@dimen/_9sdp" />
 
         <Button
             android:id="@+id/backTextBtn"
@@ -88,7 +88,7 @@
             android:fontFamily="@font/fredokamedium"
             android:text="Back"
             android:textColor="@color/black"
-            android:textSize="@dimen/_13sdp" />
+            android:textSize="@dimen/_9sdp" />
 
     </LinearLayout>
 
