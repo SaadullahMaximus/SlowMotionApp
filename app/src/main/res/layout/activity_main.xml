@@ -60,14 +60,13 @@
                 app:lottie_rawRes="@raw/main_animation"
                 app:lottie_autoPlay="true"
                 app:lottie_loop="true"
-                android:layout_marginBottom="@dimen/_4sdp"
                 app:layout_constraintBottom_toTopOf="@+id/textView"
                 app:layout_constraintEnd_toEndOf="parent"/>
 
             <ImageView
                 android:id="@+id/image_create"
-                android:layout_width="@dimen/_50sdp"
-                android:layout_height="@dimen/_50sdp"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="@dimen/_45sdp"
                 android:src="@drawable/add_main"
                 android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@+id/textView"

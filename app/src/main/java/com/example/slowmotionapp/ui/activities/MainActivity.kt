@@ -2,6 +2,7 @@ package com.example.slowmotionapp.ui.activities
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.animation.ObjectAnimator
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -9,6 +10,8 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
@@ -74,8 +77,22 @@ class MainActivity : AppCompatActivity() {
 
         binding.imageCreate.setOnClickListener {
             collapseButtons()
-            binding.animationView.visibility = View.VISIBLE
-            binding.imageCreate.visibility = View.GONE
+            // Create the ObjectAnimator for rotation animation
+            val animator = ObjectAnimator.ofFloat(binding.imageCreate, View.ROTATION, 0f, -360f)
+            animator.duration = 1000 // Animation duration in milliseconds
+
+            // Start the animation
+            animator.start()
+
+            // Delay the visibility change using a Handler
+            Handler(Looper.getMainLooper()).postDelayed({
+                binding.imageCreate.visibility = View.GONE
+                binding.animationView.visibility = View.VISIBLE
+
+                // Start the animation from the beginning
+                binding.animationView.progress = 0f
+                binding.animationView.playAnimation()
+            }, 500)
         }
 
         binding.captureVideoBtn.setOnClickListener {
