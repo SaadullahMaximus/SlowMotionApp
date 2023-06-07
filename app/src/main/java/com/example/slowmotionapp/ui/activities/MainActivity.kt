@@ -39,9 +39,13 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         // Define properties and functions here
-        var dataBasePosition: Int = 1
         var knobPosition: Float = 700F
+
+        lateinit var trimFilePath: String
+
         lateinit var tempCacheName: String
+
+        lateinit var mainCachedFile: String
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,7 +84,6 @@ class MainActivity : AppCompatActivity() {
 
         binding.selectVideoBtn.setOnClickListener {
             checkPermissionGallery(Constants.PERMISSION_GALLERY)
-
         }
 
     }
@@ -295,5 +298,4 @@ class MainActivity : AppCompatActivity() {
     private fun convertAviToMp4() {
 
     }
-
 }

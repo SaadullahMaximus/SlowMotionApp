@@ -1,15 +1,21 @@
 package com.example.slowmotionapp.viewmodel
 
-import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class SharedViewModel : ViewModel() {
-    private val _videoUri = MutableLiveData<Uri>()
-    val videoUri: LiveData<Uri> = _videoUri
+    private val _videoPath = MutableLiveData<String>()
+    val videoPath: LiveData<String> = _videoPath
 
-    fun setVideoUri(uri: Uri) {
-        _videoUri.value = uri
+    val booleanLiveData: MutableLiveData<Boolean> = MutableLiveData()
+
+    fun setVideoUri(path: String) {
+        _videoPath.value = path
     }
+
+    fun pauseVideo(newValue: Boolean) {
+        booleanLiveData.value = newValue
+    }
+
 }

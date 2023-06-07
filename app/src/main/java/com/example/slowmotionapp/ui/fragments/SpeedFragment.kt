@@ -2,8 +2,6 @@ package com.example.slowmotionapp.ui.fragments
 
 import android.animation.ValueAnimator
 import android.app.ProgressDialog
-import android.media.MediaMetadataRetriever
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -19,11 +17,11 @@ import com.example.slowmotionapp.R
 import com.example.slowmotionapp.customviews.KnobView
 import com.example.slowmotionapp.databinding.FragmentSpeedBinding
 import com.example.slowmotionapp.extras.VideoPlayerState
-import com.example.slowmotionapp.ui.activities.EditorActivity
-import com.example.slowmotionapp.ui.activities.MainActivity.Companion.dataBasePosition
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.knobPosition
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.tempCacheName
 import com.example.slowmotionapp.utils.Utils
+import com.example.slowmotionapp.utils.Utils.getVideoDuration
 import com.example.slowmotionapp.viewmodel.SharedViewModel
 import java.io.File
 
@@ -36,8 +34,6 @@ class SpeedFragment : Fragment() {
     private var videoPlayerState: VideoPlayerState = VideoPlayerState()
 
     private lateinit var sharedViewModel: SharedViewModel
-
-    private lateinit var videoUri: String
 
     // Get a reference to the shared ViewModel
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -52,10 +48,8 @@ class SpeedFragment : Fragment() {
         // Inflate the layout for this fragment
         _binding = FragmentSpeedBinding.inflate(inflater, container, false)
 
-        videoUri = (activity as EditorActivity?)!!.getTrimmedPath()
-
-        videoPlayerState.setFilename(videoUri)
-        videoPlayerState.setStop(getVideoDuration())
+        videoPlayerState.setFilename(mainCachedFile)
+        videoPlayerState.setStop(getVideoDuration(requireContext(), mainCachedFile))
 
         animateKnob(knobPosition)
 
@@ -82,11 +76,11 @@ class SpeedFragment : Fragment() {
         // Handle the event when the user stops moving the knob
         Log.d("Saad", "handleKnobStopMoving: Stop Moving")
 
-        dataBasePosition += 1
         knobPosition = knobValue * 100F
         Log.d("Saad", "handleKnobStopMoving: FileName $tempCacheName")
         Log.d("Saad", "handleKnobStopMoving: KnobValue $knobValue")
-        videoSpeedChange(tempCacheName, knobValue)
+        val tempPath = Utils.createCacheTempFile(requireContext())
+        videoSpeedChange(tempPath, knobValue)
     }
 
     private fun videoSpeedChange(tempPath: String, knobValue: Int) {
@@ -101,7 +95,7 @@ class SpeedFragment : Fragment() {
         java.lang.String.valueOf(this.videoPlayerState.getStop() / 1000)
 
 
-        val filename: String = this.videoPlayerState.getFilename()!!
+        val filename: String = mainCachedFile
 
         var f2 = 0.0f
         when (value) {
@@ -232,6 +226,7 @@ class SpeedFragment : Fragment() {
     }
 
     private fun executeFFMPEG(strArr: Array<String>, str: String) {
+        sharedViewModel.pauseVideo(true)
         val progressDialog =
             ProgressDialog(requireContext(), R.style.CustomDialog)
         progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
@@ -254,7 +249,8 @@ class SpeedFragment : Fragment() {
                 Config.RETURN_CODE_SUCCESS -> {
                     progressDialog.dismiss()
                     Toast.makeText(requireContext(), "Success", Toast.LENGTH_SHORT).show()
-                    updateVideoUri(Uri.parse(str))
+                    mainCachedFile = str
+                    updateVideoUri(str)
                 }
                 Config.RETURN_CODE_CANCEL -> {
                     Log.d("FFMPEFailure", str)
@@ -305,21 +301,9 @@ class SpeedFragment : Fragment() {
         knobAnimator.start()
     }
 
-    private fun getVideoDuration(): Int {
-        val retriever = MediaMetadataRetriever()
-        retriever.setDataSource(requireContext(), Uri.parse(videoUri))
-
-        val durationStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-        val duration = durationStr!!.toLong()
-
-        // Convert duration from milliseconds to seconds
-
-        // Convert duration from milliseconds to seconds
-        return (duration / 1000).toInt()
-    }
 
     // Example function to update the video URI
-    private fun updateVideoUri(uri: Uri) {
-        sharedViewModel.setVideoUri(uri)
+    private fun updateVideoUri(path: String) {
+        sharedViewModel.setVideoUri(path)
     }
 }

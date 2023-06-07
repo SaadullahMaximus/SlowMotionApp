@@ -19,9 +19,9 @@
 
     <ImageView
         android:id="@+id/rotateLeft"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_35sdp"
+        android:layout_width="@dimen/_25sdp"
+        android:layout_height="@dimen/_25sdp"
+        android:layout_marginTop="@dimen/_30sdp"
         android:src="@drawable/ic_undo"
         app:layout_constraintEnd_toStartOf="@+id/rotateRight"
         app:layout_constraintStart_toEndOf="@+id/backBtn"
@@ -29,9 +29,9 @@
 
     <ImageView
         android:id="@+id/rotateRight"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_35sdp"
+        android:layout_width="@dimen/_25sdp"
+        android:layout_height="@dimen/_25sdp"
+        android:layout_marginTop="@dimen/_30sdp"
         android:src="@drawable/ic_redo"
         app:layout_constraintEnd_toStartOf="@+id/linearLayoutBtnContainer"
         app:layout_constraintStart_toEndOf="@+id/rotateLeft"
@@ -40,15 +40,15 @@
     <Button
         android:id="@+id/saveBtn"
         style="@style/CustomButtonStyle"
-        android:layout_width="@dimen/_74sdp"
+        android:layout_width="@dimen/_50sdp"
         android:layout_height="@dimen/_27sdp"
         android:layout_marginTop="@dimen/_30sdp"
         android:layout_marginEnd="@dimen/_10sdp"
         android:background="@drawable/background_rounded_corners"
         android:fontFamily="@font/fredokamedium"
-        android:paddingStart="@dimen/_5sdp"
+        android:paddingStart="@dimen/_4sdp"
         android:paddingTop="@dimen/_3sdp"
-        android:paddingEnd="@dimen/_5sdp"
+        android:paddingEnd="@dimen/_4sdp"
         android:paddingBottom="@dimen/_3sdp"
         android:text="Save"
         android:textColor="@color/black"
@@ -92,16 +92,24 @@
 
     </LinearLayout>
 
-    <VideoView
-        android:id="@+id/videoView"
-        android:layout_width="wrap_content"
+    <FrameLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="@dimen/_8sdp"
         android:layout_marginBottom="@dimen/_8sdp"
         app:layout_constraintBottom_toTopOf="@id/playPauseButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/linearLayoutBtnContainer" />
+        app:layout_constraintTop_toBottomOf="@id/linearLayoutBtnContainer">
+
+        <VideoView
+            android:id="@+id/videoView"
+            android:layout_gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </FrameLayout>
 
     <ImageView
         android:id="@+id/playPauseButton"
@@ -126,7 +134,7 @@
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
         app:layout_constraintEnd_toStartOf="@+id/totalDurationTextView"
         app:layout_constraintStart_toEndOf="@+id/playPauseButton"
-        app:layout_constraintTop_toBottomOf="@id/videoView" />
+        app:layout_constraintTop_toBottomOf="@id/frameLayout" />
 
     <TextView
         android:id="@+id/totalDurationTextView"
@@ -140,7 +148,7 @@
         android:textSize="@dimen/_14sdp"
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/videoView" />
+        app:layout_constraintTop_toBottomOf="@id/frameLayout" />
 
     <FrameLayout
         android:id="@+id/fragment_container_main"

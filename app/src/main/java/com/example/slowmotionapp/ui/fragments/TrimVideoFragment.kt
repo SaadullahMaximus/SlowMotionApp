@@ -25,6 +25,8 @@ import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.FragmentTrimVideoBinding
 import com.example.slowmotionapp.ui.activities.EditorActivity
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.trimFilePath
 import com.example.slowmotionapp.utils.Utils
 import java.io.File
 import java.text.DecimalFormat
@@ -392,10 +394,10 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
         val parts = mDuration / 6.0
         val decimalFormat = DecimalFormat("#.00")
         binding.tv1.text = decimalFormat.format(parts)
-        binding.tv2.text = decimalFormat.format(parts*2)
-        binding.tv3.text = decimalFormat.format(parts*3)
-        binding.tv4.text = decimalFormat.format(parts*4)
-        binding.tv5.text = decimalFormat.format(parts*5)
+        binding.tv2.text = decimalFormat.format(parts * 2)
+        binding.tv3.text = decimalFormat.format(parts * 3)
+        binding.tv4.text = decimalFormat.format(parts * 4)
+        binding.tv5.text = decimalFormat.format(parts * 5)
     }
 
     private fun trimVideo(context: Context, strArr: Array<String>, str: String) {
@@ -420,6 +422,8 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
                 Config.RETURN_CODE_SUCCESS -> {
                     progressDialog.dismiss()
                     Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
+                    trimFilePath = str
+                    mainCachedFile = Utils.createCacheCopy(requireContext(), trimFilePath).toString()
                     switchFragment()
                 }
                 Config.RETURN_CODE_CANCEL -> {
@@ -463,7 +467,6 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
         transaction.replace(R.id.fragment_container, fragment2)
         transaction.addToBackStack(null)
         transaction.remove(fragment1).commit()
-        (activity as EditorActivity?)!!.setTrimVideoPath(outputFile)
     }
 
 }

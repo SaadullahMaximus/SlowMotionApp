@@ -13,7 +13,6 @@ import com.example.slowmotionapp.R
 import com.example.slowmotionapp.databinding.FragmentMainBinding
 import com.google.android.material.tabs.TabLayout
 
-
 class MainFragment : Fragment() {
 
     private var _binding: FragmentMainBinding? = null

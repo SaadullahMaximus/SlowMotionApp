@@ -56,7 +56,6 @@ class VideoCheckFragment : Fragment() {
             deleteVideo(videoUri)
             requireActivity().finish()
         }
-
         return binding.root
     }
 
@@ -66,7 +65,6 @@ class VideoCheckFragment : Fragment() {
         if (videoFile.exists()) {
             return videoFile.delete()
         }
-
         return false
     }
 

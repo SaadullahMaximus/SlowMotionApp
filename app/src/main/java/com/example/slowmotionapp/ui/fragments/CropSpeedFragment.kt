@@ -1,6 +1,7 @@
 package com.example.slowmotionapp.ui.fragments
 
 import android.annotation.SuppressLint
+import android.app.ProgressDialog
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
@@ -10,15 +11,19 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.SeekBar
-import android.widget.VideoView
+import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
+import com.arthenica.mobileffmpeg.Config
+import com.arthenica.mobileffmpeg.FFmpeg
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.databinding.FragmentCropSpeedBinding
-import com.example.slowmotionapp.ui.activities.EditorActivity
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.trimFilePath
+import com.example.slowmotionapp.utils.Utils
 import com.example.slowmotionapp.viewmodel.SharedViewModel
+import java.io.File
 
 
 class CropSpeedFragment : Fragment() {
@@ -40,10 +45,10 @@ class CropSpeedFragment : Fragment() {
     private val mHandler = Handler(Looper.getMainLooper())
 
     private var mediaPlayer: MediaPlayer? = null
-    private lateinit var videoUri: String
 
     private lateinit var sharedViewModel: SharedViewModel
     private lateinit var videoView: VideoView
+    private lateinit var playPause: ImageView
 
     // Get a reference to the shared ViewModel
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -52,11 +57,21 @@ class CropSpeedFragment : Fragment() {
 
         // Initialize and setup the VideoView
         videoView = view.findViewById(R.id.videoView)
+        playPause = view.findViewById(R.id.playPauseButton)
 
         // Observe the video URI LiveData
-        sharedViewModel.videoUri.observe(viewLifecycleOwner) { uri ->
-            uri?.let {
-                videoView.setVideoURI(uri)
+        sharedViewModel.videoPath.observe(viewLifecycleOwner) { path ->
+            path?.let {
+                videoView.setVideoURI(Uri.parse(path))
+            }
+        }
+
+        // Observe the booleanLiveData
+        sharedViewModel.booleanLiveData.observe(viewLifecycleOwner) { newValue ->
+            if (newValue == true && videoView.isPlaying) {
+                videoView.pause()
+                videoView.seekTo(0)
+                playPause.setImageResource(R.drawable.baseline_play_arrow)
             }
         }
     }
@@ -67,10 +82,10 @@ class CropSpeedFragment : Fragment() {
     ): View {
         _binding = FragmentCropSpeedBinding.inflate(inflater, container, false)
 
-        videoUri = (activity as EditorActivity?)!!.getTrimmedPath()
+        binding.videoView.setVideoURI(Uri.parse(mainCachedFile))
 
-        Log.d("Hello", "onCreateView: $videoUri")
-        binding.videoView.setVideoURI(Uri.parse(videoUri))
+        Log.d("Hello", "onCreateView: TrimFilePath $trimFilePath")
+        Log.d("Hello", "onCreateView: MainCachedFile $mainCachedFile")
 
         binding.videoView.setOnPreparedListener { mediaPlayer: MediaPlayer? ->
             mediaPlayer?.let {
@@ -134,7 +149,6 @@ class CropSpeedFragment : Fragment() {
             }
         })
 
-
         childFragmentManager = getChildFragmentManager()
 
         currentChildFragment = MainFragment()
@@ -173,15 +187,118 @@ class CropSpeedFragment : Fragment() {
             }
         }
 
+        binding.rotateRight.setOnClickListener {
+            rotateVideoCommand(1)
+        }
+
+        binding.rotateLeft.setOnClickListener {
+            rotateVideoCommand(2)
+        }
+
+        binding.saveBtn.setOnClickListener {
+            Utils.saveEditedVideo(requireContext(), File(mainCachedFile))
+        }
+
 
         return binding.root
+    }
+
+    private fun rotateVideoCommand(rotateValue: Int) {
+
+        Log.d("HelloHello", "rotateVideoCommand: $rotateValue")
+
+        val sb3 = StringBuilder()
+
+        sb3.append("[0:v]transpose=$rotateValue[out]")
+
+        val tempFile = Utils.createCacheTempFile(requireContext())
+
+        executeFFMPEG(
+            arrayOf(
+                "-y",
+                "-ss",
+                "0",
+                "-t",
+                "${Utils.getVideoDuration(requireContext(), mainCachedFile)}",
+                "-i",
+                mainCachedFile,
+                "-vf",
+                sb3.toString(),
+                "-c:a",
+                "copy",
+                tempFile
+            ), tempFile
+        )
+    }
+
+    private fun executeFFMPEG(strArr: Array<String>, str: String) {
+        sharedViewModel.pauseVideo(true)
+        val progressDialog =
+            ProgressDialog(requireContext(), R.style.CustomDialog)
+        progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
+        progressDialog.isIndeterminate = true
+        progressDialog.setCancelable(false)
+        progressDialog.setMessage("Please Wait")
+        progressDialog.show()
+        val ffmpegCommand: String = Utils.commandsGenerator(strArr)
+        FFmpeg.executeAsync(
+            ffmpegCommand
+        ) { _, returnCode ->
+            Log.d(
+                "TAG",
+                String.format("FFMPEG process exited with rc %d.", returnCode)
+            )
+            Log.d("TAG", "FFMPEG process output:")
+            Config.printLastCommandOutput(Log.INFO)
+            progressDialog.dismiss()
+            when (returnCode) {
+                Config.RETURN_CODE_SUCCESS -> {
+                    progressDialog.dismiss()
+                    Toast.makeText(requireContext(), "Success", Toast.LENGTH_SHORT).show()
+                    mainCachedFile = str
+                    updateVideoUri(str)
+                }
+                Config.RETURN_CODE_CANCEL -> {
+                    Log.d("FFMPEFailure", str)
+                    try {
+                        File(str).delete()
+                        Utils.deleteFromGallery(str, requireContext())
+                        Toast.makeText(
+                            requireContext(),
+                            "Error Creating Video",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    } catch (th: Throwable) {
+                        th.printStackTrace()
+                    }
+                }
+                else -> {
+                    Log.d("FFMPEFailure", str)
+                    try {
+                        File(str).delete()
+                        Utils.deleteFromGallery(str, requireContext())
+                        Toast.makeText(
+                            requireContext(),
+                            "Error Creating Video",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    } catch (th: Throwable) {
+                        th.printStackTrace()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updateVideoUri(path: String) {
+        videoView.setVideoURI(Uri.parse(path))
     }
 
     private fun videoPlay() {
         binding.videoView.start()
         binding.playPauseButton.setImageResource(R.drawable.baseline_pause)
         if (binding.seekBar.progress == 0) {
-            binding.totalDurationTextView.text = "00:00"
+            "00:00".also { binding.totalDurationTextView.text = it }
             updateProgressBar()
         } else {
             binding.totalDurationTextView.text = milliSecondsToTimer(

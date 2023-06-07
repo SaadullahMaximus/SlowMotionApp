@@ -8,14 +8,12 @@ import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.ActivityEditorBinding
 import com.example.slowmotionapp.ui.fragments.VideoCheckFragment
-import java.io.File
 
 class EditorActivity : AppCompatActivity() {
 
     private var videoUri: String? = null
     private var type: Int = 0
     private lateinit var binding: ActivityEditorBinding
-    private lateinit var trimmedVideoPath: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,13 +38,5 @@ class EditorActivity : AppCompatActivity() {
 
     fun getType(): Int {
         return type
-    }
-
-    fun setTrimVideoPath(outputFile: File) {
-        trimmedVideoPath = outputFile.toString()
-    }
-
-    fun getTrimmedPath(): String {
-        return trimmedVideoPath
     }
 }
