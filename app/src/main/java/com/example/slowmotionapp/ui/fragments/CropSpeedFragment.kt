@@ -2,11 +2,11 @@ package com.example.slowmotionapp.ui.fragments
 
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.os.*
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +17,8 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import com.arthenica.mobileffmpeg.Config
 import com.arthenica.mobileffmpeg.FFmpeg
+import com.edmodo.cropper.CropImageView
+import com.edmodo.cropper.cropwindow.edge.Edge
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.databinding.FragmentCropSpeedBinding
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
@@ -49,15 +51,57 @@ class CropSpeedFragment : Fragment() {
     private lateinit var sharedViewModel: SharedViewModel
     private lateinit var videoView: VideoView
     private lateinit var playPause: ImageView
+    private lateinit var cropView: CropImageView
+
+    private var screenWidth = 0
+
+    private var keyCodeR = 0
+    private var keyCodeW = 0
+    private var keyCodeQ = 0
+
+    private var aa = 0f
+    private var ab = 0f
+    private var ac = 0f
+    private var ad = 0f
+
+    private var a = 0
+    private var b = 0
+    private var y = 0
+    private var z = 0
+
+    private var m = 0
+    private var n = 0
+    private var o = 0
+    private var p = 0
+    private var q = 0
+    private var r = 0
+    private var s = 0
+    private var t = 0
+    private var u = 0
+    private var v = 0
+
+    private var cropVideoDuration: String? = null
+
+    private var ag = 0
+    private var ah = 0
+
+    private var cropOutputFilePath: String? = null
+
 
     // Get a reference to the shared ViewModel
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
 
+        val layoutParams = binding.frameLayout.layoutParams
+        layoutParams.width = screenWidth
+        layoutParams.height = screenWidth
+        binding.frameLayout.layoutParams = layoutParams
+
         // Initialize and setup the VideoView
         videoView = view.findViewById(R.id.videoView)
         playPause = view.findViewById(R.id.playPauseButton)
+        cropView = view.findViewById(R.id.cropperView)
 
         // Observe the video URI LiveData
         sharedViewModel.videoPath.observe(viewLifecycleOwner) { path ->
@@ -74,6 +118,45 @@ class CropSpeedFragment : Fragment() {
                 playPause.setImageResource(R.drawable.baseline_play_arrow)
             }
         }
+        // Observe the booleanCropVisible
+        sharedViewModel.booleanCropVisible.observe(viewLifecycleOwner) { newValue ->
+            if (newValue == true) {
+                cropView.visibility = View.VISIBLE
+                Toast.makeText(requireContext(), "Crop View Visible", Toast.LENGTH_SHORT).show()
+            } else {
+                cropView.visibility = View.GONE
+                Toast.makeText(requireContext(), "Crop View GONE", Toast.LENGTH_SHORT).show()
+            }
+        }
+        // Observe the cropSelected
+        sharedViewModel.cropSelected.observe(viewLifecycleOwner) { newValue ->
+            when (newValue) {
+                1 -> {
+                    cropView.setFixedAspectRatio(false)
+                }
+                2 -> {
+                    cropView.setFixedAspectRatio(true)
+                    cropView.setAspectRatio(10, 10)
+                }
+                3 -> {
+                    cropView.setFixedAspectRatio(true)
+                    cropView.setAspectRatio(9, 16)
+                }
+                4 -> {
+                    cropView.setFixedAspectRatio(true)
+                    cropView.setAspectRatio(16, 9)
+                }
+            }
+        }
+
+        // Observe the startCrop
+        sharedViewModel.startCrop.observe(viewLifecycleOwner) { newValue ->
+            if (newValue) {
+                getDimension()
+                startCrop()
+            }
+        }
+
     }
 
     override fun onCreateView(
@@ -82,7 +165,11 @@ class CropSpeedFragment : Fragment() {
     ): View {
         _binding = FragmentCropSpeedBinding.inflate(inflater, container, false)
 
+        screenWidth = Utils.getScreenWidth()
+
         binding.videoView.setVideoURI(Uri.parse(mainCachedFile))
+
+        cropViewDisplay()
 
         Log.d("Hello", "onCreateView: TrimFilePath $trimFilePath")
         Log.d("Hello", "onCreateView: MainCachedFile $mainCachedFile")
@@ -227,11 +314,11 @@ class CropSpeedFragment : Fragment() {
                 "-c:a",
                 "copy",
                 tempFile
-            ), tempFile
+            ), tempFile, 0
         )
     }
 
-    private fun executeFFMPEG(strArr: Array<String>, str: String) {
+    private fun executeFFMPEG(strArr: Array<String>, str: String, valueCheck: Int) {
         sharedViewModel.pauseVideo(true)
         val progressDialog =
             ProgressDialog(requireContext(), R.style.CustomDialog)
@@ -257,6 +344,12 @@ class CropSpeedFragment : Fragment() {
                     Toast.makeText(requireContext(), "Success", Toast.LENGTH_SHORT).show()
                     mainCachedFile = str
                     updateVideoUri(str)
+                    when(valueCheck){
+                        1 -> {
+                            cropViewDisplay()
+                            sharedViewModel.switchFragmentB(true)
+                        }
+                    }
                 }
                 Config.RETURN_CODE_CANCEL -> {
                     Log.d("FFMPEFailure", str)
@@ -401,4 +494,204 @@ class CropSpeedFragment : Fragment() {
         mEnd.toInt() % 60
 
     }
+
+    private fun cropViewDisplay() {
+        val mediaMetadataRetriever = MediaMetadataRetriever()
+        mediaMetadataRetriever.setDataSource(mainCachedFile)
+
+        keyCodeR = Integer.valueOf(mediaMetadataRetriever.extractMetadata(18)!!).toInt()
+        keyCodeQ = Integer.valueOf(mediaMetadataRetriever.extractMetadata(19)!!).toInt()
+
+        keyCodeW = Integer.valueOf(mediaMetadataRetriever.extractMetadata(24)!!).toInt()
+        val layoutParams = binding.cropperView.layoutParams as FrameLayout.LayoutParams
+
+        Log.d("KEYCODE", "cropViewDisplay: $keyCodeR $keyCodeQ $keyCodeW $screenWidth")
+
+        if (keyCodeW == 90 || keyCodeW == 270) {
+            if (keyCodeR >= keyCodeQ) {
+                if (keyCodeR >= screenWidth) {
+                    layoutParams.height = screenWidth
+                    layoutParams.width =
+                        (screenWidth.toFloat() / (keyCodeR.toFloat() / keyCodeQ.toFloat())).toInt()
+                } else {
+                    layoutParams.width = screenWidth
+                    layoutParams.height =
+                        (keyCodeQ.toFloat() * (screenWidth.toFloat() / keyCodeR.toFloat())).toInt()
+                }
+            } else if (keyCodeQ >= screenWidth) {
+                layoutParams.width = screenWidth
+                layoutParams.height =
+                    (screenWidth.toFloat() / (keyCodeQ.toFloat() / keyCodeR.toFloat())).toInt()
+            } else {
+                layoutParams.width =
+                    (keyCodeR.toFloat() * (screenWidth.toFloat() / keyCodeQ.toFloat())).toInt()
+                layoutParams.height = screenWidth
+            }
+        } else if (keyCodeR >= keyCodeQ) {
+            if (keyCodeR >= screenWidth) {
+                layoutParams.width = screenWidth
+                layoutParams.height =
+                    (screenWidth.toFloat() / (keyCodeR.toFloat() / keyCodeQ.toFloat())).toInt()
+            } else {
+                layoutParams.width = screenWidth
+                layoutParams.height =
+                    (keyCodeQ.toFloat() * (screenWidth.toFloat() / keyCodeR.toFloat())).toInt()
+            }
+        } else if (keyCodeQ >= screenWidth) {
+            layoutParams.width =
+                (screenWidth.toFloat() / (keyCodeQ.toFloat() / keyCodeR.toFloat())).toInt()
+            layoutParams.height = screenWidth
+        } else {
+            layoutParams.width =
+                (keyCodeR.toFloat() * (screenWidth.toFloat() / keyCodeQ.toFloat())).toInt()
+            layoutParams.height = screenWidth
+        }
+        binding.cropperView.layoutParams = layoutParams
+        Log.d(
+            "HEIGHTWIDTH",
+            "cropViewDisplay:width: ${layoutParams.width},height: ${layoutParams.height}"
+        )
+        binding.cropperView.setImageBitmap(
+            Bitmap.createBitmap(
+                layoutParams.width,
+                layoutParams.height,
+                Bitmap.Config.ARGB_8888
+            )
+        )
+    }
+
+    private fun startCrop() {
+        when (keyCodeW) {
+            90 -> {
+                try {
+                    o = b
+                    val i2: Int = z
+                    u = b
+                    v = a
+                    m = y
+                    n = z
+                    s = y
+                    t = a
+                    ag = m - o
+                    ah = v - i2
+                    p = q - (ah + i2)
+                } catch (e2: Exception) {
+                    e2.printStackTrace()
+                }
+            }
+            270 -> {
+                try {
+                    val i3: Int = b
+                    val i4: Int = z
+                    u = b
+                    v = a
+                    m = y
+                    n = z
+                    s = y
+                    t = a
+                    ag = m - i3
+                    ah = v - i4
+                    o = r - (ag + i3)
+                    p = i4
+                } catch (e3: Exception) {
+                    e3.printStackTrace()
+                }
+            }
+            else -> {
+                try {
+                    o = z
+                    p = b
+                    u = a
+                    v = b
+                    m = z
+                    n = y
+                    s = a
+                    t = y
+                    ag = u - o
+                    ah = n - p
+                } catch (e4: Exception) {
+                    e4.printStackTrace()
+                }
+            }
+        }
+        cropVideoDuration = Utils.getVideoDuration(requireContext(), mainCachedFile).toString()
+
+
+        cropOutputFilePath = Utils.createCacheTempFile(requireContext())
+
+        try {
+            val sb = java.lang.StringBuilder()
+            sb.append("crop=w=")
+            sb.append(ag)
+            sb.append(":h=")
+            sb.append(ah)
+            sb.append(":x=")
+            sb.append(o)
+            sb.append(":y=")
+            sb.append(p)
+            executeFFMPEG(
+                arrayOf(
+                    "-y",
+                    "-ss",
+                    "0",
+                    "-t",
+                    cropVideoDuration!!,
+                    "-i",
+                    mainCachedFile,
+                    "-strict",
+                    "experimental",
+                    "-vf",
+                    sb.toString(),
+                    "-r",
+                    "15",
+                    "-ab",
+                    "128k",
+                    "-vcodec",
+                    "mpeg4",
+                    "-acodec",
+                    "copy",
+                    "-b:v",
+                    "2500k",
+                    "-sample_fmt",
+                    "s16",
+                    "-ss",
+                    "0",
+                    "-t",
+                    cropVideoDuration!!,
+                    cropOutputFilePath!!
+                ), cropOutputFilePath!!, 1
+            )
+        } catch (unused: Exception) {
+            val file2 = File(cropOutputFilePath!!)
+            if (file2.exists()) {
+                file2.delete()
+                return
+            }
+            Toast.makeText(requireContext(), "please select any option!", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun getDimension() {
+        if (keyCodeW == 90 || keyCodeW == 270) {
+            aa = keyCodeQ.toFloat()
+            ab = keyCodeR.toFloat()
+            ac = binding.cropperView.width.toFloat()
+            ad = binding.cropperView.height.toFloat()
+            z = (Edge.LEFT.coordinate * aa / ac).toInt()
+            a = (Edge.RIGHT.coordinate * aa / ac).toInt()
+            b = (Edge.TOP.coordinate * ab / ad).toInt()
+            y = (Edge.BOTTOM.coordinate * ab / ad).toInt()
+            return
+        }
+        aa = keyCodeR.toFloat()
+        ab = keyCodeQ.toFloat()
+        ac = binding.cropperView.width.toFloat()
+        ad = binding.cropperView.height.toFloat()
+        z = (Edge.LEFT.coordinate * aa / ac).toInt()
+        a = (Edge.RIGHT.coordinate * aa / ac).toInt()
+        b = (Edge.TOP.coordinate * ab / ad).toInt()
+        y = (Edge.BOTTOM.coordinate * ab / ad).toInt()
+    }
+
+
 }

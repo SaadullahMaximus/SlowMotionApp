@@ -69,17 +69,29 @@ class MainActivity : AppCompatActivity() {
         )
 
         binding.animationView.setOnClickListener {
-            expandButtons()
-            binding.animationView.visibility = View.GONE
             binding.imageCreate.visibility = View.VISIBLE
+            binding.animationView.visibility = View.GONE
+
+            // Create the ObjectAnimator for rotation animation
+            val animator = ObjectAnimator.ofFloat(binding.imageCreate, View.ROTATION, 0f, 90f)
+            animator.duration = 800 // Animation duration in milliseconds
+
+            // Start the animation
+            animator.start()
+
+            // Delay the visibility change using a Handler
+            Handler(Looper.getMainLooper()).postDelayed({
+                expandButtons()
+            }, 100)
+
         }
 
 
         binding.imageCreate.setOnClickListener {
             collapseButtons()
             // Create the ObjectAnimator for rotation animation
-            val animator = ObjectAnimator.ofFloat(binding.imageCreate, View.ROTATION, 0f, -360f)
-            animator.duration = 1000 // Animation duration in milliseconds
+            val animator = ObjectAnimator.ofFloat(binding.imageCreate, View.ROTATION, 0f, -180f)
+            animator.duration = 800 // Animation duration in milliseconds
 
             // Start the animation
             animator.start()
@@ -116,7 +128,7 @@ class MainActivity : AppCompatActivity() {
         binding.expandedButtonsContainer.alpha = 0f
         binding.expandedButtonsContainer.animate()
             .alpha(1f)
-            .setDuration(200)
+            .setDuration(600)
             .setListener(null)
             .start()
     }
@@ -125,7 +137,7 @@ class MainActivity : AppCompatActivity() {
         isExpanded = false
         binding.expandedButtonsContainer.animate()
             .alpha(0f)
-            .setDuration(200)
+            .setDuration(600)
             .setListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
                     binding.expandedButtonsContainer.visibility = View.GONE

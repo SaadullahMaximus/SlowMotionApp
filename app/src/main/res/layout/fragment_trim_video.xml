@@ -12,7 +12,7 @@
         android:id="@+id/backBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/_30sdp"
+        android:layout_margin="@dimen/_20sdp"
         android:src="@drawable/baseline_arrow_back"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -21,7 +21,8 @@
         android:id="@+id/TVTrim"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/_30sdp"
+        android:layout_marginTop="@dimen/_17sdp"
+        android:layout_marginStart="@dimen/_20sdp"
         android:fontFamily="@font/fredokaregular"
         android:text="@string/trim_video"
         android:textColor="@color/white"
@@ -105,7 +106,6 @@
         android:layout_marginStart="@dimen/_2sdp"
         android:layout_marginTop="@dimen/_10sdp"
         android:layout_marginEnd="@dimen/_2sdp"
-        android:layout_marginBottom="@dimen/_10sdp"
         app:layout_constraintBottom_toTopOf="@+id/timeLine"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">

@@ -8,9 +8,12 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import com.example.slowmotionapp.adapters.ViewPagerAdapter
+import androidx.lifecycle.ViewModelProvider
+import androidx.viewpager.widget.ViewPager
 import com.example.slowmotionapp.R
+import com.example.slowmotionapp.adapters.ViewPagerAdapter
 import com.example.slowmotionapp.databinding.FragmentMainBinding
+import com.example.slowmotionapp.viewmodel.SharedViewModel
 import com.google.android.material.tabs.TabLayout
 
 class MainFragment : Fragment() {
@@ -19,6 +22,24 @@ class MainFragment : Fragment() {
     private val binding get() = _binding!!
 
     private var childFragmentManager: FragmentManager? = null
+
+    private lateinit var sharedViewModel: SharedViewModel
+
+    private lateinit var viewPager: ViewPager
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
+
+        viewPager = view.findViewById(R.id.viewpager)
+
+        sharedViewModel.fragmentA.observe(viewLifecycleOwner) { newValue ->
+            if (newValue) {
+                viewPager.setCurrentItem(0, true)
+                sharedViewModel.cropViewVisible(false)
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,6 +65,31 @@ class MainFragment : Fragment() {
         tab1?.customView = createTabView("Speed", R.drawable.speed_ic)
         tab2?.customView = createTabView("Crop", R.drawable.crop_ic)
 
+        binding.viewpager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            override fun onPageScrolled(
+                position: Int,
+                positionOffset: Float,
+                positionOffsetPixels: Int
+            ) {
+            }
+
+            override fun onPageSelected(position: Int) {
+                when (position) {
+                    0 -> {
+                        // Fragment A is visible
+                        sharedViewModel.cropViewVisible(false)
+                    }
+                    1 -> {
+                        // Fragment B is visible
+                        sharedViewModel.cropViewVisible(true)
+                    }
+                }
+            }
+
+            override fun onPageScrollStateChanged(state: Int) {}
+
+        })
+
         return binding.root
     }
 
@@ -59,4 +105,5 @@ class MainFragment : Fragment() {
 
         return tabView
     }
+
 }

@@ -4,11 +4,13 @@ import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.tempCacheName
@@ -245,6 +247,14 @@ object Utils {
         val duration = durationStr!!.toLong()
 
         return (duration / 1000).toInt()
+    }
+
+    fun getScreenWidth(): Int {
+        val screenWidth = Resources.getSystem().displayMetrics.widthPixels
+
+        Log.d("screenWidth", "getScreenWidth: $screenWidth")
+
+        return screenWidth
     }
 
 }
