@@ -76,7 +76,7 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
 
         binding.trimVideoView.setOnPreparedListener { mp: MediaPlayer? ->
             mp?.let {
-                this.onVideoPrepared()
+                onVideoPrepared()
             }
         }
 
@@ -423,7 +423,8 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
                     progressDialog.dismiss()
                     Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
                     trimFilePath = str
-                    mainCachedFile = Utils.createCacheCopy(requireContext(), trimFilePath).toString()
+                    mainCachedFile =
+                        Utils.createCacheCopy(requireContext(), trimFilePath).toString()
                     switchFragment()
                 }
                 Config.RETURN_CODE_CANCEL -> {

@@ -252,6 +252,7 @@ class CropSpeedFragment : Fragment() {
         binding.enhanceBtn.setOnClickListener {
             binding.enhanceBtn.visibility = View.GONE
             binding.backTextBtn.visibility = View.VISIBLE
+            sharedViewModel.cropViewVisible(false)
             childFragmentManager!!.beginTransaction()
                 .replace(R.id.fragment_container_main, effectMusicFragment as EffectMusicFragment)
                 .commit()
