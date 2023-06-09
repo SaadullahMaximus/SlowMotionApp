@@ -42,6 +42,5 @@ class Constants {
         const val AVI_FORMAT = ".avi"
 
         const val VIDEO_LIMIT = 4 //4 minutes
-
     }
 }

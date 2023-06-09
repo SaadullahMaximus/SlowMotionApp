@@ -22,8 +22,7 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
-        ndk {
-        }
+        ndk {}
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -53,10 +52,9 @@ ext.abiCodes = ['x86': 1, 'x86_64': 2, 'armeabi-v7a': 3, 'arm64-v8a': 4]
 
 
 android.applicationVariants.all { variant ->
-    variant.outputs.each {
-        output ->
-            def baseAbiVersionCode = project.ext.abiCodes.get(output.getFilter(com.android.build.OutputFile.ABI))
-            output.versionCodeOverride = baseAbiVersionCode + variant.versionCode
+    variant.outputs.each { output ->
+        def baseAbiVersionCode = project.ext.abiCodes.get(output.getFilter(com.android.build.OutputFile.ABI))
+        output.versionCodeOverride = baseAbiVersionCode + variant.versionCode
     }
 }
 
