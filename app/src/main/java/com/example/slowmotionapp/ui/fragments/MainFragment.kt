@@ -137,9 +137,6 @@ class MainFragment : Fragment() {
         })
 
 
-//        // Update the SeekBar initially
-//        updateSeekBar()
-
         return binding.root
     }
 

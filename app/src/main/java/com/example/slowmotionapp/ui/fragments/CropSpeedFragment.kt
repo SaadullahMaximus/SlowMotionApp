@@ -502,8 +502,9 @@ class CropSpeedFragment : Fragment() {
 
         keyCodeR = Integer.valueOf(mediaMetadataRetriever.extractMetadata(18)!!).toInt()
         keyCodeQ = Integer.valueOf(mediaMetadataRetriever.extractMetadata(19)!!).toInt()
-
         keyCodeW = Integer.valueOf(mediaMetadataRetriever.extractMetadata(24)!!).toInt()
+
+
         val layoutParams = binding.cropperView.layoutParams as FrameLayout.LayoutParams
 
         Log.d("KEYCODE", "cropViewDisplay: $keyCodeR $keyCodeQ $keyCodeW $screenWidth")
@@ -548,10 +549,7 @@ class CropSpeedFragment : Fragment() {
             layoutParams.height = screenWidth
         }
         binding.cropperView.layoutParams = layoutParams
-        Log.d(
-            "HEIGHTWIDTH",
-            "cropViewDisplay:width: ${layoutParams.width},height: ${layoutParams.height}"
-        )
+
         binding.cropperView.setImageBitmap(
             Bitmap.createBitmap(
                 layoutParams.width,

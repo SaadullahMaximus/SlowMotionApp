@@ -115,6 +115,10 @@ class MainActivity : AppCompatActivity() {
             checkPermissionGallery(Constants.PERMISSION_GALLERY)
         }
 
+        binding.btnSaved.setOnClickListener {
+            startActivity(Intent(this, SavedActivity::class.java))
+        }
+
     }
 
     private fun checkPermissionGallery(permissionGallery: Array<String>) {

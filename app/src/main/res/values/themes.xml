@@ -25,6 +25,7 @@
 
     <style name="CustomTabLayout" parent="Widget.Design.TabLayout">
         <item name="tabIndicatorColor">@color/baseColor</item>
+        <item name="android:textColor">@color/baseColor</item>
     </style>
 
 
