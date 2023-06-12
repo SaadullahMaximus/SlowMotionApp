@@ -10,4 +10,6 @@
     <!-- Fully transparent, equivalent to 0x00000000 -->
     <color name="transparent">#00000000</color>
     <color name="baseColor">#FCC203</color>
+
+    <color name="fragmentBg">#646464</color>
 </resources>

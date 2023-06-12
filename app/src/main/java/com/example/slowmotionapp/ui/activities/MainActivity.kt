@@ -24,6 +24,7 @@ import androidx.core.content.FileProvider
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.ActivityMainBinding
+import com.example.slowmotionapp.ui.fragments.MyDialogFragment
 import com.example.slowmotionapp.utils.Utils
 import java.io.File
 
@@ -41,6 +42,9 @@ class MainActivity : AppCompatActivity() {
     private var isLargeVideo: Boolean? = false
 
     companion object {
+
+        var isFromTrim: Boolean = false
+
         // Define properties and functions here
         var knobPosition: Float = 700F
 
@@ -108,10 +112,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.captureVideoBtn.setOnClickListener {
+            isFromTrim = false
             startCamera()
         }
 
         binding.selectVideoBtn.setOnClickListener {
+            isFromTrim = false
             checkPermissionGallery(Constants.PERMISSION_GALLERY)
         }
 
@@ -119,9 +125,14 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, SavedActivity::class.java))
         }
 
+        binding.btnTrim.setOnClickListener {
+            val myDialogFragment = MyDialogFragment()
+            myDialogFragment.show(supportFragmentManager, "MyDialogFragment")
+        }
+
     }
 
-    private fun checkPermissionGallery(permissionGallery: Array<String>) {
+    fun checkPermissionGallery(permissionGallery: Array<String>) {
         openGallery(permissionGallery)
     }
 
@@ -151,7 +162,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun startCamera() {
+    fun startCamera() {
         val blockedPermission = checkHasPermission(this, Constants.PERMISSION_CAMERA)
         if (blockedPermission != null && blockedPermission.size > 0) {
             Log.d("Maximus", "startCamera: If $blockedPermission")
@@ -249,6 +260,9 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
+        Log.d("LETSGO", "setFilePath: Trim Lets Go RequestCode $requestCode")
+
+
         when (requestCode) {
 
             Constants.VIDEO_GALLERY -> {
@@ -258,7 +272,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             Constants.RECORD_VIDEO -> {
-                val intent = Intent(this, EditorActivity::class.java)
+                val intent = Intent(this, TrimVideoActivity::class.java)
                 intent.putExtra("VideoUri", videoUri.toString())
                 intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
                 startActivity(intent)
@@ -269,10 +283,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun setFilePath(resultCode: Int, data: Intent, mode: Int) {
 
+        Log.d("LETSGO", "setFilePath: Trim Lets Go ResultCode $resultCode")
+        Log.d("LETSGO", "setFilePath: Trim Lets Go Mode $mode")
+
+
         if (resultCode == RESULT_OK) {
             try {
                 val selectedImage = data.data
-                //  Log.e("selectedImage==>", "" + selectedImage)
+                Log.e("selectedImage==>", "" + selectedImage)
                 val filePathColumn = arrayOf(MediaStore.MediaColumns.DATA)
                 val cursor = this.contentResolver
                     .query(selectedImage!!, filePathColumn, null, null, null)
@@ -293,14 +311,16 @@ class MainActivity : AppCompatActivity() {
 
                         //check if video is more than 4 minutes
                         if (duration < Constants.VIDEO_LIMIT) {
+                            Log.d("LETSGO", "setFilePath: Trim Lets Go Almost extension $extension")
                             //check video format before playing into exoplayer
                             if (extension == Constants.AVI_FORMAT) {
                                 convertAviToMp4() //avi format is not supported in exoplayer
                             } else {
                                 playbackPosition = 0
                                 currentWindow = 0
+                                Log.d("LETSGO", "setFilePath: Trim Lets Go")
                                 val uri = Uri.fromFile(masterVideoFile)
-                                val intent = Intent(this, EditorActivity::class.java)
+                                val intent = Intent(this, TrimVideoActivity::class.java)
                                 intent.putExtra("VideoUri", filePath)
                                 intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
                                 intent.putExtra("VideoDuration", Utils.getMediaDuration(this, uri))
@@ -314,8 +334,9 @@ class MainActivity : AppCompatActivity() {
                             ).show()
 
                             isLargeVideo = true
+                            Log.d("LETSGO", "setFilePath: Trim Lets Go")
                             val uri = Uri.fromFile(masterVideoFile)
-                            val intent = Intent(this, EditorActivity::class.java)
+                            val intent = Intent(this, TrimVideoActivity::class.java)
                             intent.putExtra("VideoPath", filePath)
                             intent.putExtra("VideoDuration", Utils.getMediaDuration(this, uri))
                             startActivityForResult(intent, Constants.MAIN_VIDEO_TRIM)

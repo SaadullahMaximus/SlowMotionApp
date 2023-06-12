@@ -11,7 +11,8 @@
         <item name="colorOnSecondary">@color/black</item>
 
     </style>
-    <style name="CustomDialog" parent="android:Theme.Material.Dialog" >
+
+    <style name="CustomDialog" parent="android:Theme.Material.Dialog">
         <item name="android:textColor">@android:color/white</item>
         <item name="iconTint">@android:color/white</item>
         <item name="color">@android:color/white</item>
@@ -28,5 +29,10 @@
         <item name="android:textColor">@color/baseColor</item>
     </style>
 
+    <style name="MyDialogTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
 
 </resources>
