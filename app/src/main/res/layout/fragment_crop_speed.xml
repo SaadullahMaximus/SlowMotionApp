@@ -10,9 +10,8 @@
         android:id="@+id/backBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_25sdp"
+        android:layout_margin="@dimen/_25sdp"
         android:src="@drawable/baseline_arrow_back"
-        app:layout_constraintEnd_toStartOf="@+id/rotateLeft"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

@@ -311,6 +311,10 @@ class CropSpeedFragment : Fragment() {
             binding.backTextBtn.visibility = View.VISIBLE
 
             binding.videoView.visibility = View.GONE
+
+            binding.rotateLeft.visibility = View.GONE
+            binding.rotateRight.visibility = View.GONE
+
             binding.videoView.stopPlayback()
             binding.layoutMovieWrapper.visibility = View.VISIBLE
             player!!.seekTo(0)
@@ -326,8 +330,6 @@ class CropSpeedFragment : Fragment() {
                 }
             })
 
-
-
             Log.d("EXOPLAYER", "onCreateView: Exoplayer true")
 
             sharedViewModel.cropViewVisible(false)
@@ -339,6 +341,9 @@ class CropSpeedFragment : Fragment() {
         binding.backTextBtn.setOnClickListener {
             binding.enhanceBtn.visibility = View.VISIBLE
             binding.backTextBtn.visibility = View.GONE
+
+            binding.rotateLeft.visibility = View.VISIBLE
+            binding.rotateRight.visibility = View.VISIBLE
 
             binding.videoView.visibility = View.VISIBLE
             binding.layoutMovieWrapper.visibility = View.GONE
