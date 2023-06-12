@@ -7,7 +7,6 @@
     android:background="@color/black"
     tools:context=".ui.fragments.EffectMusicFragment">
 
-
     <ImageView
         android:id="@+id/speakerButton"
         android:layout_width="@dimen/_20sdp"

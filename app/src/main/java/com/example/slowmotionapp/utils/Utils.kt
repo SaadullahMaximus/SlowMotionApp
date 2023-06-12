@@ -13,7 +13,14 @@ import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
 import com.example.slowmotionapp.constants.Constants
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.tempCacheName
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
+import com.google.android.exoplayer2.upstream.DataSource
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.google.android.exoplayer2.util.Util
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -22,6 +29,8 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 object Utils {
+
+    var player: ExoPlayer? = null
     fun createVideoFile(): File {
         val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
             Date()
@@ -255,6 +264,34 @@ object Utils {
         Log.d("screenWidth", "getScreenWidth: $screenWidth")
 
         return screenWidth
+    }
+
+    fun setUpSimpleExoPlayer(context: Context) {
+        // Produces DataSource instances through which media data is loaded.
+        val dataSourceFactory: DataSource.Factory =
+            DefaultDataSourceFactory(context, Util.getUserAgent(context, Constants.APP_NAME))
+
+        // SimpleExoPlayer
+        player = ExoPlayer.Builder(context)
+            .setMediaSourceFactory(ProgressiveMediaSource.Factory(dataSourceFactory))
+            .build()
+        player!!.addMediaItem(MediaItem.fromUri(Uri.parse(mainCachedFile)))
+        player!!.prepare()
+        Log.d("EXOPLAYER", "onCreateView: setUpSimpleExoPlayer")
+    }
+
+    fun getVideoSize(context: Context,uri: Uri): Pair<Int, Int>? {
+        val retriever = MediaMetadataRetriever()
+        retriever.setDataSource(context, uri)
+
+        val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull()
+        val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull()
+
+        return if (width != null && height != null) {
+            Pair(width, height)
+        } else {
+            null
+        }
     }
 
 }

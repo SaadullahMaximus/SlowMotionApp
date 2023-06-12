@@ -1,10 +1,16 @@
 package com.example.slowmotionapp.ui.fragments
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.media.AudioManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.SeekBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -20,6 +26,36 @@ class EffectMusicFragment : Fragment() {
     private val binding get() = _binding!!
 
     private var childFragmentManager: FragmentManager? = null
+
+    private lateinit var audioManager: AudioManager
+
+    private lateinit var volumeChangeReceiver: BroadcastReceiver
+
+    private val volumeChangedAction = "android.media.VOLUME_CHANGED_ACTION"
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        audioManager = requireActivity().getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+        // Register a broadcast receiver to listen for volume changes and audio becoming noisy
+        volumeChangeReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                val action = intent.action
+                if (action == volumeChangedAction || action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
+                    updateSeekBar()
+                }
+            }
+        }
+        val filter = IntentFilter().apply {
+            addAction(volumeChangedAction)
+            addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+        }
+        requireActivity().registerReceiver(volumeChangeReceiver, filter)
+
+        // Update the SeekBar initially
+        updateSeekBar()
+    }
 
 
     override fun onCreateView(
@@ -61,6 +97,18 @@ class EffectMusicFragment : Fragment() {
 
         })
 
+        binding.seekBarSpeaker.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+                val volume = (maxVolume * progress) / 100
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0)
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
+
 
 
         return binding.root
@@ -77,6 +125,18 @@ class EffectMusicFragment : Fragment() {
         iconView.setImageResource(iconResId)
 
         return tabView
+    }
+
+    private fun updateSeekBar() {
+        val currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+        val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        val progress = (currentVolume * 100) / maxVolume
+        binding.seekBarSpeaker.progress = progress
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        requireActivity().unregisterReceiver(volumeChangeReceiver)
     }
 
 }

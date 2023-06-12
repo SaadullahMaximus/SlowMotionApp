@@ -17,6 +17,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import com.arthenica.mobileffmpeg.Config
 import com.arthenica.mobileffmpeg.FFmpeg
+import com.daasuu.epf.EPlayerView
 import com.edmodo.cropper.CropImageView
 import com.edmodo.cropper.cropwindow.edge.Edge
 import com.example.slowmotionapp.R
@@ -24,7 +25,10 @@ import com.example.slowmotionapp.databinding.FragmentCropSpeedBinding
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.trimFilePath
 import com.example.slowmotionapp.utils.Utils
+import com.example.slowmotionapp.utils.Utils.getVideoSize
+import com.example.slowmotionapp.utils.Utils.player
 import com.example.slowmotionapp.viewmodel.SharedViewModel
+import com.google.android.exoplayer2.Player
 import java.io.File
 
 
@@ -52,6 +56,7 @@ class CropSpeedFragment : Fragment() {
     private lateinit var videoView: VideoView
     private lateinit var playPause: ImageView
     private lateinit var cropView: CropImageView
+    private lateinit var layoutMovieWrapper: FrameLayout
 
     private var screenWidth = 0
 
@@ -87,6 +92,10 @@ class CropSpeedFragment : Fragment() {
 
     private var cropOutputFilePath: String? = null
 
+    companion object {
+        var ePlayerView: EPlayerView? = null
+    }
+
 
     // Get a reference to the shared ViewModel
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -102,6 +111,11 @@ class CropSpeedFragment : Fragment() {
         videoView = view.findViewById(R.id.videoView)
         playPause = view.findViewById(R.id.playPauseButton)
         cropView = view.findViewById(R.id.cropperView)
+
+        layoutMovieWrapper = view.findViewById(R.id.layout_movie_wrapper)
+
+        Utils.setUpSimpleExoPlayer(requireContext())
+        setUoGlPlayerView()
 
         // Observe the video URI LiveData
         sharedViewModel.videoPath.observe(viewLifecycleOwner) { path ->
@@ -156,6 +170,49 @@ class CropSpeedFragment : Fragment() {
                 startCrop()
             }
         }
+
+    }
+
+    private fun setUoGlPlayerView() {
+        ePlayerView = EPlayerView(requireContext())
+        ePlayerView!!.setSimpleExoPlayer(player)
+
+        val videoSize = getVideoSize(requireContext(), Uri.parse(mainCachedFile))
+        if (videoSize != null) {
+            val videoWidth = videoSize.first
+            val videoHeight = videoSize.second
+
+            val layoutParams = RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+
+            // Calculate the desired height based on the video aspect ratio
+            val aspectRatio = videoWidth.toFloat() / videoHeight.toFloat()
+            val desiredHeight = (ePlayerView!!.width / aspectRatio).toInt()
+
+            layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
+            layoutParams.height = desiredHeight
+
+            ePlayerView!!.layoutParams = layoutParams
+        } else {
+            // Failed to retrieve video dimensions, use default layout params
+            ePlayerView!!.layoutParams =
+                RelativeLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+        }
+
+
+        ePlayerView!!.layoutParams =
+            RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        layoutMovieWrapper.addView(ePlayerView)
+        ePlayerView!!.onResume()
+        Log.d("EXOPLAYER", "onCreateView: setUoGlPlayerView")
 
     }
 
@@ -252,6 +309,27 @@ class CropSpeedFragment : Fragment() {
         binding.enhanceBtn.setOnClickListener {
             binding.enhanceBtn.visibility = View.GONE
             binding.backTextBtn.visibility = View.VISIBLE
+
+            binding.videoView.visibility = View.GONE
+            binding.videoView.stopPlayback()
+            binding.layoutMovieWrapper.visibility = View.VISIBLE
+            player!!.seekTo(0)
+            player!!.playWhenReady = true
+
+            player!!.addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(state: Int) {
+                    if (state == Player.STATE_ENDED) {
+                        // Playback has ended, seek to the beginning and start playing again
+                        player!!.seekTo(0)
+                        player!!.play()
+                    }
+                }
+            })
+
+
+
+            Log.d("EXOPLAYER", "onCreateView: Exoplayer true")
+
             sharedViewModel.cropViewVisible(false)
             childFragmentManager!!.beginTransaction()
                 .replace(R.id.fragment_container_main, effectMusicFragment as EffectMusicFragment)
@@ -261,6 +339,11 @@ class CropSpeedFragment : Fragment() {
         binding.backTextBtn.setOnClickListener {
             binding.enhanceBtn.visibility = View.VISIBLE
             binding.backTextBtn.visibility = View.GONE
+
+            binding.videoView.visibility = View.VISIBLE
+            binding.layoutMovieWrapper.visibility = View.GONE
+            player!!.pause()
+
             childFragmentManager!!.beginTransaction()
                 .replace(R.id.fragment_container_main, currentChildFragment as MainFragment)
                 .commit()
@@ -345,7 +428,7 @@ class CropSpeedFragment : Fragment() {
                     Toast.makeText(requireContext(), "Success", Toast.LENGTH_SHORT).show()
                     mainCachedFile = str
                     updateVideoUri(str)
-                    when(valueCheck){
+                    when (valueCheck) {
                         1 -> {
                             cropViewDisplay()
                             sharedViewModel.switchFragmentB(true)

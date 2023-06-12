@@ -33,12 +33,4 @@ class EditorActivity : AppCompatActivity() {
         Log.d("MaximusTech", "onCreate: $videoUri")
     }
 
-    fun getVideoUri(): String? {
-        // Return the video URI
-        return videoUri
-    }
-
-    fun getType(): Int {
-        return type
-    }
 }
