@@ -1,51 +1,51 @@
-package com.example.slowmotionapp.effects;
+package com.example.slowmotionapp.effects
 
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.TextView;
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+import com.example.slowmotionapp.R
 
-import com.example.slowmotionapp.R;
+class FilterAdapter(
+    private val values: List<FilterType>,
+    private val listener: OnItemClickListener
+) : RecyclerView.Adapter<FilterAdapter.ViewHolder>() {
 
-import java.util.List;
-
-public class FilterAdapter extends ArrayAdapter<FilterType> {
-
-    static class ViewHolder {
-        public TextView text;
+    interface OnItemClickListener {
+        fun onItemClick(position: Int)
     }
 
-    private final Context context;
-    private final List<FilterType> values;
+    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val textView: TextView = view.findViewById(R.id.label)
 
-    public FilterAdapter(Context context, int resource, List<FilterType> objects) {
-        super(context, resource, objects);
-        this.context = context;
-        values = objects;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View rowView = convertView;
-        // reuse views
-        if (rowView == null) {
-            LayoutInflater inflater = (LayoutInflater) context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            rowView = inflater.inflate(R.layout.row_text, null);
-            // configure view holder
-            ViewHolder viewHolder = new ViewHolder();
-            viewHolder.text = (TextView) rowView.findViewById(R.id.label);
-            rowView.setTag(viewHolder);
+        init {
+            itemView.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    listener.onItemClick(position)
+                }
+            }
         }
-
-        ViewHolder holder = (ViewHolder) rowView.getTag();
-        String s = values.get(position).name();
-        holder.text.setText(s);
-
-        return rowView;
     }
 
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.row_text, parent, false)
+        return ViewHolder(view)
+    }
 
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.textView.text = values[position].name
+    }
+
+    override fun getItemCount(): Int {
+        return values.size
+    }
+
+    fun getItem(position: Int): FilterType {
+        return values[position]
+    }
 }
+
+

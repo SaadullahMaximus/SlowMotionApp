@@ -1,25 +1,24 @@
 package com.example.slowmotionapp.ui.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView.OnItemClickListener
-import android.widget.RelativeLayout
 import androidx.fragment.app.Fragment
-import com.daasuu.epf.EPlayerView
-import com.example.slowmotionapp.R
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.slowmotionapp.databinding.FragmentEffectBinding
 import com.example.slowmotionapp.effects.FilterAdapter
 import com.example.slowmotionapp.effects.FilterType
 import com.example.slowmotionapp.ui.fragments.CropSpeedFragment.Companion.ePlayerView
-import com.example.slowmotionapp.utils.Utils
 
-class EffectFragment : Fragment() {
+class EffectFragment : Fragment(), FilterAdapter.OnItemClickListener {
 
     private var _binding: FragmentEffectBinding? = null
     private val binding get() = _binding!!
 
+    private lateinit var adapter: FilterAdapter
+    private lateinit var filterTypes: List<FilterType>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -28,20 +27,25 @@ class EffectFragment : Fragment() {
         // Inflate the layout for this fragment
         _binding = FragmentEffectBinding.inflate(inflater, container, false)
 
-        // list
+        filterTypes = FilterType.createFilterList()
 
-        // list
-        val filterTypes: List<FilterType> = FilterType.createFilterList()
-        binding.listView.adapter = FilterAdapter(requireContext(), R.layout.row_text, filterTypes)
-        binding.listView.onItemClickListener =
-            OnItemClickListener { _, _, position, _ ->
-                ePlayerView!!.setGlFilter(
-                    FilterType.createGlFilter(
-                        filterTypes[position],
-                        requireContext()
-                    )
-                )
-            }
+        // Initialize RecyclerView
+        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        adapter = FilterAdapter(filterTypes, this)
+        binding.recyclerView.adapter = adapter
+
         return binding.root
+    }
+
+    override fun onItemClick(position: Int) {
+        val selectedItem = adapter.getItem(position)
+        Log.d("EFFECT", "onItemClick: $selectedItem")
+        ePlayerView!!.setGlFilter(
+            FilterType.createGlFilter(
+                filterTypes[position],
+                requireContext()
+            )
+        )
+
     }
 }
