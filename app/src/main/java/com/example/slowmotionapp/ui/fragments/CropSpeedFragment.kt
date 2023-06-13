@@ -23,6 +23,8 @@ import com.edmodo.cropper.cropwindow.edge.Edge
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.databinding.FragmentCropSpeedBinding
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.musicReady
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.myMusicUri
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.trimFilePath
 import com.example.slowmotionapp.utils.Utils
 import com.example.slowmotionapp.utils.Utils.getVideoSize
@@ -94,6 +96,8 @@ class CropSpeedFragment : Fragment() {
 
     private lateinit var handler: Handler
     private lateinit var runnable: Runnable
+
+    private var audioPlayer: MediaPlayer? = null
 
     companion object {
         var ePlayerView: EPlayerView? = null
@@ -172,6 +176,21 @@ class CropSpeedFragment : Fragment() {
                 getDimension()
                 startCrop()
             }
+        }
+
+        sharedViewModel.musicSet.observe(viewLifecycleOwner) { newValue ->
+            if (newValue) {
+                audioPlayer = MediaPlayer.create(requireContext(), myMusicUri)
+                musicReady = true
+            }
+        }
+
+        sharedViewModel.audioVolumeLevel.observe(viewLifecycleOwner) {
+            audioPlayer!!.setVolume(it, it)
+        }
+
+        sharedViewModel.videoVolumeLevel.observe(viewLifecycleOwner) {
+            player!!.volume = it
         }
 
     }
@@ -345,10 +364,15 @@ class CropSpeedFragment : Fragment() {
                         handler = Handler()
                         runnable = Runnable { updateSeekBar() }
                     }
-                    if (playbackState == Player.STATE_ENDED){
+                    if (playbackState == Player.STATE_ENDED) {
                         binding.playPauseButton2.setImageResource(R.drawable.baseline_play_arrow)
                         player!!.seekTo(0)
                         player!!.pause()
+                        if (musicReady && audioPlayer!!.isPlaying) {
+                            audioPlayer!!.pause()
+                            audioPlayer!!.seekTo(0)
+                        }
+
                     }
                 }
             })
@@ -367,11 +391,17 @@ class CropSpeedFragment : Fragment() {
             if (player!!.isPlaying) {
                 binding.playPauseButton2.setImageResource(R.drawable.baseline_play_arrow)
                 player!!.pause()
+                if (musicReady && audioPlayer!!.isPlaying) {
+                    audioPlayer!!.pause()
+                }
                 // Stop tracking the seek bar progress
                 stopTrackingSeekBar()
             } else {
                 binding.playPauseButton2.setImageResource(R.drawable.baseline_pause)
                 player!!.play()
+                if (musicReady) {
+                    audioPlayer!!.start()
+                }
                 startTrackingSeekBar()
             }
         }
@@ -388,6 +418,10 @@ class CropSpeedFragment : Fragment() {
 
             binding.videoView.visibility = View.VISIBLE
             binding.layoutMovieWrapper.visibility = View.GONE
+
+            ePlayerView!!.onPause()
+            binding.layoutMovieWrapper.removeView(ePlayerView)
+            player!!.release()
 
             binding.seekBar2.visibility = View.GONE
             binding.playPauseButton2.visibility = View.GONE
@@ -852,6 +886,5 @@ class CropSpeedFragment : Fragment() {
         b = (Edge.TOP.coordinate * ab / ad).toInt()
         y = (Edge.BOTTOM.coordinate * ab / ad).toInt()
     }
-
 
 }

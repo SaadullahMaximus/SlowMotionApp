@@ -28,6 +28,16 @@ class Constants {
             )
         }
 
+        val PERMISSION_AUDIO = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            arrayOf(
+                Manifest.permission.READ_MEDIA_AUDIO
+            )
+        } else {
+            arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            )
+        }
+
         const val provider = "com.example.slowmotionapp.provider"
         const val APP_NAME = "SlowMotionApp"
 
@@ -35,6 +45,7 @@ class Constants {
 
         const val VIDEO_GALLERY = 101
         const val RECORD_VIDEO = 102
+        const val AUDIO_GALLERY = 103
         const val MAIN_VIDEO_TRIM = 107
 
         const val DATE_FORMAT = "yyyyMMdd_HHmmss"

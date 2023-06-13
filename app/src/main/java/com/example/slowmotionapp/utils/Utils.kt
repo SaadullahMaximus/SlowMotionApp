@@ -136,6 +136,17 @@ object Utils {
         }
     }
 
+    fun refreshAudioGallery(context: Context) {
+        try {
+            val audioContentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+            val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, audioContentUri)
+            context.sendBroadcast(mediaScanIntent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+
     fun getFileExtension(filePath: String): String {
         return filePath.substring(filePath.lastIndexOf("."))
     }

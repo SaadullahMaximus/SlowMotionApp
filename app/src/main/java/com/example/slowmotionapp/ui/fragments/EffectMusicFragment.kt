@@ -1,23 +1,33 @@
 package com.example.slowmotionapp.ui.fragments
 
-import android.content.BroadcastReceiver
-import android.content.Context
+import android.app.Activity
 import android.content.Intent
-import android.content.IntentFilter
-import android.media.AudioManager
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
+import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
+import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager.widget.ViewPager
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.adapters.ViewPagerAdapter
+import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.FragmentEffectMusicBinding
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.myMusic
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.myMusicUri
+import com.example.slowmotionapp.utils.Utils
+import com.example.slowmotionapp.viewmodel.SharedViewModel
 import com.google.android.material.tabs.TabLayout
 
 class EffectMusicFragment : Fragment() {
@@ -26,37 +36,12 @@ class EffectMusicFragment : Fragment() {
     private val binding get() = _binding!!
 
     private var childFragmentManager: FragmentManager? = null
-
-    private lateinit var audioManager: AudioManager
-
-    private lateinit var volumeChangeReceiver: BroadcastReceiver
-
-    private val volumeChangedAction = "android.media.VOLUME_CHANGED_ACTION"
+    private lateinit var sharedViewModel: SharedViewModel
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        audioManager = requireActivity().getSystemService(Context.AUDIO_SERVICE) as AudioManager
-
-        // Register a broadcast receiver to listen for volume changes and audio becoming noisy
-        volumeChangeReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                val action = intent.action
-                if (action == volumeChangedAction || action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
-                    updateSeekBar()
-                }
-            }
-        }
-        val filter = IntentFilter().apply {
-            addAction(volumeChangedAction)
-            addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
-        }
-        requireActivity().registerReceiver(volumeChangeReceiver, filter)
-
-        // Update the SeekBar initially
-        updateSeekBar()
+        sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
     }
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -64,6 +49,9 @@ class EffectMusicFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         _binding = FragmentEffectMusicBinding.inflate(inflater, container, false)
+
+        binding.seekBarSpeaker.progress = 50
+        binding.seekBarMusic.progress = 50
 
         childFragmentManager = getChildFragmentManager()
 
@@ -99,9 +87,10 @@ class EffectMusicFragment : Fragment() {
 
         binding.seekBarSpeaker.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-                val volume = (maxVolume * progress) / 100
-                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0)
+                // Calculate the volume based on the SeekBar progress
+                val volume = progress.toFloat() / seekBar.max
+
+                sharedViewModel.videoVolumeLevelCheck(volume)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
@@ -109,10 +98,94 @@ class EffectMusicFragment : Fragment() {
             override fun onStopTrackingTouch(seekBar: SeekBar) {}
         })
 
+        binding.seekBarMusic.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                // Calculate the volume based on the SeekBar progress
+                val volume = progress.toFloat() / seekBar.max
 
+                sharedViewModel.audioVolumeLevelCheck(volume)
+            }
+
+            override fun onStartTrackingTouch(p0: SeekBar?) {
+            }
+
+            override fun onStopTrackingTouch(p0: SeekBar?) {
+            }
+
+        })
+
+        binding.myMusicConstraint.setOnClickListener {
+            openAudioFiles(Constants.PERMISSION_AUDIO)
+        }
+
+        binding.crossButton.setOnClickListener {
+            binding.myMusicConstraint.visibility = View.VISIBLE
+            binding.musicButton.visibility = View.GONE
+            binding.seekBarMusic.visibility = View.GONE
+            binding.crossButton.visibility = View.GONE
+        }
 
         return binding.root
     }
+
+    private fun openAudioFiles(permissionAudio: Array<String>) {
+        for (permission in permissionAudio) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(
+                    requireActivity() as Activity,
+                    permission
+                )
+            ) {
+                Toast.makeText(requireContext(), "Permission Denied", Toast.LENGTH_SHORT).show()
+                break
+            } else {
+                if (ActivityCompat.checkSelfPermission(
+                        requireActivity() as Activity,
+                        permission
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    //call the gallery intent
+                    Utils.refreshAudioGallery(requireContext())
+                    val i = Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
+                    i.type = "audio/*"
+                    i.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("audio/*"))
+                    startActivityForResult(i, Constants.AUDIO_GALLERY)
+                } else {
+                    callPermissionSettings()
+                }
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == Constants.AUDIO_GALLERY && resultCode == Activity.RESULT_OK) {
+            // Handle the selected video here
+            Log.d("AUDIO", "onActivityResult: ${data?.data}")
+            // Perform any required operations with the selected video
+            setupFragment(data?.data)
+        }
+    }
+
+    private fun setupFragment(data: Uri?) {
+        myMusicUri = data!!
+        myMusic = true
+        sharedViewModel.musicSetCheck(true)
+        binding.myMusicConstraint.visibility = View.GONE
+        binding.musicButton.visibility = View.VISIBLE
+        binding.seekBarMusic.visibility = View.VISIBLE
+        binding.crossButton.visibility = View.VISIBLE
+    }
+
+
+    private fun callPermissionSettings() {
+        val intent = Intent()
+        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+        val uri = Uri.fromParts("package", requireContext().applicationContext.packageName, null)
+        intent.data = uri
+        startActivityForResult(intent, 300)
+    }
+
 
     // Create a custom view for the tab with both icon and text
     private fun createTabView(text: String, iconResId: Int): View {
@@ -126,17 +199,4 @@ class EffectMusicFragment : Fragment() {
 
         return tabView
     }
-
-    private fun updateSeekBar() {
-        val currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
-        val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-        val progress = (currentVolume * 100) / maxVolume
-        binding.seekBarSpeaker.progress = progress
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        requireActivity().unregisterReceiver(volumeChangeReceiver)
-    }
-
 }

@@ -11,9 +11,6 @@ import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.video.VideoSize;
 
-/**
- * Created by sudamasayuki on 2017/05/16.
- */
 public class EPlayerView extends GLSurfaceView implements Player.Listener {
 
     private final static String TAG = EPlayerView.class.getSimpleName();
@@ -89,9 +86,6 @@ public class EPlayerView extends GLSurfaceView implements Player.Listener {
         super.onPause();
         renderer.release();
     }
-
-    //////////////////////////////////////////////////////////////////////////
-    // Player.Listener
 
     @Override
     public void onVideoSizeChanged(VideoSize videoSize) {

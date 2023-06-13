@@ -55,6 +55,12 @@ class MainActivity : AppCompatActivity() {
         lateinit var mainCachedFile: String
 
         var trimOrCrop = false
+
+        lateinit var myMusicUri: Uri
+
+        var myMusic = false
+
+        var musicReady = false
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -18,6 +18,12 @@ class SharedViewModel : ViewModel() {
 
     val fragmentA: MutableLiveData<Boolean> = MutableLiveData()
 
+    val musicSet: MutableLiveData<Boolean> = MutableLiveData()
+
+    val audioVolumeLevel: MutableLiveData<Float> = MutableLiveData()
+
+    val videoVolumeLevel: MutableLiveData<Float> = MutableLiveData()
+
     fun setVideoUri(path: String) {
         _videoPath.value = path
     }
@@ -40,6 +46,18 @@ class SharedViewModel : ViewModel() {
 
     fun switchFragmentB(newValue: Boolean) {
         fragmentA.value = newValue
+    }
+
+    fun musicSetCheck(newValue: Boolean) {
+        musicSet.value = newValue
+    }
+
+    fun audioVolumeLevelCheck(newValue: Float) {
+        audioVolumeLevel.value = newValue
+    }
+
+    fun videoVolumeLevelCheck(newValue: Float) {
+        videoVolumeLevel.value = newValue
     }
 
 }
