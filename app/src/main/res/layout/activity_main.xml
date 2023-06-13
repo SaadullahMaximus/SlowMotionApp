@@ -225,6 +225,7 @@
             android:background="@drawable/fade_out_gradient" />
 
         <LinearLayout
+            android:id="@+id/btnCrop"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

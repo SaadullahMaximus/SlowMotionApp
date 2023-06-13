@@ -452,6 +452,7 @@ class TrimVideoActivity : AppCompatActivity() {
     private fun switchActivity(videoPath: String) {
         if (isFromTrim) {
             Toast.makeText(this, "Video Trimmed Successfully!", Toast.LENGTH_SHORT).show()
+            isFromTrim = false
             finish()
         } else {
             val intent = Intent(this, EditorActivity::class.java)

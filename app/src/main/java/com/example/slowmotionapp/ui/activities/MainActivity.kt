@@ -53,6 +53,8 @@ class MainActivity : AppCompatActivity() {
         lateinit var tempCacheName: String
 
         lateinit var mainCachedFile: String
+
+        var trimOrCrop = false
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -126,6 +128,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnTrim.setOnClickListener {
+            trimOrCrop = false
+            val myDialogFragment = MyDialogFragment()
+            myDialogFragment.show(supportFragmentManager, "MyDialogFragment")
+        }
+
+        binding.btnCrop.setOnClickListener {
+            trimOrCrop = true
             val myDialogFragment = MyDialogFragment()
             myDialogFragment.show(supportFragmentManager, "MyDialogFragment")
         }
@@ -272,10 +281,17 @@ class MainActivity : AppCompatActivity() {
             }
 
             Constants.RECORD_VIDEO -> {
-                val intent = Intent(this, TrimVideoActivity::class.java)
-                intent.putExtra("VideoUri", videoUri.toString())
-                intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
-                startActivity(intent)
+                if (trimOrCrop) {
+                    val intent = Intent(this, CropActivity::class.java)
+                    intent.putExtra("VideoUri", videoUri.toString())
+                    intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
+                    startActivity(intent)
+                } else {
+                    val intent = Intent(this, TrimVideoActivity::class.java)
+                    intent.putExtra("VideoUri", videoUri.toString())
+                    intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
+                    startActivity(intent)
+                }
             }
         }
 
@@ -316,15 +332,25 @@ class MainActivity : AppCompatActivity() {
                             if (extension == Constants.AVI_FORMAT) {
                                 convertAviToMp4() //avi format is not supported in exoplayer
                             } else {
-                                playbackPosition = 0
-                                currentWindow = 0
-                                Log.d("LETSGO", "setFilePath: Trim Lets Go")
-                                val uri = Uri.fromFile(masterVideoFile)
-                                val intent = Intent(this, TrimVideoActivity::class.java)
-                                intent.putExtra("VideoUri", filePath)
-                                intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
-                                intent.putExtra("VideoDuration", Utils.getMediaDuration(this, uri))
-                                startActivity(intent)
+                                if (trimOrCrop) {
+                                    val intent = Intent(this, CropActivity::class.java)
+                                    intent.putExtra("VideoUri", filePath)
+                                    intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
+                                    startActivity(intent)
+                                } else {
+                                    playbackPosition = 0
+                                    currentWindow = 0
+                                    Log.d("LETSGO", "setFilePath: Trim Lets Go")
+                                    val uri = Uri.fromFile(masterVideoFile)
+                                    val intent = Intent(this, TrimVideoActivity::class.java)
+                                    intent.putExtra("VideoUri", filePath)
+                                    intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
+                                    intent.putExtra(
+                                        "VideoDuration",
+                                        Utils.getMediaDuration(this, uri)
+                                    )
+                                    startActivity(intent)
+                                }
                             }
                         } else {
                             Toast.makeText(
@@ -333,13 +359,21 @@ class MainActivity : AppCompatActivity() {
                                 Toast.LENGTH_SHORT
                             ).show()
 
-                            isLargeVideo = true
-                            Log.d("LETSGO", "setFilePath: Trim Lets Go")
-                            val uri = Uri.fromFile(masterVideoFile)
-                            val intent = Intent(this, TrimVideoActivity::class.java)
-                            intent.putExtra("VideoPath", filePath)
-                            intent.putExtra("VideoDuration", Utils.getMediaDuration(this, uri))
-                            startActivityForResult(intent, Constants.MAIN_VIDEO_TRIM)
+                            if (trimOrCrop) {
+                                val intent = Intent(this, CropActivity::class.java)
+                                intent.putExtra("VideoUri", filePath)
+                                intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
+                                startActivity(intent)
+                            } else {
+
+                                isLargeVideo = true
+                                Log.d("LETSGO", "setFilePath: Trim Lets Go")
+                                val uri = Uri.fromFile(masterVideoFile)
+                                val intent = Intent(this, TrimVideoActivity::class.java)
+                                intent.putExtra("VideoPath", filePath)
+                                intent.putExtra("VideoDuration", Utils.getMediaDuration(this, uri))
+                                startActivityForResult(intent, Constants.MAIN_VIDEO_TRIM)
+                            }
                         }
                     }
                 }
