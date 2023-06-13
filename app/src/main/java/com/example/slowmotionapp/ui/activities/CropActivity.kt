@@ -22,6 +22,7 @@ import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.ActivityCropBinding
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.trimOrCrop
 import com.example.slowmotionapp.utils.Utils
 import java.io.File
 
@@ -161,6 +162,7 @@ class CropActivity : AppCompatActivity() {
         })
 
         binding.backBtn.setOnClickListener {
+            trimOrCrop = false
             finish()
         }
 
@@ -617,6 +619,11 @@ class CropActivity : AppCompatActivity() {
         binding.videoView.seekTo(mStartPosition * 1000)
         binding.videoView.pause()
         binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        trimOrCrop = false
     }
 
 }

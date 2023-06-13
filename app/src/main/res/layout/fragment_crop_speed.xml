@@ -106,7 +106,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <VideoView
             android:id="@+id/videoView"
@@ -136,6 +136,16 @@
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <ImageView
+        android:id="@+id/playPauseButton2"
+        android:visibility="gone"
+        android:layout_width="@dimen/_20sdp"
+        android:layout_height="@dimen/_20sdp"
+        android:layout_marginStart="@dimen/_40sdp"
+        android:src="@drawable/baseline_play_arrow"
+        app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <SeekBar
         android:id="@+id/seekBar"
         style="?android:attr/progressBarStyleHorizontal"
@@ -150,6 +160,23 @@
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
         app:layout_constraintEnd_toStartOf="@+id/totalDurationTextView"
         app:layout_constraintStart_toEndOf="@+id/playPauseButton"
+        app:layout_constraintTop_toBottomOf="@id/frameLayout" />
+
+    <SeekBar
+        android:id="@+id/seekBar2"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginTop="@dimen/_24sdp"
+        android:layout_marginEnd="@dimen/_40sdp"
+        android:layout_marginBottom="@dimen/_20sdp"
+        android:progressDrawable="@drawable/custom_seekbar_progress"
+        android:thumb="@drawable/custom_seekbar_thumb"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/playPauseButton2"
         app:layout_constraintTop_toBottomOf="@id/frameLayout" />
 
     <TextView

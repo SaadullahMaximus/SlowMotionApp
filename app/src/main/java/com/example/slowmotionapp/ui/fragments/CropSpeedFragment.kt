@@ -92,6 +92,9 @@ class CropSpeedFragment : Fragment() {
 
     private var cropOutputFilePath: String? = null
 
+    private lateinit var handler: Handler
+    private lateinit var runnable: Runnable
+
     companion object {
         var ePlayerView: EPlayerView? = null
     }
@@ -315,20 +318,42 @@ class CropSpeedFragment : Fragment() {
             binding.rotateLeft.visibility = View.GONE
             binding.rotateRight.visibility = View.GONE
 
+            binding.seekBar.visibility = View.GONE
+            binding.playPauseButton.visibility = View.GONE
+
+            binding.seekBar2.visibility = View.VISIBLE
+            binding.playPauseButton2.visibility = View.VISIBLE
+
+            binding.totalDurationTextView.visibility = View.GONE
+
+            Utils.setUpSimpleExoPlayer(requireContext())
+            setUoGlPlayerView()
+
             binding.videoView.stopPlayback()
             binding.layoutMovieWrapper.visibility = View.VISIBLE
-            player!!.seekTo(0)
-            player!!.playWhenReady = true
 
             player!!.addListener(object : Player.Listener {
-                override fun onPlaybackStateChanged(state: Int) {
-                    if (state == Player.STATE_ENDED) {
-                        // Playback has ended, seek to the beginning and start playing again
+                override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+                    if (playbackState == Player.STATE_READY && playWhenReady) {
+                        // ExoPlayer is ready to play
+                        // You can start playing the media here
+                        binding.seekBar2.max = player!!.duration.toInt()
+
+                        player!!.playWhenReady = true
+
+                        // Initialize handler and runnable
+                        handler = Handler()
+                        runnable = Runnable { updateSeekBar() }
+                    }
+                    if (playbackState == Player.STATE_ENDED){
+                        binding.playPauseButton2.setImageResource(R.drawable.baseline_play_arrow)
                         player!!.seekTo(0)
-                        player!!.play()
+                        player!!.pause()
                     }
                 }
             })
+
+            binding.seekBar2.isEnabled = false
 
             Log.d("EXOPLAYER", "onCreateView: Exoplayer true")
 
@@ -338,15 +363,37 @@ class CropSpeedFragment : Fragment() {
                 .commit()
         }
 
+        binding.playPauseButton2.setOnClickListener {
+            if (player!!.isPlaying) {
+                binding.playPauseButton2.setImageResource(R.drawable.baseline_play_arrow)
+                player!!.pause()
+                // Stop tracking the seek bar progress
+                stopTrackingSeekBar()
+            } else {
+                binding.playPauseButton2.setImageResource(R.drawable.baseline_pause)
+                player!!.play()
+                startTrackingSeekBar()
+            }
+        }
+
         binding.backTextBtn.setOnClickListener {
             binding.enhanceBtn.visibility = View.VISIBLE
             binding.backTextBtn.visibility = View.GONE
+
+            binding.seekBar.visibility = View.VISIBLE
+            binding.playPauseButton.visibility = View.VISIBLE
 
             binding.rotateLeft.visibility = View.VISIBLE
             binding.rotateRight.visibility = View.VISIBLE
 
             binding.videoView.visibility = View.VISIBLE
             binding.layoutMovieWrapper.visibility = View.GONE
+
+            binding.seekBar2.visibility = View.GONE
+            binding.playPauseButton2.visibility = View.GONE
+
+            binding.totalDurationTextView.visibility = View.VISIBLE
+
             player!!.pause()
 
             childFragmentManager!!.beginTransaction()
@@ -377,6 +424,24 @@ class CropSpeedFragment : Fragment() {
 
 
         return binding.root
+    }
+
+    private fun updateSeekBar() {
+        // Update the seek bar progress with the current position of the player
+        binding.seekBar2.progress = player!!.currentPosition.toInt()
+
+        // Schedule the next update after a certain delay
+        handler.postDelayed(runnable, 1000) // Update every second (adjust as needed)
+    }
+
+    private fun startTrackingSeekBar() {
+        // Start updating the seek bar progress
+        handler.postDelayed(runnable, 0)
+    }
+
+    private fun stopTrackingSeekBar() {
+        // Stop updating the seek bar progress
+        handler.removeCallbacks(runnable)
     }
 
     private fun rotateVideoCommand(rotateValue: Int) {
@@ -474,6 +539,14 @@ class CropSpeedFragment : Fragment() {
 
     private fun updateVideoUri(path: String) {
         videoView.setVideoURI(Uri.parse(path))
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // Clean up resources
+        handler.removeCallbacks(runnable)
+        player!!.release()
     }
 
     private fun videoPlay() {
