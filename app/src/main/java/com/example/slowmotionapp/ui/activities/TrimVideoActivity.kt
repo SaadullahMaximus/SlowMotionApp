@@ -23,7 +23,9 @@ import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.ActivityTrimVideoBinding
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.isFromTrim
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
 import com.example.slowmotionapp.utils.Utils
+import com.example.slowmotionapp.utils.Utils.milliSecondsToTimer
 import java.io.File
 import java.text.DecimalFormat
 import java.util.*
@@ -351,33 +353,6 @@ class TrimVideoActivity : AppCompatActivity() {
 
     }
 
-    fun milliSecondsToTimer(milliseconds: Long): String {
-        var finalTimerString = ""
-        val secondsString: String
-        val minutesString: String
-        val hours = (milliseconds / (1000 * 60 * 60)).toInt()
-        val minutes = (milliseconds % (1000 * 60 * 60)).toInt() / (1000 * 60)
-        val seconds = (milliseconds % (1000 * 60 * 60) % (1000 * 60) / 1000).toInt()
-
-        if (hours > 0) {
-            finalTimerString = "$hours:"
-        }
-
-        secondsString = if (seconds < 10) {
-            "0$seconds"
-        } else {
-            "" + seconds
-        }
-        minutesString = if (minutes < 10) {
-            "0$minutes"
-        } else {
-            "" + minutes
-        }
-        finalTimerString = "$finalTimerString$minutesString:$secondsString"
-
-        return finalTimerString
-    }
-
     private fun timeLineNumbersSet(mDuration: Int) {
         val parts = mDuration / 6.0
         val decimalFormat = DecimalFormat("#.00")
@@ -409,11 +384,11 @@ class TrimVideoActivity : AppCompatActivity() {
             when (returnCode) {
                 Config.RETURN_CODE_SUCCESS -> {
                     progressDialog.dismiss()
-                    Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
                     MainActivity.trimFilePath = str
                     MainActivity.mainCachedFile =
                         Utils.createCacheCopy(this, MainActivity.trimFilePath)
                             .toString()
+                    playVideo = str
                     switchActivity(str)
                 }
                 Config.RETURN_CODE_CANCEL -> {
@@ -451,8 +426,8 @@ class TrimVideoActivity : AppCompatActivity() {
 
     private fun switchActivity(videoPath: String) {
         if (isFromTrim) {
-            Toast.makeText(this, "Video Trimmed Successfully!", Toast.LENGTH_SHORT).show()
             isFromTrim = false
+            startActivity(Intent(this, PlayerActivity::class.java))
             finish()
         } else {
             val intent = Intent(this, EditorActivity::class.java)

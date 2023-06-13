@@ -100,10 +100,18 @@ class EffectMusicFragment : Fragment() {
 
         binding.seekBarMusic.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                // Calculate the volume based on the SeekBar progress
-                val volume = progress.toFloat() / seekBar.max
 
-                sharedViewModel.audioVolumeLevelCheck(volume)
+                if (fromUser) {
+                    val minProgress = (seekBar.max * 0.2).toInt()
+                    val restrictedProgress = if (progress < minProgress) minProgress else progress
+                    seekBar.progress = restrictedProgress
+                    // Calculate the volume based on the SeekBar progress
+                    val volume = restrictedProgress.toFloat() / seekBar.max
+
+                    sharedViewModel.audioVolumeLevelCheck(volume)
+                }
+
+
             }
 
             override fun onStartTrackingTouch(p0: SeekBar?) {

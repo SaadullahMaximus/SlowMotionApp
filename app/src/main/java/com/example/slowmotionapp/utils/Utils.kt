@@ -55,6 +55,18 @@ object Utils {
         return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, storageDir)
     }
 
+    fun createCroppedFile(): File {
+        val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
+            Date()
+        )
+        val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
+        val filepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
+            .toString() + "/SlowMotionApp/"
+        val storageDir = File("$filepath/Cropped/")
+        if (!storageDir.exists()) storageDir.mkdirs()
+        return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, storageDir)
+    }
+
     fun saveEditedVideo(context: Context, videoFile: File) {
         val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
             Date()
@@ -304,5 +316,33 @@ object Utils {
             null
         }
     }
+
+    fun milliSecondsToTimer(milliseconds: Long): String {
+        var finalTimerString = ""
+        val secondsString: String
+        val minutesString: String
+        val hours = (milliseconds / (1000 * 60 * 60)).toInt()
+        val minutes = (milliseconds % (1000 * 60 * 60)).toInt() / (1000 * 60)
+        val seconds = (milliseconds % (1000 * 60 * 60) % (1000 * 60) / 1000).toInt()
+
+        if (hours > 0) {
+            finalTimerString = "$hours:"
+        }
+
+        secondsString = if (seconds < 10) {
+            "0$seconds"
+        } else {
+            "" + seconds
+        }
+        minutesString = if (minutes < 10) {
+            "0$minutes"
+        } else {
+            "" + minutes
+        }
+        finalTimerString = "$finalTimerString$minutesString:$secondsString"
+
+        return finalTimerString
+    }
+
 
 }

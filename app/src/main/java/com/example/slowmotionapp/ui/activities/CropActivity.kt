@@ -2,6 +2,7 @@ package com.example.slowmotionapp.ui.activities
 
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
+import android.content.Intent
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
@@ -22,6 +23,7 @@ import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.ActivityCropBinding
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.trimOrCrop
 import com.example.slowmotionapp.utils.Utils
 import java.io.File
@@ -224,6 +226,11 @@ class CropActivity : AppCompatActivity() {
             binding.imageView11.setImageResource(R.drawable.crop_unselect)
             binding.imageViewPortrait.setImageResource(R.drawable.crop_unselect)
             binding.imageViewLandScape.setImageResource(R.drawable.crop_unselect)
+            if (binding.videoView.isPlaying) {
+                binding.videoView.pause()
+                binding.videoView.seekTo(0)
+                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
+            }
             getDimension()
             startCrop()
         }
@@ -309,7 +316,7 @@ class CropActivity : AppCompatActivity() {
         cropVideoDuration =
             Utils.getVideoDuration(this, mainCachedFile).toString()
 
-        cropOutputFilePath = Utils.createCacheTempFile(this)
+        cropOutputFilePath = Utils.createCroppedFile().toString()
 
         try {
             val sb = java.lang.StringBuilder()
@@ -351,7 +358,7 @@ class CropActivity : AppCompatActivity() {
                     "-t",
                     cropVideoDuration!!,
                     cropOutputFilePath!!
-                ), cropOutputFilePath!!, 1
+                ), cropOutputFilePath!!
             )
         } catch (unused: Exception) {
             val file2 = File(cropOutputFilePath!!)
@@ -363,7 +370,7 @@ class CropActivity : AppCompatActivity() {
         }
     }
 
-    private fun executeFFMPEG(strArr: Array<String>, str: String, valueCheck: Int) {
+    private fun executeFFMPEG(strArr: Array<String>, str: String) {
         val progressDialog =
             ProgressDialog(this, R.style.CustomDialog)
         progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
@@ -385,14 +392,9 @@ class CropActivity : AppCompatActivity() {
             when (returnCode) {
                 Config.RETURN_CODE_SUCCESS -> {
                     progressDialog.dismiss()
-                    Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show()
-                    mainCachedFile = str
-                    updateVideoUri(str)
-                    when (valueCheck) {
-                        1 -> {
-                            cropViewDisplay()
-                        }
-                    }
+                    playVideo = str
+                    startActivity(Intent(this, PlayerActivity::class.java))
+                    finish()
                 }
                 Config.RETURN_CODE_CANCEL -> {
                     Log.d("FFMPEFailure", str)
@@ -401,7 +403,7 @@ class CropActivity : AppCompatActivity() {
                         Utils.deleteFromGallery(str, this)
                         Toast.makeText(
                             this,
-                            "Error Creating Video",
+                            "Unable to Crop",
                             Toast.LENGTH_LONG
                         ).show()
                     } catch (th: Throwable) {
@@ -415,7 +417,7 @@ class CropActivity : AppCompatActivity() {
                         Utils.deleteFromGallery(str, this)
                         Toast.makeText(
                             this,
-                            "Error Creating Video",
+                            "Please Try Again",
                             Toast.LENGTH_LONG
                         ).show()
                     } catch (th: Throwable) {

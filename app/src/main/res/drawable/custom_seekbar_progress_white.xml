@@ -3,8 +3,8 @@
     <item android:id="@android:id/background">
         <shape android:shape="line">
             <stroke
-                android:width="2dp"
-                android:color="#373200" /> <!-- Set the desired background color here -->
+                android:width="3dp"
+                android:color="#BDBCAC" /> <!-- Set the desired background color here -->
         </shape>
     </item>
 
@@ -13,7 +13,7 @@
         <clip>
             <shape android:shape="line">
                 <stroke
-                    android:width="4dp"
+                    android:width="5dp"
                     android:color="#FFFFFF" /> <!-- Set the desired progress color here -->
                 <size
                     android:bottom="1dp"
