@@ -63,6 +63,8 @@ class MainActivity : AppCompatActivity() {
         var musicReady = false
 
         lateinit var playVideo: String
+
+        var filterPosition = 0
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

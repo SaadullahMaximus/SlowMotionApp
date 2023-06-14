@@ -24,6 +24,9 @@ class SharedViewModel : ViewModel() {
 
     val videoVolumeLevel: MutableLiveData<Float> = MutableLiveData()
 
+    val enhanced: MutableLiveData<Boolean> = MutableLiveData()
+
+
     fun setVideoUri(path: String) {
         _videoPath.value = path
     }
@@ -58,6 +61,10 @@ class SharedViewModel : ViewModel() {
 
     fun videoVolumeLevelCheck(newValue: Float) {
         videoVolumeLevel.value = newValue
+    }
+
+    fun enhanced(newValue: Boolean) {
+        enhanced.value = newValue
     }
 
 }

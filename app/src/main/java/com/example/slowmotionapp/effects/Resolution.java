@@ -1,10 +1,7 @@
-package com.daasuu.epf;
+package com.example.slowmotionapp.effects;
 
 import java.io.Serializable;
 
-/**
- * Created by sudamasayuki on 2017/05/16.
- */
 
 public class Resolution implements Serializable {
     private final int width;

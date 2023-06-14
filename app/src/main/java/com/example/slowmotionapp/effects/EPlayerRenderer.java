@@ -1,4 +1,11 @@
-package com.daasuu.epf;
+package com.example.slowmotionapp.effects;
+
+import static android.opengl.GLES20.GL_COLOR_BUFFER_BIT;
+import static android.opengl.GLES20.GL_LINEAR;
+import static android.opengl.GLES20.GL_MAX_TEXTURE_SIZE;
+import static android.opengl.GLES20.GL_NEAREST;
+import static android.opengl.GLES20.GL_TEXTURE_2D;
+import static android.opengl.GLES20.glViewport;
 
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES20;
@@ -8,23 +15,13 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.Surface;
 
-import com.daasuu.epf.filter.GlFilter;
-import com.daasuu.epf.filter.GlLookUpTableFilter;
-import com.daasuu.epf.filter.GlPreviewFilter;
+import com.daasuu.mp4compose.filter.GlFilter;
+import com.daasuu.mp4compose.filter.GlLookUpTableFilter;
+import com.daasuu.mp4compose.gl.GlFramebufferObject;
+import com.daasuu.mp4compose.gl.GlPreviewFilter;
 import com.google.android.exoplayer2.ExoPlayer;
 
 import javax.microedition.khronos.egl.EGLConfig;
-
-import static android.opengl.GLES20.GL_COLOR_BUFFER_BIT;
-import static android.opengl.GLES20.GL_LINEAR;
-import static android.opengl.GLES20.GL_MAX_TEXTURE_SIZE;
-import static android.opengl.GLES20.GL_NEAREST;
-import static android.opengl.GLES20.GL_TEXTURE_2D;
-import static android.opengl.GLES20.glViewport;
-
-/**
- * Created by sudamasayuki on 2017/05/16.
- */
 
 class EPlayerRenderer extends EFrameBufferObjectRenderer implements SurfaceTexture.OnFrameAvailableListener {
 
@@ -60,20 +57,17 @@ class EPlayerRenderer extends EFrameBufferObjectRenderer implements SurfaceTextu
     }
 
     void setGlFilter(final GlFilter filter) {
-        glPreview.queueEvent(new Runnable() {
-            @Override
-            public void run() {
-                if (glFilter != null) {
-                    glFilter.release();
-                    if (glFilter instanceof GlLookUpTableFilter) {
-                        ((GlLookUpTableFilter) glFilter).releaseLutBitmap();
-                    }
-                    glFilter = null;
+        glPreview.queueEvent(() -> {
+            if (glFilter != null) {
+                glFilter.release();
+                if (glFilter instanceof GlLookUpTableFilter) {
+                    ((GlLookUpTableFilter) glFilter).releaseLutBitmap();
                 }
-                glFilter = filter;
-                isNewFilter = true;
-                glPreview.requestRender();
+                glFilter = null;
             }
+            glFilter = filter;
+            isNewFilter = true;
+            glPreview.requestRender();
         });
     }
 
@@ -138,7 +132,7 @@ class EPlayerRenderer extends EFrameBufferObjectRenderer implements SurfaceTextu
     }
 
     @Override
-    public void onDrawFrame(final EFramebufferObject fbo) {
+    public void onDrawFrame(final GlFramebufferObject fbo) {
 
         synchronized (this) {
             if (updateSurface) {

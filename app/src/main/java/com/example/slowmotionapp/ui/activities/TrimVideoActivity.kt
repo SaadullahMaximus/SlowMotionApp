@@ -350,7 +350,6 @@ class TrimVideoActivity : AppCompatActivity() {
     private fun timeLineSet(mDuration: Int) {
         binding.endTime.text = milliSecondsToTimer((mDuration * 1000).toLong())
         timeLineNumbersSet(mDuration)
-
     }
 
     private fun timeLineNumbersSet(mDuration: Int) {

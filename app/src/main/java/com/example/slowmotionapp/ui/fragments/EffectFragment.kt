@@ -1,7 +1,6 @@
 package com.example.slowmotionapp.ui.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.slowmotionapp.databinding.FragmentEffectBinding
 import com.example.slowmotionapp.effects.FilterAdapter
 import com.example.slowmotionapp.effects.FilterType
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.filterPosition
 import com.example.slowmotionapp.ui.fragments.CropSpeedFragment.Companion.ePlayerView
 
 class EffectFragment : Fragment(), FilterAdapter.OnItemClickListener {
@@ -31,7 +31,8 @@ class EffectFragment : Fragment(), FilterAdapter.OnItemClickListener {
         filterTypes = FilterType.createFilterList()
 
         // Initialize RecyclerView
-        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        binding.recyclerView.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         adapter = FilterAdapter(filterTypes, this, lifecycleScope)
         binding.recyclerView.adapter = adapter
 
@@ -45,6 +46,7 @@ class EffectFragment : Fragment(), FilterAdapter.OnItemClickListener {
                 requireContext()
             )
         )
+        filterPosition = position
 
     }
 }

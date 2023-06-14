@@ -1,4 +1,7 @@
-package com.daasuu.epf.contextfactory;
+package com.example.slowmotionapp.effects;
+
+import static javax.microedition.khronos.egl.EGL10.EGL_NONE;
+import static javax.microedition.khronos.egl.EGL10.EGL_NO_CONTEXT;
 
 import android.opengl.GLSurfaceView;
 import android.util.Log;
@@ -7,13 +10,6 @@ import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
-
-import static javax.microedition.khronos.egl.EGL10.EGL_NONE;
-import static javax.microedition.khronos.egl.EGL10.EGL_NO_CONTEXT;
-
-/**
- * Created by sudamasayuki on 2017/05/16.
- */
 
 public class EContextFactory implements GLSurfaceView.EGLContextFactory {
 

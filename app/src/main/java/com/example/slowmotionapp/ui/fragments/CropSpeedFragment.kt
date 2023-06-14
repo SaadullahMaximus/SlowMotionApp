@@ -17,7 +17,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import com.arthenica.mobileffmpeg.Config
 import com.arthenica.mobileffmpeg.FFmpeg
-import com.daasuu.epf.EPlayerView
+import com.example.slowmotionapp.effects.EPlayerView
 import com.edmodo.cropper.CropImageView
 import com.edmodo.cropper.cropwindow.edge.Edge
 import com.example.slowmotionapp.R
@@ -98,6 +98,8 @@ class CropSpeedFragment : Fragment() {
     private lateinit var runnable: Runnable
 
     private var audioPlayer: MediaPlayer? = null
+
+    private var enhanced = false
 
     companion object {
         var ePlayerView: EPlayerView? = null
@@ -196,7 +198,8 @@ class CropSpeedFragment : Fragment() {
     }
 
     private fun setUoGlPlayerView() {
-        ePlayerView = EPlayerView(requireContext())
+        ePlayerView =
+            EPlayerView(requireContext())
         ePlayerView!!.setSimpleExoPlayer(player)
 
         val videoSize = getVideoSize(requireContext(), Uri.parse(mainCachedFile))
@@ -329,6 +332,7 @@ class CropSpeedFragment : Fragment() {
             .commit()
 
         binding.enhanceBtn.setOnClickListener {
+            enhanced = true
             binding.enhanceBtn.visibility = View.GONE
             binding.backTextBtn.visibility = View.VISIBLE
 
@@ -407,6 +411,7 @@ class CropSpeedFragment : Fragment() {
         }
 
         binding.backTextBtn.setOnClickListener {
+            enhanced = false
             binding.enhanceBtn.visibility = View.VISIBLE
             binding.backTextBtn.visibility = View.GONE
 
@@ -453,10 +458,11 @@ class CropSpeedFragment : Fragment() {
         }
 
         binding.saveBtn.setOnClickListener {
+            if (enhanced) {
+                sharedViewModel.enhanced(true)
+            }
             Utils.saveEditedVideo(requireContext(), File(mainCachedFile))
         }
-
-
         return binding.root
     }
 
@@ -886,5 +892,4 @@ class CropSpeedFragment : Fragment() {
         b = (Edge.TOP.coordinate * ab / ad).toInt()
         y = (Edge.BOTTOM.coordinate * ab / ad).toInt()
     }
-
 }

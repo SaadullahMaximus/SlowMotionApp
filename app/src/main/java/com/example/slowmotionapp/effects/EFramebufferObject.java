@@ -1,4 +1,4 @@
-package com.daasuu.epf;
+package com.example.slowmotionapp.effects;
 
 import android.opengl.GLES20;
 
@@ -18,10 +18,6 @@ import static android.opengl.GLES20.GL_RGBA;
 import static android.opengl.GLES20.GL_TEXTURE_2D;
 import static android.opengl.GLES20.GL_TEXTURE_BINDING_2D;
 import static android.opengl.GLES20.GL_UNSIGNED_BYTE;
-
-/**
- * Created by sudamasayuki on 2017/05/16.
- */
 
 public class EFramebufferObject {
 

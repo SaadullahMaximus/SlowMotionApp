@@ -1,12 +1,10 @@
-package com.daasuu.epf;
+package com.example.slowmotionapp.effects;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 
-import com.daasuu.epf.chooser.EConfigChooser;
-import com.daasuu.epf.contextfactory.EContextFactory;
-import com.daasuu.epf.filter.GlFilter;
+import com.daasuu.mp4compose.filter.GlFilter;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.video.VideoSize;

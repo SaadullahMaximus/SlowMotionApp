@@ -3,7 +3,7 @@ package com.example.slowmotionapp.effects
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.util.Log
-import com.daasuu.epf.filter.*
+import com.daasuu.mp4compose.filter.*
 import com.example.slowmotionapp.R
 import java.io.IOException
 

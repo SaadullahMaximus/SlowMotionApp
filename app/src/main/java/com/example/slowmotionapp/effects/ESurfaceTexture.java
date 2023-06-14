@@ -1,12 +1,8 @@
-package com.daasuu.epf;
+package com.example.slowmotionapp.effects;
 
 import android.graphics.SurfaceTexture;
 
-import com.daasuu.epf.filter.GlPreviewFilter;
-
-/**
- * Created by sudamasayuki on 2017/05/16.
- */
+import com.daasuu.mp4compose.gl.GlPreviewFilter;
 
 class ESurfaceTexture implements SurfaceTexture.OnFrameAvailableListener {
 

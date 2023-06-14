@@ -1,14 +1,4 @@
-package com.daasuu.epf;
-
-import android.graphics.Bitmap;
-import android.opengl.GLES20;
-import android.opengl.GLException;
-import android.opengl.GLUtils;
-import android.util.Log;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
+package com.example.slowmotionapp.effects;
 
 import static android.opengl.GLES20.GL_ARRAY_BUFFER;
 import static android.opengl.GLES20.GL_CLAMP_TO_EDGE;
@@ -21,9 +11,17 @@ import static android.opengl.GLES20.GL_TEXTURE_WRAP_T;
 import static android.opengl.GLES20.GL_TRUE;
 import static android.opengl.GLES20.glCreateProgram;
 
-/**
- * Created by sudamasayuki on 2017/05/16.
- */
+import android.graphics.Bitmap;
+import android.opengl.GLES20;
+import android.opengl.GLException;
+import android.opengl.GLUtils;
+import android.util.Log;
+
+import com.daasuu.epf.BuildConfig;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 
 public class EglUtil {
 

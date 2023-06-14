@@ -1,11 +1,4 @@
-package com.daasuu.epf.chooser;
-
-import android.opengl.GLSurfaceView;
-import android.os.Build;
-
-import javax.microedition.khronos.egl.EGL10;
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.egl.EGLDisplay;
+package com.example.slowmotionapp.effects;
 
 import static javax.microedition.khronos.egl.EGL10.EGL_ALPHA_SIZE;
 import static javax.microedition.khronos.egl.EGL10.EGL_BLUE_SIZE;
@@ -16,9 +9,11 @@ import static javax.microedition.khronos.egl.EGL10.EGL_RED_SIZE;
 import static javax.microedition.khronos.egl.EGL10.EGL_RENDERABLE_TYPE;
 import static javax.microedition.khronos.egl.EGL10.EGL_STENCIL_SIZE;
 
-/**
- * Created by sudamasayuki on 2017/05/16.
- */
+import android.opengl.GLSurfaceView;
+
+import javax.microedition.khronos.egl.EGL10;
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.egl.EGLDisplay;
 
 public class EConfigChooser implements GLSurfaceView.EGLConfigChooser {
 
@@ -32,7 +27,7 @@ public class EConfigChooser implements GLSurfaceView.EGLConfigChooser {
 
     private static final int EGL_CONTEXT_CLIENT_VERSION = 2;
 
-    private static final boolean USE_RGB_888 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1;
+    private static final boolean USE_RGB_888 = true;
 
     public EConfigChooser() {
         this(

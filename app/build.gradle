@@ -90,5 +90,6 @@ dependencies {
 
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.6.1"
 
+    implementation 'com.github.MasayukiSuda:Mp4Composer-android:v0.3.8'
 
 }
