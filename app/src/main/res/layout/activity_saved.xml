@@ -36,6 +36,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/_20sdp"
         android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginBottom="@dimen/_7sdp"
         android:background="@color/black"
         app:layout_constraintBottom_toTopOf="@id/viewpager"
         app:layout_constraintEnd_toEndOf="parent"
@@ -44,7 +45,7 @@
         app:tabGravity="fill"
         app:tabMode="fixed" />
 
-    <com.example.slowmotionapp.customviews.NonSwipeViewPager
+    <androidx.viewpager.widget.ViewPager
         android:id="@+id/viewpager"
         android:layout_width="match_parent"
         android:layout_height="0dp"

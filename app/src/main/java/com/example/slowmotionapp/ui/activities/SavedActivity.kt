@@ -13,12 +13,19 @@ import com.example.slowmotionapp.databinding.ActivitySavedBinding
 import com.example.slowmotionapp.ui.fragments.savedfragments.SavedCropFragment
 import com.example.slowmotionapp.ui.fragments.savedfragments.SavedEditedFragment
 import com.example.slowmotionapp.ui.fragments.savedfragments.SavedTrimFragment
+import com.example.slowmotionapp.utils.Utils
+import com.example.slowmotionapp.utils.Utils.fetchVideosFromDirectory
 import com.google.android.material.tabs.TabLayout
 
 class SavedActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySavedBinding
 
+    companion object {
+        val trimmedFiles = fetchVideosFromDirectory(Utils.trimmedDir)
+        val croppedFiles = fetchVideosFromDirectory(Utils.croppedDir)
+        val editedFiles = fetchVideosFromDirectory(Utils.editedDir)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

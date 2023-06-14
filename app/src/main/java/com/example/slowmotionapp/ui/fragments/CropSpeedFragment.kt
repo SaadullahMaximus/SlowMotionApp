@@ -221,14 +221,12 @@ class CropSpeedFragment : Fragment() {
 
             ePlayerView!!.layoutParams = layoutParams
         } else {
-            // Failed to retrieve video dimensions, use default layout params
             ePlayerView!!.layoutParams =
                 RelativeLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
         }
-
 
         ePlayerView!!.layoutParams =
             RelativeLayout.LayoutParams(

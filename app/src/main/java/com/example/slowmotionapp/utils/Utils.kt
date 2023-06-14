@@ -33,6 +33,34 @@ import java.util.concurrent.TimeUnit
 object Utils {
 
     var player: ExoPlayer? = null
+
+    private val filepath =
+        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
+            .toString() + "/SlowMotionApp/"
+    val trimmedDir = File("$filepath/Trimmed/")
+
+    val croppedDir = File("$filepath/Cropped/")
+
+    val editedDir = File("$filepath/Edited/")
+
+    fun fetchVideosFromDirectory(dir: File): List<File> {
+        val videosList = mutableListOf<File>()
+
+        if (dir.exists() && dir.isDirectory) {
+            val files = dir.listFiles()
+
+            if (files != null) {
+                for (file in files) {
+                    if (file.isFile && file.extension == "mp4") {
+                        videosList.add(file)
+                    }
+                }
+            }
+        }
+
+        return videosList
+    }
+
     fun createVideoFile(): File {
         val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
             Date()
@@ -50,11 +78,8 @@ object Utils {
             Date()
         )
         val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
-        val filepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
-            .toString() + "/SlowMotionApp/"
-        val storageDir = File("$filepath/Trimmed/")
-        if (!storageDir.exists()) storageDir.mkdirs()
-        return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, storageDir)
+        if (!trimmedDir.exists()) trimmedDir.mkdirs()
+        return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, trimmedDir)
     }
 
     fun createCroppedFile(): File {
@@ -62,11 +87,9 @@ object Utils {
             Date()
         )
         val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
-        val filepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
-            .toString() + "/SlowMotionApp/"
-        val storageDir = File("$filepath/Cropped/")
-        if (!storageDir.exists()) storageDir.mkdirs()
-        return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, storageDir)
+
+        if (!croppedDir.exists()) croppedDir.mkdirs()
+        return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, croppedDir)
     }
 
     fun saveEditedVideo(context: Context) {
@@ -76,10 +99,6 @@ object Utils {
         )
         val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
 
-        val downloadsDir =
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
-                .toString() + "/SlowMotionApp/"
-        val editedDir = File("$downloadsDir/Edited/")
 
         // Create the "Edited" directory if it doesn't exist
         if (!editedDir.exists()) {
