@@ -53,7 +53,6 @@ class FilterAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
-        // Load thumbnails in the background thread using coroutines
         lifecycleScope.launch(Dispatchers.Default) {
             val bitmap = ThumbnailUtils.createVideoThumbnail(
                 mainCachedFile,
@@ -90,5 +89,3 @@ class FilterAdapter(
             gpuImage.bitmapWithFilterApplied
         }
 }
-
-

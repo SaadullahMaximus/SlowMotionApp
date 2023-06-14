@@ -24,7 +24,7 @@ public class EFramebufferObject {
     private int width;
     private int height;
     private int framebufferName;
-    private int renderbufferName;
+    private int renderBufferName;
     private int texName;
 
     public int getWidth() {
@@ -70,10 +70,10 @@ public class EFramebufferObject {
             GLES20.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName);
 
             GLES20.glGenRenderbuffers(args.length, args, 0);
-            renderbufferName = args[0];
-            GLES20.glBindRenderbuffer(GL_RENDERBUFFER, renderbufferName);
+            renderBufferName = args[0];
+            GLES20.glBindRenderbuffer(GL_RENDERBUFFER, renderBufferName);
             GLES20.glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
-            GLES20.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderbufferName);
+            GLES20.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderBufferName);
 
             GLES20.glGenTextures(args.length, args, 0);
             texName = args[0];
@@ -103,9 +103,9 @@ public class EFramebufferObject {
         args[0] = texName;
         GLES20.glDeleteTextures(args.length, args, 0);
         texName = 0;
-        args[0] = renderbufferName;
+        args[0] = renderBufferName;
         GLES20.glDeleteRenderbuffers(args.length, args, 0);
-        renderbufferName = 0;
+        renderBufferName = 0;
         args[0] = framebufferName;
         GLES20.glDeleteFramebuffers(args.length, args, 0);
         framebufferName = 0;
@@ -114,6 +114,4 @@ public class EFramebufferObject {
     public void enable() {
         GLES20.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName);
     }
-
-
 }

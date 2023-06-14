@@ -82,8 +82,6 @@ public class EConfigChooser implements GLSurfaceView.EGLConfigChooser {
         return newConfigSpec;
     }
 
-    //////////////////////////////////////////////////////////////////////////
-
     @Override
     public EGLConfig chooseConfig(final EGL10 egl, final EGLDisplay display) {
         final int[] num_config = new int[1];

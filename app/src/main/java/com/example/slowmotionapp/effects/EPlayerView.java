@@ -3,7 +3,6 @@ package com.example.slowmotionapp.effects;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
-
 import com.daasuu.mp4compose.filter.GlFilter;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Player;
@@ -11,13 +10,11 @@ import com.google.android.exoplayer2.video.VideoSize;
 
 public class EPlayerView extends GLSurfaceView implements Player.Listener {
 
-    private final static String TAG = EPlayerView.class.getSimpleName();
-
     private final EPlayerRenderer renderer;
     private ExoPlayer player;
 
     private float videoAspect = 1f;
-    private PlayerScaleType playerScaleType = PlayerScaleType.RESIZE_FIT_WIDTH;
+    private final PlayerScaleType playerScaleType = PlayerScaleType.RESIZE_FIT_WIDTH;
 
     public EPlayerView(Context context) {
         this(context, null);
@@ -37,7 +34,6 @@ public class EPlayerView extends GLSurfaceView implements Player.Listener {
     public EPlayerView setSimpleExoPlayer(ExoPlayer player) {
         if (this.player != null) {
             this.player.release();
-            this.player = null;
         }
         this.player = player;
         this.player.addListener(this);
@@ -47,11 +43,6 @@ public class EPlayerView extends GLSurfaceView implements Player.Listener {
 
     public void setGlFilter(GlFilter glFilter) {
         renderer.setGlFilter(glFilter);
-    }
-
-    public void setPlayerScaleType(PlayerScaleType playerScaleType) {
-        this.playerScaleType = playerScaleType;
-        requestLayout();
     }
 
     @Override
@@ -72,9 +63,6 @@ public class EPlayerView extends GLSurfaceView implements Player.Listener {
                 viewWidth = (int) (measuredHeight * videoAspect);
                 break;
         }
-
-        // Log.d(TAG, "onMeasure viewWidth = " + viewWidth + " viewHeight = " + viewHeight);
-
         setMeasuredDimension(viewWidth, viewHeight);
 
     }
@@ -90,16 +78,12 @@ public class EPlayerView extends GLSurfaceView implements Player.Listener {
         int width = videoSize.width;
         int height = videoSize.height;
         float pixelWidthHeightRatio = videoSize.pixelWidthHeightRatio;
-        int unappliedRotationDegrees = videoSize.unappliedRotationDegrees;
 
-        // Log.d(TAG, "width = " + width + " height = " + height + " unappliedRotationDegrees = " + unappliedRotationDegrees + " pixelWidthHeightRatio = " + pixelWidthHeightRatio);
         videoAspect = ((float) width / height) * pixelWidthHeightRatio;
-        // Log.d(TAG, "videoAspect = " + videoAspect);
         requestLayout();
     }
 
     @Override
     public void onRenderedFirstFrame() {
-        // do nothing
     }
 }

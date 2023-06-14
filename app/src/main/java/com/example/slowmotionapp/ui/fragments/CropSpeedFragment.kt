@@ -17,11 +17,11 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import com.arthenica.mobileffmpeg.Config
 import com.arthenica.mobileffmpeg.FFmpeg
-import com.example.slowmotionapp.effects.EPlayerView
 import com.edmodo.cropper.CropImageView
 import com.edmodo.cropper.cropwindow.edge.Edge
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.databinding.FragmentCropSpeedBinding
+import com.example.slowmotionapp.effects.EPlayerView
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.musicReady
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.myMusicUri
@@ -365,7 +365,7 @@ class CropSpeedFragment : Fragment() {
                         player!!.playWhenReady = true
 
                         // Initialize handler and runnable
-                        handler = Handler()
+                        handler = Handler(Looper.getMainLooper())
                         runnable = Runnable { updateSeekBar() }
                     }
                     if (playbackState == Player.STATE_ENDED) {
@@ -461,7 +461,7 @@ class CropSpeedFragment : Fragment() {
             if (enhanced) {
                 sharedViewModel.enhanced(true)
             }
-            Utils.saveEditedVideo(requireContext(), File(mainCachedFile))
+            Utils.saveEditedVideo(requireContext())
         }
         return binding.root
     }
@@ -585,7 +585,6 @@ class CropSpeedFragment : Fragment() {
         super.onDestroy()
 
         // Clean up resources
-        handler.removeCallbacks(runnable)
         player!!.release()
     }
 
@@ -598,7 +597,7 @@ class CropSpeedFragment : Fragment() {
         } else {
             binding.totalDurationTextView.text = milliSecondsToTimer(
                 binding.seekBar.progress.toLong()
-            ) + ""
+            )
             updateProgressBar()
         }
     }

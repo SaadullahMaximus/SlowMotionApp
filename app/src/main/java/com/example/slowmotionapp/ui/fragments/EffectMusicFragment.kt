@@ -1,6 +1,7 @@
 package com.example.slowmotionapp.ui.fragments
 
 import android.app.Activity
+import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -20,10 +21,16 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager.widget.ViewPager
+import com.daasuu.mp4compose.FillMode
+import com.daasuu.mp4compose.Rotation
+import com.daasuu.mp4compose.composer.Mp4Composer
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.adapters.ViewPagerAdapter
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.FragmentEffectMusicBinding
+import com.example.slowmotionapp.effects.FilterType
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.filterPosition
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.myMusic
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.myMusicUri
 import com.example.slowmotionapp.utils.Utils
@@ -38,9 +45,17 @@ class EffectMusicFragment : Fragment() {
     private var childFragmentManager: FragmentManager? = null
     private lateinit var sharedViewModel: SharedViewModel
 
+    private lateinit var filterTypes: List<FilterType>
+
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
+        sharedViewModel.enhanced.observe(viewLifecycleOwner) { newValue ->
+            if (newValue) {
+                saveVideoWithFilter()
+            }
+        }
     }
 
     override fun onCreateView(
@@ -52,6 +67,8 @@ class EffectMusicFragment : Fragment() {
 
         binding.seekBarSpeaker.progress = 50
         binding.seekBarMusic.progress = 50
+
+        filterTypes = FilterType.createFilterList()
 
         childFragmentManager = getChildFragmentManager()
 
@@ -207,4 +224,53 @@ class EffectMusicFragment : Fragment() {
 
         return tabView
     }
+
+    private fun saveVideoWithFilter() {
+
+        val progressDialog =
+            ProgressDialog(requireContext(), R.style.CustomDialog)
+        progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
+        progressDialog.isIndeterminate = true
+        progressDialog.setCancelable(false)
+        progressDialog.setMessage("Please Wait")
+        progressDialog.show()
+
+        if (filterPosition != 0) {
+            val outputFile = Utils.createCroppedFile().toString()
+            val filter = FilterType.createGlFilter(
+                FilterType.createFilterList()[filterPosition],
+                requireContext()
+            )
+            Mp4Composer(mainCachedFile, outputFile)
+                .rotation(Rotation.NORMAL)
+                .fillMode(FillMode.PRESERVE_ASPECT_FIT)
+                .filter(filter)
+                .listener(object : Mp4Composer.Listener {
+                    override fun onProgress(progress: Double) {
+                        Log.d(Constants.APP_NAME, "onProgress Filter = " + progress * 100)
+                    }
+
+                    override fun onCompleted() {
+                        Log.d(Constants.APP_NAME, "onCompleted() Filter : $outputFile")
+                        progressDialog.dismiss()
+                        mainCachedFile = outputFile
+                        Utils.saveEditedVideo(requireContext())
+                    }
+
+                    override fun onCanceled() {
+                        progressDialog.dismiss()
+                        Log.d(Constants.APP_NAME, "onCanceled")
+                    }
+
+                    override fun onFailed(exception: Exception) {
+                        progressDialog.dismiss()
+                        Log.e(Constants.APP_NAME, "onFailed() Filter", exception)
+                    }
+                })
+                .start()
+        } else {
+            progressDialog.dismiss()
+        }
+    }
+
 }

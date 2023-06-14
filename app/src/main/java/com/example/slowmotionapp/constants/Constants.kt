@@ -54,6 +54,5 @@ class Constants {
 
         const val VIDEO_LIMIT = 4 //4 minutes
 
-        const val STREAM_URL_MP4_VOD_SHORT = "http://demos.webmproject.org/exoplayer/glass.mp4"
     }
 }

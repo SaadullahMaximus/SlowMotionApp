@@ -1,5 +1,6 @@
 package com.example.slowmotionapp.utils
 
+import android.app.Activity
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
@@ -11,10 +12,11 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
-import android.widget.Toast
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.tempCacheName
+import com.example.slowmotionapp.ui.activities.PlayerActivity
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
@@ -67,7 +69,8 @@ object Utils {
         return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, storageDir)
     }
 
-    fun saveEditedVideo(context: Context, videoFile: File) {
+    fun saveEditedVideo(context: Context) {
+        val videoFile = File(mainCachedFile)
         val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
             Date()
         )
@@ -106,11 +109,11 @@ object Utils {
 
             // Delete the original file from the cache directory
             videoFile.delete()
-
-            Toast.makeText(context, "Video Saved", Toast.LENGTH_SHORT).show()
+            playVideo = destinationFile.toString()
+            context.startActivity(Intent(context, PlayerActivity::class.java))
+            (context as Activity).finish()
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(context, "Can't Video Saved", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -303,12 +306,14 @@ object Utils {
         Log.d("EXOPLAYER", "onCreateView: setUpSimpleExoPlayer")
     }
 
-    fun getVideoSize(context: Context,uri: Uri): Pair<Int, Int>? {
+    fun getVideoSize(context: Context, uri: Uri): Pair<Int, Int>? {
         val retriever = MediaMetadataRetriever()
         retriever.setDataSource(context, uri)
 
-        val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull()
-        val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull()
+        val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
+            ?.toIntOrNull()
+        val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
+            ?.toIntOrNull()
 
         return if (width != null && height != null) {
             Pair(width, height)

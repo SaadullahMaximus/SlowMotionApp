@@ -6,7 +6,6 @@ import static android.opengl.GLES20.GL_MAX_TEXTURE_SIZE;
 import static android.opengl.GLES20.GL_NEAREST;
 import static android.opengl.GLES20.GL_TEXTURE_2D;
 import static android.opengl.GLES20.glViewport;
-
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
@@ -14,7 +13,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.Surface;
-
 import com.daasuu.mp4compose.filter.GlFilter;
 import com.daasuu.mp4compose.filter.GlLookUpTableFilter;
 import com.daasuu.mp4compose.gl.GlFramebufferObject;
@@ -63,7 +61,6 @@ class EPlayerRenderer extends EFrameBufferObjectRenderer implements SurfaceTextu
                 if (glFilter instanceof GlLookUpTableFilter) {
                     ((GlLookUpTableFilter) glFilter).releaseLutBitmap();
                 }
-                glFilter = null;
             }
             glFilter = filter;
             isNewFilter = true;
@@ -80,18 +77,15 @@ class EPlayerRenderer extends EFrameBufferObjectRenderer implements SurfaceTextu
         GLES20.glGenTextures(args.length, args, 0);
         texName = args[0];
 
-
         previewTexture = new ESurfaceTexture(texName);
         previewTexture.setOnFrameAvailableListener(this);
 
 
         GLES20.glBindTexture(previewTexture.getTextureTarget(), texName);
-        // GL_TEXTURE_EXTERNAL_OES
         EglUtil.setupSampler(previewTexture.getTextureTarget(), GL_LINEAR, GL_NEAREST);
         GLES20.glBindTexture(GL_TEXTURE_2D, 0);
 
         filterFramebufferObject = new EFramebufferObject();
-        // GL_TEXTURE_EXTERNAL_OES
         previewFilter = new GlPreviewFilter(previewTexture.getTextureTarget());
         previewFilter.setup();
         new Handler(Looper.getMainLooper()).post(() -> {
@@ -187,5 +181,4 @@ class EPlayerRenderer extends EFrameBufferObjectRenderer implements SurfaceTextu
             previewTexture.release();
         }
     }
-
 }

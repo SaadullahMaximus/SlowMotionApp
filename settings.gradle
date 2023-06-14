@@ -17,4 +17,3 @@ dependencyResolutionManagement {
 rootProject.name = "SlowMotionApp"
 include ':app'
 include ':videotrimmer'
-include ':epf'

@@ -65,7 +65,7 @@ abstract class EFrameBufferObjectRenderer implements GLSurfaceView.Renderer {
     }
 
     @Override
-    protected void finalize() throws Throwable {
+    protected void finalize() {
 
     }
 
