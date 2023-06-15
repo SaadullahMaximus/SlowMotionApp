@@ -53,14 +53,12 @@ class Mp3StoreAdapter(
         }
 
         holder.btnApply.setOnClickListener {
-            val previousPosition = selectedPosition
-            selectedPosition = position
-            notifyItemChanged(previousPosition)
-            notifyItemChanged(selectedPosition)
+            val finalPosition = selectedPosition
+            selectedPosition = -1
 
             holder.btnApply.visibility = View.GONE
 
-            if (position == selectedPosition) {
+            if (position == finalPosition) {
                 holder.selected.setImageResource(R.drawable.music_select)
             } else {
                 holder.selected.setImageResource(R.drawable.music_unselect)

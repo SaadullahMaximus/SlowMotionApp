@@ -26,6 +26,8 @@ class SharedViewModel : ViewModel() {
 
     val enhanced: MutableLiveData<Boolean> = MutableLiveData()
 
+    val downloadedMusic: MutableLiveData<String> = MutableLiveData()
+
 
     fun setVideoUri(path: String) {
         _videoPath.value = path
@@ -65,6 +67,10 @@ class SharedViewModel : ViewModel() {
 
     fun enhanced(newValue: Boolean) {
         enhanced.value = newValue
+    }
+
+    fun downloadMusicPath(newValue: String) {
+        downloadedMusic.value = newValue
     }
 
 }

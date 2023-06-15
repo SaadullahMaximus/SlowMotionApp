@@ -56,6 +56,9 @@ class EffectMusicFragment : Fragment() {
                 saveVideoWithFilter()
             }
         }
+        sharedViewModel.downloadedMusic.observe(viewLifecycleOwner) { newValue ->
+            setupFragment(Uri.parse(newValue))
+        }
     }
 
     override fun onCreateView(
