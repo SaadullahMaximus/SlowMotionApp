@@ -16,8 +16,8 @@
                     android:width="4dp"
                     android:color="#FFFFFF" /> <!-- Set the desired progress color here -->
                 <size
-                    android:top="1dp"
-                    android:bottom="1dp" /> <!-- Adjust the top and bottom values to change the height -->
+                    android:bottom="1dp"
+                    android:top="1dp" /> <!-- Adjust the top and bottom values to change the height -->
             </shape>
         </clip>
     </item>

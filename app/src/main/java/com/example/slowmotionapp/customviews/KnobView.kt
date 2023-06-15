@@ -165,10 +165,6 @@ class KnobView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         knobPositionChangeListener = listener
     }
 
-    fun getKnobValue(): Int {
-        return knobValue
-    }
-
     private fun dpToPx(dp: Int): Float {
         return dp * resources.displayMetrics.density
     }

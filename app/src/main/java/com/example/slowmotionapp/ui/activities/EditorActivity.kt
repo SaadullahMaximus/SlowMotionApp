@@ -7,7 +7,8 @@ import androidx.fragment.app.Fragment
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.ActivityEditorBinding
-import com.example.slowmotionapp.ui.fragments.VideoCheckFragment
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
+import com.example.slowmotionapp.ui.fragments.CropSpeedFragment
 
 class EditorActivity : AppCompatActivity() {
 
@@ -21,22 +22,15 @@ class EditorActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         supportFragmentManager.beginTransaction()
-            .add(R.id.fragment_container, VideoCheckFragment() as Fragment)
+            .add(R.id.fragment_container, CropSpeedFragment() as Fragment)
             .commit()
 
 
         // Fetch the videoUri from the intent
         videoUri = intent.getStringExtra("VideoUri")
+        mainCachedFile = videoUri!!
         type = intent.getIntExtra(Constants.TYPE, 0)
         Log.d("MaximusTech", "onCreate: $videoUri")
     }
 
-    fun getVideoUri(): String? {
-        // Return the video URI
-        return videoUri
-    }
-
-    fun getType(): Int {
-        return type
-    }
 }

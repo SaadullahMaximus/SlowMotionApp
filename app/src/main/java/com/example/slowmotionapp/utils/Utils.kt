@@ -1,5 +1,6 @@
 package com.example.slowmotionapp.utils
 
+import android.app.Activity
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
@@ -11,9 +12,19 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
-import android.widget.Toast
 import com.example.slowmotionapp.constants.Constants
+import com.example.slowmotionapp.interfaces.MyListener
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.backSave
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.tempCacheName
+import com.example.slowmotionapp.ui.activities.PlayerActivity
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
+import com.google.android.exoplayer2.upstream.DataSource
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.google.android.exoplayer2.util.Util
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -22,6 +33,42 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 object Utils {
+
+    var player: ExoPlayer? = null
+
+    private val filepath =
+        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
+            .toString() + "/SlowMotionApp/"
+    val trimmedDir = File("$filepath/Trimmed/")
+
+    val croppedDir = File("$filepath/Cropped/")
+
+    val editedDir = File("$filepath/Edited/")
+
+    private var listener: MyListener? = null
+
+    fun setListener(listener: MyListener) {
+        this.listener = listener
+    }
+
+    fun fetchVideosFromDirectory(dir: File): List<File> {
+        val videosList = mutableListOf<File>()
+
+        if (dir.exists() && dir.isDirectory) {
+            val files = dir.listFiles()
+
+            if (files != null) {
+                for (file in files) {
+                    if (file.isFile && file.extension == "mp4") {
+                        videosList.add(file)
+                    }
+                }
+            }
+        }
+
+        return videosList
+    }
+
     fun createVideoFile(): File {
         val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
             Date()
@@ -39,23 +86,27 @@ object Utils {
             Date()
         )
         val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
-        val filepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
-            .toString() + "/SlowMotionApp/"
-        val storageDir = File("$filepath/Trimmed/")
-        if (!storageDir.exists()) storageDir.mkdirs()
-        return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, storageDir)
+        if (!trimmedDir.exists()) trimmedDir.mkdirs()
+        return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, trimmedDir)
     }
 
-    fun saveEditedVideo(context: Context, videoFile: File) {
+    fun createCroppedFile(): File {
         val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
             Date()
         )
         val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
 
-        val downloadsDir =
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
-                .toString() + "/SlowMotionApp/"
-        val editedDir = File("$downloadsDir/Edited/")
+        if (!croppedDir.exists()) croppedDir.mkdirs()
+        return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, croppedDir)
+    }
+
+    fun saveEditedVideo(context: Context) {
+        val videoFile = File(mainCachedFile)
+        val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
+            Date()
+        )
+        val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
+
 
         // Create the "Edited" directory if it doesn't exist
         if (!editedDir.exists()) {
@@ -85,11 +136,19 @@ object Utils {
 
             // Delete the original file from the cache directory
             videoFile.delete()
+            if (backSave) {
+                mainCachedFile = destinationFile.toString()
+                // Call the listener function
+                listener?.onUtilityFunctionCalled()
+                backSave = false
+            } else {
+                playVideo = destinationFile.toString()
+                context.startActivity(Intent(context, PlayerActivity::class.java))
+                (context as Activity).finish()
+            }
 
-            Toast.makeText(context, "Video Saved", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(context, "Can't Video Saved", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -126,6 +185,17 @@ object Utils {
             e.printStackTrace()
         }
     }
+
+    fun refreshAudioGallery(context: Context) {
+        try {
+            val audioContentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+            val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, audioContentUri)
+            context.sendBroadcast(mediaScanIntent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
 
     fun getFileExtension(filePath: String): String {
         return filePath.substring(filePath.lastIndexOf("."))
@@ -256,5 +326,76 @@ object Utils {
 
         return screenWidth
     }
+
+    fun setUpSimpleExoPlayer(context: Context) {
+        // Produces DataSource instances through which media data is loaded.
+        val dataSourceFactory: DataSource.Factory =
+            DefaultDataSourceFactory(context, Util.getUserAgent(context, Constants.APP_NAME))
+
+        // SimpleExoPlayer
+        player = ExoPlayer.Builder(context)
+            .setMediaSourceFactory(ProgressiveMediaSource.Factory(dataSourceFactory))
+            .build()
+        player!!.addMediaItem(MediaItem.fromUri(Uri.parse(mainCachedFile)))
+        player!!.prepare()
+        Log.d("EXOPLAYER", "onCreateView: setUpSimpleExoPlayer")
+    }
+
+    fun getVideoSize(context: Context, uri: Uri): Pair<Int, Int>? {
+        val retriever = MediaMetadataRetriever()
+        retriever.setDataSource(context, uri)
+
+        val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
+            ?.toIntOrNull()
+        val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
+            ?.toIntOrNull()
+
+        return if (width != null && height != null) {
+            Pair(width, height)
+        } else {
+            null
+        }
+    }
+
+    fun milliSecondsToTimer(milliseconds: Long): String {
+        var finalTimerString = ""
+        val secondsString: String
+        val minutesString: String
+        val hours = (milliseconds / (1000 * 60 * 60)).toInt()
+        val minutes = (milliseconds % (1000 * 60 * 60)).toInt() / (1000 * 60)
+        val seconds = (milliseconds % (1000 * 60 * 60) % (1000 * 60) / 1000).toInt()
+
+        if (hours > 0) {
+            finalTimerString = "$hours:"
+        }
+
+        secondsString = if (seconds < 10) {
+            "0$seconds"
+        } else {
+            "" + seconds
+        }
+        minutesString = if (minutes < 10) {
+            "0$minutes"
+        } else {
+            "" + minutes
+        }
+        finalTimerString = "$finalTimerString$minutesString:$secondsString"
+
+        return finalTimerString
+    }
+
+    fun getAudioFilePathFromUri(context: Context, uri: Uri): String? {
+        var filePath: String? = null
+        val projection = arrayOf(MediaStore.Audio.Media.DATA)
+        val cursor = context.contentResolver.query(uri, projection, null, null, null)
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val columnIndex = it.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
+                filePath = it.getString(columnIndex)
+            }
+        }
+        return filePath
+    }
+
 
 }

@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
-    tools:context=".ui.fragments.TrimVideoFragment">
-
+    android:background="@color/black">
 
     <ImageView
         android:id="@+id/backBtn"
@@ -21,8 +18,8 @@
         android:id="@+id/TVTrim"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_17sdp"
         android:layout_marginStart="@dimen/_20sdp"
+        android:layout_marginTop="@dimen/_17sdp"
         android:fontFamily="@font/fredokaregular"
         android:text="@string/trim_video"
         android:textColor="@color/white"
@@ -43,9 +40,9 @@
 
         <VideoView
             android:id="@+id/trimVideoView"
-            android:layout_gravity="center"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:layout_gravity="center" />
 
     </FrameLayout>
 
@@ -240,6 +237,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,8 +1,9 @@
-package com.example.slowmotionapp.ui.fragments
+package com.example.slowmotionapp.ui.activities
 
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.Context
+import android.content.Intent
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
@@ -10,32 +11,33 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.SeekBar
-import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.Toast
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
-import com.ahmedbadereldin.videotrimmer.customVideoViews.*
+import androidx.appcompat.app.AppCompatActivity
+import com.ahmedbadereldin.videotrimmer.customVideoViews.BarThumb
+import com.ahmedbadereldin.videotrimmer.customVideoViews.CustomRangeSeekBar
+import com.ahmedbadereldin.videotrimmer.customVideoViews.OnRangeSeekBarChangeListener
 import com.arthenica.mobileffmpeg.Config
 import com.arthenica.mobileffmpeg.FFmpeg
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
-import com.example.slowmotionapp.databinding.FragmentTrimVideoBinding
-import com.example.slowmotionapp.ui.activities.EditorActivity
+import com.example.slowmotionapp.databinding.ActivityTrimVideoBinding
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.isFromTrim
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.trimFilePath
 import com.example.slowmotionapp.utils.Utils
+import com.example.slowmotionapp.utils.Utils.milliSecondsToTimer
 import java.io.File
 import java.text.DecimalFormat
 import java.util.*
 
-class TrimVideoFragment : Fragment(), View.OnClickListener {
+class TrimVideoActivity : AppCompatActivity() {
 
-    private var _binding: FragmentTrimVideoBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: ActivityTrimVideoBinding
+
+    private var videoUri: String? = null
+    private var type: Int = 0
 
     private var mStartPosition = 0
     private var mDuration = 0
@@ -44,35 +46,56 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
     private val mMaxDuration = 120
     private var mDurationWithoutEdit = 0
 
-    private lateinit var videoUri: String
-    private var type: Int = 0
-
     private lateinit var file: File
 
     private lateinit var outputFile: File
 
     private val mHandler = Handler(Looper.getMainLooper())
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentTrimVideoBinding.inflate(inflater, container, false)
+    private val mUpdateTimeTask: Runnable = object : Runnable {
+        @SuppressLint("SetTextI18n")
+        override fun run() {
+            if (binding.seekBar.progress >= binding.seekBar.max) {
+                binding.seekBar.progress =
+                    binding.trimVideoView.currentPosition - mStartPosition * 1000
+                binding.totalDurationTextView.text = milliSecondsToTimer(
+                    binding.seekBar.progress.toLong()
+                ) + ""
+                binding.trimVideoView.seekTo(mStartPosition * 1000)
+                binding.trimVideoView.pause()
+                binding.seekBar.progress = 0
+                binding.totalDurationTextView.text = "00:00"
+                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
+            } else {
+                binding.seekBar.progress =
+                    binding.trimVideoView.currentPosition - mStartPosition * 1000
+                binding.totalDurationTextView.text = milliSecondsToTimer(
+                    binding.seekBar.progress.toLong()
+                ) + ""
+                mHandler.postDelayed(this, 100)
+            }
+        }
+    }
 
-        videoUri = (activity as EditorActivity?)!!.getVideoUri()!!
-        type = (activity as EditorActivity?)!!.getType()
+    @SuppressLint("SetTextI18n")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityTrimVideoBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        // Fetch the videoUri from the intent
+        videoUri = intent.getStringExtra("VideoUri")
+        type = intent.getIntExtra(Constants.TYPE, 0)
+        Log.d("MaximusTech", "onCreate: $videoUri")
 
         binding.backBtn.setOnClickListener {
-            requireActivity().finish()
+            finish()
         }
 
         binding.timeLineView.post {
-            setBitmap(videoUri)
+            setBitmap(videoUri!!)
             binding.trimVideoView.setVideoURI(Uri.parse(videoUri))
         }
-
-        binding.btnDone.setOnClickListener(this)
-        binding.playPauseButton.setOnClickListener(this)
 
         binding.trimVideoView.setOnPreparedListener { mp: MediaPlayer? ->
             mp?.let {
@@ -120,7 +143,7 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
         })
 
 
-        binding.seekBar.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
+        binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {}
             override fun onStartTrackingTouch(seekBar: SeekBar) {
                 mHandler.removeCallbacks(mUpdateTimeTask)
@@ -172,25 +195,20 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
             }
         })
 
-        return binding.root
-    }
-
-    @SuppressLint("SetTextI18n")
-    override fun onClick(view: View) {
-        if (view === binding.btnDone) {
+        binding.btnDone.setOnClickListener {
             val diff = mEndPosition - mStartPosition
             if (diff < 3) {
                 Toast.makeText(
-                    requireContext(), getString(R.string.video_length_validation),
+                    this, getString(R.string.video_length_validation),
                     Toast.LENGTH_LONG
                 ).show()
             } else {
                 val mediaMetadataRetriever = MediaMetadataRetriever()
-                mediaMetadataRetriever.setDataSource(requireContext(), Uri.parse(videoUri))
+                mediaMetadataRetriever.setDataSource(this, Uri.parse(videoUri))
                 file = if (type == Constants.RECORD_VIDEO) {
-                    File(Utils.convertContentUriToFilePath(videoUri))
+                    File(Utils.convertContentUriToFilePath(videoUri!!))
                 } else {
-                    File(videoUri)
+                    File(videoUri!!)
                 }
 
                 try {
@@ -198,7 +216,7 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
                     outputFile = Utils.createTrimmedFile()
 
                     trimVideo(
-                        requireContext(),
+                        this,
                         arrayOf(
                             "-ss",
                             mStartPosition.toString(),
@@ -228,7 +246,9 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
                         )
                 }
             }
-        } else if (view === binding.playPauseButton) {
+        }
+
+        binding.playPauseButton.setOnClickListener {
             if (binding.trimVideoView.isPlaying) {
                 binding.trimVideoView.pause()
                 binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
@@ -236,90 +256,23 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
                 binding.trimVideoView.start()
                 binding.playPauseButton.setImageResource(R.drawable.baseline_pause)
                 if (binding.seekBar.progress == 0) {
-                    binding.totalDurationTextView.text = "00:00"
+                    binding.totalDurationTextView.setText(R.string._00_00)
                     updateProgressBar()
                 } else {
                     binding.totalDurationTextView.text = milliSecondsToTimer(
                         binding.seekBar.progress.toLong()
-                    ) + ""
+                    )
                     updateProgressBar()
                 }
             }
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
     private fun updateProgressBar() {
         mHandler.postDelayed(mUpdateTimeTask, 100)
     }
 
-    fun milliSecondsToTimer(milliseconds: Long): String {
-        var finalTimerString = ""
-        val secondsString: String
-        val minutesString: String
-        val hours = (milliseconds / (1000 * 60 * 60)).toInt()
-        val minutes = (milliseconds % (1000 * 60 * 60)).toInt() / (1000 * 60)
-        val seconds = (milliseconds % (1000 * 60 * 60) % (1000 * 60) / 1000).toInt()
-
-        if (hours > 0) {
-            finalTimerString = "$hours:"
-        }
-
-        secondsString = if (seconds < 10) {
-            "0$seconds"
-        } else {
-            "" + seconds
-        }
-        minutesString = if (minutes < 10) {
-            "0$minutes"
-        } else {
-            "" + minutes
-        }
-        finalTimerString = "$finalTimerString$minutesString:$secondsString"
-
-        return finalTimerString
-    }
-
-
-    private val mUpdateTimeTask: Runnable = object : Runnable {
-        @SuppressLint("SetTextI18n")
-        override fun run() {
-            if (binding.seekBar.progress >= binding.seekBar.max) {
-                binding.seekBar.progress =
-                    binding.trimVideoView.currentPosition - mStartPosition * 1000
-                binding.totalDurationTextView.text = milliSecondsToTimer(
-                    binding.seekBar.progress.toLong()
-                ) + ""
-                binding.trimVideoView.seekTo(mStartPosition * 1000)
-                binding.trimVideoView.pause()
-                binding.seekBar.progress = 0
-                binding.totalDurationTextView.text = "00:00"
-                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
-            } else {
-                binding.seekBar.progress =
-                    binding.trimVideoView.currentPosition - mStartPosition * 1000
-                binding.totalDurationTextView.text = milliSecondsToTimer(
-                    binding.seekBar.progress.toLong()
-                ) + ""
-                mHandler.postDelayed(this, 100)
-            }
-        }
-    }
-
-
-    private fun onVideoPrepared() {
-        mDuration = binding.trimVideoView.duration / 1000
-        setSeekBarPosition()
-    }
-
-
-    private fun setBitmap(mVideoUri: String) {
-        binding.timeLineView.setVideo(Uri.parse(mVideoUri))
-    }
+    private fun onStopSeekThumbs() {}
 
     private fun onSeekThumbs(index: Int, value: Float) {
         when (index) {
@@ -353,7 +306,19 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
         binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
     }
 
-    private fun onStopSeekThumbs() {}
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finish()
+    }
+
+    private fun setBitmap(mVideoUri: String) {
+        binding.timeLineView.setVideo(Uri.parse(mVideoUri))
+    }
+
+    private fun onVideoPrepared() {
+        mDuration = binding.trimVideoView.duration / 1000
+        setSeekBarPosition()
+    }
 
     private fun setSeekBarPosition() {
         if (mDuration >= mMaxDuration) {
@@ -387,7 +352,6 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
     private fun timeLineSet(mDuration: Int) {
         binding.endTime.text = milliSecondsToTimer((mDuration * 1000).toLong())
         timeLineNumbersSet(mDuration)
-
     }
 
     private fun timeLineNumbersSet(mDuration: Int) {
@@ -421,11 +385,12 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
             when (returnCode) {
                 Config.RETURN_CODE_SUCCESS -> {
                     progressDialog.dismiss()
-                    Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
                     trimFilePath = str
                     mainCachedFile =
-                        Utils.createCacheCopy(requireContext(), trimFilePath).toString()
-                    switchFragment()
+                        Utils.createCacheCopy(this, trimFilePath)
+                            .toString()
+                    playVideo = str
+                    switchActivity(str)
                 }
                 Config.RETURN_CODE_CANCEL -> {
                     Log.d("FFMPEFailure", str)
@@ -460,14 +425,18 @@ class TrimVideoFragment : Fragment(), View.OnClickListener {
         }
     }
 
-    private fun switchFragment() {
-        Log.d("TrimFFMPEG", "onSuccess()")
-        val fragment1 = TrimVideoFragment()
-        val fragment2 = CropSpeedFragment()
-        val transaction: FragmentTransaction = parentFragmentManager.beginTransaction()
-        transaction.replace(R.id.fragment_container, fragment2)
-        transaction.addToBackStack(null)
-        transaction.remove(fragment1).commit()
+    private fun switchActivity(videoPath: String) {
+        if (isFromTrim) {
+            isFromTrim = false
+            startActivity(Intent(this, PlayerActivity::class.java))
+            finish()
+        } else {
+            val intent = Intent(this, EditorActivity::class.java)
+            intent.putExtra("VideoUri", videoPath)
+            intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
+            startActivity(intent)
+            finish()
+        }
     }
 
 }

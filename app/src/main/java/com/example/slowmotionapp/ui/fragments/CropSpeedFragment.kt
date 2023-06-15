@@ -1,6 +1,7 @@
 package com.example.slowmotionapp.ui.fragments
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.app.ProgressDialog
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
@@ -21,14 +22,22 @@ import com.edmodo.cropper.CropImageView
 import com.edmodo.cropper.cropwindow.edge.Edge
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.databinding.FragmentCropSpeedBinding
+import com.example.slowmotionapp.effects.EPlayerView
+import com.example.slowmotionapp.interfaces.MyListener
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.backSave
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.musicReady
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.myMusicUri
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.trimFilePath
 import com.example.slowmotionapp.utils.Utils
+import com.example.slowmotionapp.utils.Utils.getVideoSize
+import com.example.slowmotionapp.utils.Utils.player
 import com.example.slowmotionapp.viewmodel.SharedViewModel
+import com.google.android.exoplayer2.Player
 import java.io.File
 
 
-class CropSpeedFragment : Fragment() {
+class CropSpeedFragment : Fragment(), MyListener {
 
     private var _binding: FragmentCropSpeedBinding? = null
     private val binding get() = _binding!!
@@ -52,6 +61,7 @@ class CropSpeedFragment : Fragment() {
     private lateinit var videoView: VideoView
     private lateinit var playPause: ImageView
     private lateinit var cropView: CropImageView
+    private lateinit var layoutMovieWrapper: FrameLayout
 
     private var screenWidth = 0
 
@@ -87,6 +97,17 @@ class CropSpeedFragment : Fragment() {
 
     private var cropOutputFilePath: String? = null
 
+    private lateinit var handler: Handler
+    private lateinit var runnable: Runnable
+
+    private var audioPlayer: MediaPlayer? = null
+
+    private var enhanced = false
+
+    companion object {
+        var ePlayerView: EPlayerView? = null
+    }
+
 
     // Get a reference to the shared ViewModel
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -102,6 +123,11 @@ class CropSpeedFragment : Fragment() {
         videoView = view.findViewById(R.id.videoView)
         playPause = view.findViewById(R.id.playPauseButton)
         cropView = view.findViewById(R.id.cropperView)
+
+        layoutMovieWrapper = view.findViewById(R.id.layout_movie_wrapper)
+
+        Utils.setUpSimpleExoPlayer(requireContext())
+        setUoGlPlayerView()
 
         // Observe the video URI LiveData
         sharedViewModel.videoPath.observe(viewLifecycleOwner) { path ->
@@ -157,6 +183,63 @@ class CropSpeedFragment : Fragment() {
             }
         }
 
+        sharedViewModel.musicSet.observe(viewLifecycleOwner) { newValue ->
+            if (newValue) {
+                audioPlayer = MediaPlayer.create(requireContext(), Uri.parse(myMusicUri))
+                musicReady = true
+            }
+        }
+
+        sharedViewModel.audioVolumeLevel.observe(viewLifecycleOwner) {
+            audioPlayer!!.setVolume(it, it)
+        }
+
+        sharedViewModel.videoVolumeLevel.observe(viewLifecycleOwner) {
+            player!!.volume = it
+        }
+
+    }
+
+    private fun setUoGlPlayerView() {
+        ePlayerView =
+            EPlayerView(requireContext())
+        ePlayerView!!.setSimpleExoPlayer(player)
+
+        val videoSize = getVideoSize(requireContext(), Uri.parse(mainCachedFile))
+        if (videoSize != null) {
+            val videoWidth = videoSize.first
+            val videoHeight = videoSize.second
+
+            val layoutParams = RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+
+            // Calculate the desired height based on the video aspect ratio
+            val aspectRatio = videoWidth.toFloat() / videoHeight.toFloat()
+            val desiredHeight = (ePlayerView!!.width / aspectRatio).toInt()
+
+            layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
+            layoutParams.height = desiredHeight
+
+            ePlayerView!!.layoutParams = layoutParams
+        } else {
+            ePlayerView!!.layoutParams =
+                RelativeLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+        }
+
+        ePlayerView!!.layoutParams =
+            RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        layoutMovieWrapper.addView(ePlayerView)
+        ePlayerView!!.onResume()
+        Log.d("EXOPLAYER", "onCreateView: setUoGlPlayerView")
+
     }
 
     override fun onCreateView(
@@ -164,6 +247,8 @@ class CropSpeedFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentCropSpeedBinding.inflate(inflater, container, false)
+
+        Utils.setListener(this)
 
         screenWidth = Utils.getScreenWidth()
 
@@ -250,20 +335,86 @@ class CropSpeedFragment : Fragment() {
             .commit()
 
         binding.enhanceBtn.setOnClickListener {
+            enhanced = true
             binding.enhanceBtn.visibility = View.GONE
             binding.backTextBtn.visibility = View.VISIBLE
+
+            binding.videoView.visibility = View.GONE
+
+            binding.rotateLeft.visibility = View.GONE
+            binding.rotateRight.visibility = View.GONE
+
+            binding.seekBar.visibility = View.GONE
+            binding.playPauseButton.visibility = View.GONE
+
+            binding.seekBar2.visibility = View.VISIBLE
+            binding.playPauseButton2.visibility = View.VISIBLE
+
+            binding.totalDurationTextView.visibility = View.GONE
+
+            Utils.setUpSimpleExoPlayer(requireContext())
+            setUoGlPlayerView()
+
+            binding.videoView.stopPlayback()
+            binding.layoutMovieWrapper.visibility = View.VISIBLE
+
+            player!!.addListener(object : Player.Listener {
+                override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+                    if (playbackState == Player.STATE_READY && playWhenReady) {
+                        // ExoPlayer is ready to play
+                        // You can start playing the media here
+                        binding.seekBar2.max = player!!.duration.toInt()
+
+                        player!!.playWhenReady = true
+
+                        // Initialize handler and runnable
+                        handler = Handler(Looper.getMainLooper())
+                        runnable = Runnable { updateSeekBar() }
+                    }
+                    if (playbackState == Player.STATE_ENDED) {
+                        binding.playPauseButton2.setImageResource(R.drawable.baseline_play_arrow)
+                        player!!.seekTo(0)
+                        player!!.pause()
+                        if (musicReady && audioPlayer!!.isPlaying) {
+                            audioPlayer!!.pause()
+                            audioPlayer!!.seekTo(0)
+                        }
+
+                    }
+                }
+            })
+
+            binding.seekBar2.isEnabled = false
+
+            Log.d("EXOPLAYER", "onCreateView: Exoplayer true")
+
             sharedViewModel.cropViewVisible(false)
             childFragmentManager!!.beginTransaction()
                 .replace(R.id.fragment_container_main, effectMusicFragment as EffectMusicFragment)
                 .commit()
         }
 
+        binding.playPauseButton2.setOnClickListener {
+            if (player!!.isPlaying) {
+                binding.playPauseButton2.setImageResource(R.drawable.baseline_play_arrow)
+                player!!.pause()
+                if (musicReady && audioPlayer!!.isPlaying) {
+                    audioPlayer!!.pause()
+                }
+                // Stop tracking the seek bar progress
+                stopTrackingSeekBar()
+            } else {
+                binding.playPauseButton2.setImageResource(R.drawable.baseline_pause)
+                player!!.play()
+                if (musicReady) {
+                    audioPlayer!!.start()
+                }
+                startTrackingSeekBar()
+            }
+        }
+
         binding.backTextBtn.setOnClickListener {
-            binding.enhanceBtn.visibility = View.VISIBLE
-            binding.backTextBtn.visibility = View.GONE
-            childFragmentManager!!.beginTransaction()
-                .replace(R.id.fragment_container_main, currentChildFragment as MainFragment)
-                .commit()
+            showFullScreenDialog()
         }
 
         binding.playPauseButton.setOnClickListener {
@@ -284,11 +435,32 @@ class CropSpeedFragment : Fragment() {
         }
 
         binding.saveBtn.setOnClickListener {
-            Utils.saveEditedVideo(requireContext(), File(mainCachedFile))
+            if (enhanced) {
+                sharedViewModel.enhanced(true)
+            } else {
+                Utils.saveEditedVideo(requireContext())
+            }
         }
 
-
         return binding.root
+    }
+
+    private fun updateSeekBar() {
+        // Update the seek bar progress with the current position of the player
+        binding.seekBar2.progress = player!!.currentPosition.toInt()
+
+        // Schedule the next update after a certain delay
+        handler.postDelayed(runnable, 1000) // Update every second (adjust as needed)
+    }
+
+    private fun startTrackingSeekBar() {
+        // Start updating the seek bar progress
+        handler.postDelayed(runnable, 0)
+    }
+
+    private fun stopTrackingSeekBar() {
+        // Stop updating the seek bar progress
+        handler.removeCallbacks(runnable)
     }
 
     private fun rotateVideoCommand(rotateValue: Int) {
@@ -345,7 +517,7 @@ class CropSpeedFragment : Fragment() {
                     Toast.makeText(requireContext(), "Success", Toast.LENGTH_SHORT).show()
                     mainCachedFile = str
                     updateVideoUri(str)
-                    when(valueCheck){
+                    when (valueCheck) {
                         1 -> {
                             cropViewDisplay()
                             sharedViewModel.switchFragmentB(true)
@@ -388,6 +560,13 @@ class CropSpeedFragment : Fragment() {
         videoView.setVideoURI(Uri.parse(path))
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // Clean up resources
+        player!!.release()
+    }
+
     private fun videoPlay() {
         binding.videoView.start()
         binding.playPauseButton.setImageResource(R.drawable.baseline_pause)
@@ -397,7 +576,7 @@ class CropSpeedFragment : Fragment() {
         } else {
             binding.totalDurationTextView.text = milliSecondsToTimer(
                 binding.seekBar.progress.toLong()
-            ) + ""
+            )
             updateProgressBar()
         }
     }
@@ -502,8 +681,9 @@ class CropSpeedFragment : Fragment() {
 
         keyCodeR = Integer.valueOf(mediaMetadataRetriever.extractMetadata(18)!!).toInt()
         keyCodeQ = Integer.valueOf(mediaMetadataRetriever.extractMetadata(19)!!).toInt()
-
         keyCodeW = Integer.valueOf(mediaMetadataRetriever.extractMetadata(24)!!).toInt()
+
+
         val layoutParams = binding.cropperView.layoutParams as FrameLayout.LayoutParams
 
         Log.d("KEYCODE", "cropViewDisplay: $keyCodeR $keyCodeQ $keyCodeW $screenWidth")
@@ -548,10 +728,7 @@ class CropSpeedFragment : Fragment() {
             layoutParams.height = screenWidth
         }
         binding.cropperView.layoutParams = layoutParams
-        Log.d(
-            "HEIGHTWIDTH",
-            "cropViewDisplay:width: ${layoutParams.width},height: ${layoutParams.height}"
-        )
+
         binding.cropperView.setImageBitmap(
             Bitmap.createBitmap(
                 layoutParams.width,
@@ -694,5 +871,68 @@ class CropSpeedFragment : Fragment() {
         y = (Edge.BOTTOM.coordinate * ab / ad).toInt()
     }
 
+    private fun showFullScreenDialog() {
+        val dialog = Dialog(requireContext(), R.style.FullScreenDialogStyle)
+        dialog.setContentView(R.layout.back_dialog)
+
+        val btnYes = dialog.findViewById<TextView>(R.id.yesBtn)
+        val btnNo = dialog.findViewById<TextView>(R.id.noBtn)
+
+        btnYes.setOnClickListener {
+            backSave = true
+
+            sharedViewModel.enhanced(true)
+
+            enhanced = false
+
+            dialog.dismiss()
+        }
+
+        btnNo.setOnClickListener {
+            backSave = false
+
+            fragmentSwap()
+
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun fragmentSwap() {
+        enhanced = false
+        binding.enhanceBtn.visibility = View.VISIBLE
+        binding.backTextBtn.visibility = View.GONE
+
+        binding.seekBar.visibility = View.VISIBLE
+        binding.playPauseButton.visibility = View.VISIBLE
+
+        binding.rotateLeft.visibility = View.VISIBLE
+        binding.rotateRight.visibility = View.VISIBLE
+
+        binding.videoView.visibility = View.VISIBLE
+        binding.layoutMovieWrapper.visibility = View.GONE
+
+        ePlayerView!!.onPause()
+        binding.layoutMovieWrapper.removeView(ePlayerView)
+        player!!.release()
+
+        binding.seekBar2.visibility = View.GONE
+        binding.playPauseButton2.visibility = View.GONE
+
+        binding.totalDurationTextView.visibility = View.VISIBLE
+
+        player!!.pause()
+
+        binding.videoView.setVideoURI(Uri.parse(mainCachedFile))
+
+        childFragmentManager!!.beginTransaction()
+            .replace(R.id.fragment_container_main, currentChildFragment as MainFragment)
+            .commit()
+    }
+
+    override fun onUtilityFunctionCalled() {
+        fragmentSwap()
+    }
 
 }
