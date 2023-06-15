@@ -182,7 +182,7 @@ class CropSpeedFragment : Fragment() {
 
         sharedViewModel.musicSet.observe(viewLifecycleOwner) { newValue ->
             if (newValue) {
-                audioPlayer = MediaPlayer.create(requireContext(), myMusicUri)
+                audioPlayer = MediaPlayer.create(requireContext(), Uri.parse(myMusicUri))
                 musicReady = true
             }
         }
@@ -458,8 +458,9 @@ class CropSpeedFragment : Fragment() {
         binding.saveBtn.setOnClickListener {
             if (enhanced) {
                 sharedViewModel.enhanced(true)
+            } else {
+                Utils.saveEditedVideo(requireContext())
             }
-            Utils.saveEditedVideo(requireContext())
         }
         return binding.root
     }

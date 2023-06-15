@@ -50,18 +50,18 @@
         <LinearLayout
             android:layout_width="@dimen/_70sdp"
             android:layout_height="@dimen/_70sdp"
-            android:orientation="horizontal"
-            android:gravity="center">
+            android:gravity="center"
+            android:orientation="horizontal">
 
             <com.airbnb.lottie.LottieAnimationView
                 android:id="@+id/animationView"
                 android:layout_width="@dimen/_60sdp"
                 android:layout_height="@dimen/_60sdp"
-                app:lottie_rawRes="@raw/main_animation"
+                app:layout_constraintBottom_toTopOf="@+id/textView"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:lottie_autoPlay="true"
                 app:lottie_loop="true"
-                app:layout_constraintBottom_toTopOf="@+id/textView"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                app:lottie_rawRes="@raw/main_animation" />
 
             <ImageView
                 android:id="@+id/image_create"
@@ -91,8 +91,8 @@
         android:id="@+id/expanded_buttons_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/_50sdp"
         android:layout_marginEnd="@dimen/_30sdp"
+        android:layout_marginBottom="@dimen/_50sdp"
         android:orientation="horizontal"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
@@ -102,19 +102,19 @@
             android:id="@+id/captureVideoBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/_40sdp"
             android:layout_weight="1"
             android:gravity="center"
-            android:layout_marginEnd="@dimen/_40sdp"
             android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/fredokalight"
-                android:textSize="@dimen/_12sdp"
-                android:text="@string/record"
                 android:layout_marginBottom="@dimen/_4sdp"
-                android:textColor="@color/white" />
+                android:fontFamily="@font/fredokalight"
+                android:text="@string/record"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_12sdp" />
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -138,9 +138,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/_4sdp"
                 android:fontFamily="@font/fredokalight"
-                android:textSize="@dimen/_12sdp"
                 android:text="@string/pick_video"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                android:textSize="@dimen/_12sdp" />
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -182,9 +182,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/fredokaregular"
-                android:textSize="@dimen/_11sdp"
                 android:text="@string/saved"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                android:textSize="@dimen/_11sdp" />
 
 
         </LinearLayout>
@@ -212,9 +212,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/fredokaregular"
-                android:textSize="@dimen/_11sdp"
                 android:text="@string/trim"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                android:textSize="@dimen/_11sdp" />
 
 
         </LinearLayout>
@@ -242,9 +242,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/fredokaregular"
-                android:textSize="@dimen/_11sdp"
                 android:text="@string/crop"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                android:textSize="@dimen/_11sdp" />
 
 
         </LinearLayout>
@@ -255,6 +255,7 @@
             android:background="@drawable/fade_out_gradient" />
 
         <LinearLayout
+            android:id="@+id/btnEffects"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -271,9 +272,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/fredokaregular"
-                android:textSize="@dimen/_11sdp"
-                android:text="@string/movies"
-                android:textColor="@color/white" />
+                android:text="Effect"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_11sdp" />
 
 
         </LinearLayout>

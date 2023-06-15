@@ -23,7 +23,9 @@ import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.ActivityTrimVideoBinding
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.isFromTrim
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.trimFilePath
 import com.example.slowmotionapp.utils.Utils
 import com.example.slowmotionapp.utils.Utils.milliSecondsToTimer
 import java.io.File
@@ -383,9 +385,9 @@ class TrimVideoActivity : AppCompatActivity() {
             when (returnCode) {
                 Config.RETURN_CODE_SUCCESS -> {
                     progressDialog.dismiss()
-                    MainActivity.trimFilePath = str
-                    MainActivity.mainCachedFile =
-                        Utils.createCacheCopy(this, MainActivity.trimFilePath)
+                    trimFilePath = str
+                    mainCachedFile =
+                        Utils.createCacheCopy(this, trimFilePath)
                             .toString()
                     playVideo = str
                     switchActivity(str)

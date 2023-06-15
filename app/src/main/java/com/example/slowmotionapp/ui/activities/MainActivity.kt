@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
 
         var trimOrCrop = false
 
-        lateinit var myMusicUri: Uri
+        lateinit var myMusicUri: String
 
         var myMusic = false
 
@@ -65,6 +65,10 @@ class MainActivity : AppCompatActivity() {
         lateinit var playVideo: String
 
         var filterPosition = 0
+
+        var MusicApplied = false
+
+        var justEffects = false
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -145,6 +149,12 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnCrop.setOnClickListener {
             trimOrCrop = true
+            val myDialogFragment = MyDialogFragment()
+            myDialogFragment.show(supportFragmentManager, "MyDialogFragment")
+        }
+
+        binding.btnEffects.setOnClickListener {
+            justEffects = true
             val myDialogFragment = MyDialogFragment()
             myDialogFragment.show(supportFragmentManager, "MyDialogFragment")
         }

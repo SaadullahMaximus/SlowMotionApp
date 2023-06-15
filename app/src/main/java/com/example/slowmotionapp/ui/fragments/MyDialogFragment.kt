@@ -12,6 +12,7 @@ import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.ui.activities.MainActivity
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.isFromTrim
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.justEffects
 
 class MyDialogFragment : DialogFragment() {
 
@@ -39,6 +40,7 @@ class MyDialogFragment : DialogFragment() {
         val openGallery = view.findViewById<CardView>(R.id.openGallery)
 
         overlayLayout.setOnClickListener {
+            justEffects = false
             // Dismiss the fragment when the overlay layout is clicked
             dismiss()
         }

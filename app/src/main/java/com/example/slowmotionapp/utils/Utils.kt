@@ -368,5 +368,19 @@ object Utils {
         return finalTimerString
     }
 
+    fun getAudioFilePathFromUri(context: Context, uri: Uri): String? {
+        var filePath: String? = null
+        val projection = arrayOf(MediaStore.Audio.Media.DATA)
+        val cursor = context.contentResolver.query(uri, projection, null, null, null)
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val columnIndex = it.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
+                filePath = it.getString(columnIndex)
+            }
+        }
+        return filePath
+    }
+
+
 
 }
