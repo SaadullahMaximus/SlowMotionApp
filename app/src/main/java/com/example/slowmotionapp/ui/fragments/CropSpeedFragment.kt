@@ -1,6 +1,7 @@
 package com.example.slowmotionapp.ui.fragments
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.app.ProgressDialog
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
@@ -22,6 +23,8 @@ import com.edmodo.cropper.cropwindow.edge.Edge
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.databinding.FragmentCropSpeedBinding
 import com.example.slowmotionapp.effects.EPlayerView
+import com.example.slowmotionapp.interfaces.MyListener
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.backSave
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.musicReady
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.myMusicUri
@@ -34,7 +37,7 @@ import com.google.android.exoplayer2.Player
 import java.io.File
 
 
-class CropSpeedFragment : Fragment() {
+class CropSpeedFragment : Fragment(), MyListener {
 
     private var _binding: FragmentCropSpeedBinding? = null
     private val binding get() = _binding!!
@@ -245,6 +248,8 @@ class CropSpeedFragment : Fragment() {
     ): View {
         _binding = FragmentCropSpeedBinding.inflate(inflater, container, false)
 
+        Utils.setListener(this)
+
         screenWidth = Utils.getScreenWidth()
 
         binding.videoView.setVideoURI(Uri.parse(mainCachedFile))
@@ -409,33 +414,7 @@ class CropSpeedFragment : Fragment() {
         }
 
         binding.backTextBtn.setOnClickListener {
-            enhanced = false
-            binding.enhanceBtn.visibility = View.VISIBLE
-            binding.backTextBtn.visibility = View.GONE
-
-            binding.seekBar.visibility = View.VISIBLE
-            binding.playPauseButton.visibility = View.VISIBLE
-
-            binding.rotateLeft.visibility = View.VISIBLE
-            binding.rotateRight.visibility = View.VISIBLE
-
-            binding.videoView.visibility = View.VISIBLE
-            binding.layoutMovieWrapper.visibility = View.GONE
-
-            ePlayerView!!.onPause()
-            binding.layoutMovieWrapper.removeView(ePlayerView)
-            player!!.release()
-
-            binding.seekBar2.visibility = View.GONE
-            binding.playPauseButton2.visibility = View.GONE
-
-            binding.totalDurationTextView.visibility = View.VISIBLE
-
-            player!!.pause()
-
-            childFragmentManager!!.beginTransaction()
-                .replace(R.id.fragment_container_main, currentChildFragment as MainFragment)
-                .commit()
+            showFullScreenDialog()
         }
 
         binding.playPauseButton.setOnClickListener {
@@ -462,6 +441,7 @@ class CropSpeedFragment : Fragment() {
                 Utils.saveEditedVideo(requireContext())
             }
         }
+
         return binding.root
     }
 
@@ -890,4 +870,69 @@ class CropSpeedFragment : Fragment() {
         b = (Edge.TOP.coordinate * ab / ad).toInt()
         y = (Edge.BOTTOM.coordinate * ab / ad).toInt()
     }
+
+    private fun showFullScreenDialog() {
+        val dialog = Dialog(requireContext(), R.style.FullScreenDialogStyle)
+        dialog.setContentView(R.layout.back_dialog)
+
+        val btnYes = dialog.findViewById<TextView>(R.id.yesBtn)
+        val btnNo = dialog.findViewById<TextView>(R.id.noBtn)
+
+        btnYes.setOnClickListener {
+            backSave = true
+
+            sharedViewModel.enhanced(true)
+
+            enhanced = false
+
+            dialog.dismiss()
+        }
+
+        btnNo.setOnClickListener {
+            backSave = false
+
+            fragmentSwap()
+
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun fragmentSwap() {
+        enhanced = false
+        binding.enhanceBtn.visibility = View.VISIBLE
+        binding.backTextBtn.visibility = View.GONE
+
+        binding.seekBar.visibility = View.VISIBLE
+        binding.playPauseButton.visibility = View.VISIBLE
+
+        binding.rotateLeft.visibility = View.VISIBLE
+        binding.rotateRight.visibility = View.VISIBLE
+
+        binding.videoView.visibility = View.VISIBLE
+        binding.layoutMovieWrapper.visibility = View.GONE
+
+        ePlayerView!!.onPause()
+        binding.layoutMovieWrapper.removeView(ePlayerView)
+        player!!.release()
+
+        binding.seekBar2.visibility = View.GONE
+        binding.playPauseButton2.visibility = View.GONE
+
+        binding.totalDurationTextView.visibility = View.VISIBLE
+
+        player!!.pause()
+
+        binding.videoView.setVideoURI(Uri.parse(mainCachedFile))
+
+        childFragmentManager!!.beginTransaction()
+            .replace(R.id.fragment_container_main, currentChildFragment as MainFragment)
+            .commit()
+    }
+
+    override fun onUtilityFunctionCalled() {
+        fragmentSwap()
+    }
+
 }

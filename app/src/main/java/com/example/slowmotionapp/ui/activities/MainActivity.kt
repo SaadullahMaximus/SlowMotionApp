@@ -69,6 +69,8 @@ class MainActivity : AppCompatActivity() {
         var MusicApplied = false
 
         var justEffects = false
+
+        var backSave = false
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

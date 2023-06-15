@@ -13,6 +13,8 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import com.example.slowmotionapp.constants.Constants
+import com.example.slowmotionapp.interfaces.MyListener
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.backSave
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.tempCacheName
@@ -42,6 +44,12 @@ object Utils {
     val croppedDir = File("$filepath/Cropped/")
 
     val editedDir = File("$filepath/Edited/")
+
+    private var listener: MyListener? = null
+
+    fun setListener(listener: MyListener) {
+        this.listener = listener
+    }
 
     fun fetchVideosFromDirectory(dir: File): List<File> {
         val videosList = mutableListOf<File>()
@@ -92,16 +100,6 @@ object Utils {
         return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, croppedDir)
     }
 
-    fun createEffectFile(): File {
-        val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
-            Date()
-        )
-        val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
-
-        if (!editedDir.exists()) editedDir.mkdirs()
-        return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, editedDir)
-    }
-
     fun saveEditedVideo(context: Context) {
         val videoFile = File(mainCachedFile)
         val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
@@ -138,9 +136,17 @@ object Utils {
 
             // Delete the original file from the cache directory
             videoFile.delete()
-            playVideo = destinationFile.toString()
-            context.startActivity(Intent(context, PlayerActivity::class.java))
-            (context as Activity).finish()
+            if (backSave) {
+                mainCachedFile = destinationFile.toString()
+                // Call the listener function
+                listener?.onUtilityFunctionCalled()
+                backSave = false
+            } else {
+                playVideo = destinationFile.toString()
+                context.startActivity(Intent(context, PlayerActivity::class.java))
+                (context as Activity).finish()
+            }
+
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -390,7 +396,6 @@ object Utils {
         }
         return filePath
     }
-
 
 
 }

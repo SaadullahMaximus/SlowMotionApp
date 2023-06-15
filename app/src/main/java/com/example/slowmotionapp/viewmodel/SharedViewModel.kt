@@ -28,7 +28,6 @@ class SharedViewModel : ViewModel() {
 
     val downloadedMusic: MutableLiveData<String> = MutableLiveData()
 
-
     fun setVideoUri(path: String) {
         _videoPath.value = path
     }
