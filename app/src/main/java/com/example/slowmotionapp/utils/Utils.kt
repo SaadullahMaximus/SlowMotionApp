@@ -92,6 +92,16 @@ object Utils {
         return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, croppedDir)
     }
 
+    fun createEffectFile(): File {
+        val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
+            Date()
+        )
+        val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
+
+        if (!editedDir.exists()) editedDir.mkdirs()
+        return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, editedDir)
+    }
+
     fun saveEditedVideo(context: Context) {
         val videoFile = File(mainCachedFile)
         val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(

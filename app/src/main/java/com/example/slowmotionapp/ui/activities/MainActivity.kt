@@ -289,9 +289,6 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        Log.d("LETSGO", "setFilePath: Trim Lets Go RequestCode $requestCode")
-
-
         when (requestCode) {
 
             Constants.VIDEO_GALLERY -> {
@@ -301,16 +298,23 @@ class MainActivity : AppCompatActivity() {
             }
 
             Constants.RECORD_VIDEO -> {
-                if (trimOrCrop) {
-                    val intent = Intent(this, CropActivity::class.java)
+                if (justEffects) {
+                    val intent = Intent(this, EffectActivity::class.java)
                     intent.putExtra("VideoUri", videoUri.toString())
                     intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
                     startActivity(intent)
                 } else {
-                    val intent = Intent(this, TrimVideoActivity::class.java)
-                    intent.putExtra("VideoUri", videoUri.toString())
-                    intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
-                    startActivity(intent)
+                    if (trimOrCrop) {
+                        val intent = Intent(this, CropActivity::class.java)
+                        intent.putExtra("VideoUri", videoUri.toString())
+                        intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
+                        startActivity(intent)
+                    } else {
+                        val intent = Intent(this, TrimVideoActivity::class.java)
+                        intent.putExtra("VideoUri", videoUri.toString())
+                        intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
+                        startActivity(intent)
+                    }
                 }
             }
         }
@@ -318,10 +322,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setFilePath(resultCode: Int, data: Intent, mode: Int) {
-
-        Log.d("LETSGO", "setFilePath: Trim Lets Go ResultCode $resultCode")
-        Log.d("LETSGO", "setFilePath: Trim Lets Go Mode $mode")
-
 
         if (resultCode == RESULT_OK) {
             try {
@@ -347,29 +347,34 @@ class MainActivity : AppCompatActivity() {
 
                         //check if video is more than 4 minutes
                         if (duration < Constants.VIDEO_LIMIT) {
-                            Log.d("LETSGO", "setFilePath: Trim Lets Go Almost extension $extension")
                             //check video format before playing into exoplayer
                             if (extension == Constants.AVI_FORMAT) {
                                 convertAviToMp4() //avi format is not supported in exoplayer
                             } else {
-                                if (trimOrCrop) {
-                                    val intent = Intent(this, CropActivity::class.java)
+                                if (justEffects) {
+                                    val intent = Intent(this, EffectActivity::class.java)
                                     intent.putExtra("VideoUri", filePath)
                                     intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
                                     startActivity(intent)
                                 } else {
-                                    playbackPosition = 0
-                                    currentWindow = 0
-                                    Log.d("LETSGO", "setFilePath: Trim Lets Go")
-                                    val uri = Uri.fromFile(masterVideoFile)
-                                    val intent = Intent(this, TrimVideoActivity::class.java)
-                                    intent.putExtra("VideoUri", filePath)
-                                    intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
-                                    intent.putExtra(
-                                        "VideoDuration",
-                                        Utils.getMediaDuration(this, uri)
-                                    )
-                                    startActivity(intent)
+                                    if (trimOrCrop) {
+                                        val intent = Intent(this, CropActivity::class.java)
+                                        intent.putExtra("VideoUri", filePath)
+                                        intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
+                                        startActivity(intent)
+                                    } else {
+                                        playbackPosition = 0
+                                        currentWindow = 0
+                                        val uri = Uri.fromFile(masterVideoFile)
+                                        val intent = Intent(this, TrimVideoActivity::class.java)
+                                        intent.putExtra("VideoUri", filePath)
+                                        intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
+                                        intent.putExtra(
+                                            "VideoDuration",
+                                            Utils.getMediaDuration(this, uri)
+                                        )
+                                        startActivity(intent)
+                                    }
                                 }
                             }
                         } else {
@@ -378,21 +383,29 @@ class MainActivity : AppCompatActivity() {
                                 getString(R.string.error_select_smaller_video),
                                 Toast.LENGTH_SHORT
                             ).show()
-
-                            if (trimOrCrop) {
-                                val intent = Intent(this, CropActivity::class.java)
+                            if (justEffects) {
+                                val intent = Intent(this, EffectActivity::class.java)
                                 intent.putExtra("VideoUri", filePath)
                                 intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
                                 startActivity(intent)
                             } else {
 
-                                isLargeVideo = true
-                                Log.d("LETSGO", "setFilePath: Trim Lets Go")
-                                val uri = Uri.fromFile(masterVideoFile)
-                                val intent = Intent(this, TrimVideoActivity::class.java)
-                                intent.putExtra("VideoPath", filePath)
-                                intent.putExtra("VideoDuration", Utils.getMediaDuration(this, uri))
-                                startActivityForResult(intent, Constants.MAIN_VIDEO_TRIM)
+                                if (trimOrCrop) {
+                                    val intent = Intent(this, CropActivity::class.java)
+                                    intent.putExtra("VideoUri", filePath)
+                                    intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
+                                    startActivity(intent)
+                                } else {
+                                    isLargeVideo = true
+                                    val uri = Uri.fromFile(masterVideoFile)
+                                    val intent = Intent(this, TrimVideoActivity::class.java)
+                                    intent.putExtra("VideoPath", filePath)
+                                    intent.putExtra(
+                                        "VideoDuration",
+                                        Utils.getMediaDuration(this, uri)
+                                    )
+                                    startActivityForResult(intent, Constants.MAIN_VIDEO_TRIM)
+                                }
                             }
                         }
                     }
