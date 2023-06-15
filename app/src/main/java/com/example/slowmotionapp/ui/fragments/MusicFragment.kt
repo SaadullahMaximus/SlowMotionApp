@@ -22,6 +22,8 @@ class MusicFragment : Fragment() {
     private var _binding: FragmentMusicBinding? = null
     private val binding get() = _binding!!
 
+    private var currentMediaPlayer: MediaPlayer? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -30,16 +32,33 @@ class MusicFragment : Fragment() {
 
         _binding = FragmentMusicBinding.inflate(inflater, container, false)
 
-        mp3StoreAdapter = Mp3StoreAdapter(emptyList()) { link ->
-            // Start playing the music using the provided link
-            // You can use the MediaPlayer or any other audio playback library of your choice
-            // Example with MediaPlayer:
+        mp3StoreAdapter = Mp3StoreAdapter(emptyList(), { link, position ->
             val mediaPlayer = MediaPlayer()
             mediaPlayer.setDataSource(link)
-            mediaPlayer.prepare()
-            mediaPlayer.start()
-        }
+            mediaPlayer.prepareAsync()
 
+            mp3StoreAdapter.notifyItemChanged(position)
+
+            mediaPlayer.setOnPreparedListener {
+                mediaPlayer.start()
+                mp3StoreAdapter.notifyItemChanged(position)
+                mp3StoreAdapter.dialogDismiss()
+            }
+            mediaPlayer.setOnCompletionListener {
+                mediaPlayer.seekTo(0)
+                mediaPlayer.start()
+            }
+
+            // Stop any other media player that might be playing
+            val previousMediaPlayer = mp3StoreAdapter.getCurrentMediaPlayer()
+            if (previousMediaPlayer != null && previousMediaPlayer.isPlaying) {
+                previousMediaPlayer.stop()
+            }
+
+            mp3StoreAdapter.setCurrentMediaPlayer(mediaPlayer)
+        }, {
+
+        })
 
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.adapter = mp3StoreAdapter
