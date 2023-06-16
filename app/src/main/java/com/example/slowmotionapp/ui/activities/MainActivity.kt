@@ -152,6 +152,24 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    override fun onResume() {
+        super.onResume()
+        collapseButtons()
+        // Create the ObjectAnimator for rotation animation
+        val animator = ObjectAnimator.ofFloat(binding.imageCreate, View.ROTATION, 0f, -180f)
+        animator.duration = 100 // Animation duration in milliseconds
+
+        // Start the animation
+        animator.start()
+
+        binding.imageCreate.visibility = View.GONE
+        binding.animationView.visibility = View.VISIBLE
+
+        // Start the animation from the beginning
+        binding.animationView.progress = 0f
+        binding.animationView.playAnimation()
+    }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -169,8 +187,9 @@ class MainActivity : AppCompatActivity() {
                 Constants.VIDEO_GALLERY -> {
                     //call the gallery intent
                     Utils.refreshGalleryAlone(this)
-                    val i = Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
-                    i.type = "video/*"
+                    val i = Intent(Intent.ACTION_PICK)
+                    i.setDataAndType(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, "video/*")
+
                     i.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("video/*"))
                     permissionAllowed = true
                     startActivityForResult(i, Constants.VIDEO_GALLERY)
@@ -216,7 +235,6 @@ class MainActivity : AppCompatActivity() {
         }
         dialog.show()
     }
-
 
     fun startCamera() {
         requestPermissions(Constants.PERMISSION_CAMERA, Constants.RECORD_VIDEO)
@@ -398,5 +416,4 @@ class MainActivity : AppCompatActivity() {
     private fun convertAviToMp4() {
 
     }
-
 }

@@ -19,13 +19,26 @@ class SavedEditedFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val videoAdapter =
-            VideoAdapter(requireContext(), editedFiles)
-
         _binding = FragmentSavedEditedBinding.inflate(inflater, container, false)
-        binding.recyclerView.apply {
-            layoutManager = GridLayoutManager(requireContext(), 3)
-            adapter = videoAdapter
+
+        if (editedFiles.isNotEmpty()) {
+
+            binding.recyclerView.visibility = View.VISIBLE
+
+            binding.lottieAnimationView.visibility = View.GONE
+            binding.btnCreateNew.visibility = View.GONE
+            binding.title.visibility = View.GONE
+
+            val videoAdapter = VideoAdapter(requireContext(), editedFiles)
+
+            binding.recyclerView.apply {
+                layoutManager = GridLayoutManager(requireContext(), 3)
+                adapter = videoAdapter
+            }
+        }
+
+        binding.btnCreateNew.setOnClickListener {
+
         }
 
         return binding.root

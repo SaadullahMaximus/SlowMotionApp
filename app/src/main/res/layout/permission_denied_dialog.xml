@@ -40,7 +40,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/fredokaregular"
-                android:text="Permissions"
+                android:text="@string/permissions"
                 android:textColor="@color/white"
                 android:textSize="@dimen/_14sdp" />
 
@@ -70,7 +70,7 @@
                     android:fontFamily="@font/fredokaregular"
                     android:gravity="center"
                     android:padding="@dimen/_4sdp"
-                    android:text="Not now"
+                    android:text="@string/not_now"
                     android:textColor="@color/white"
                     android:textSize="@dimen/_14sdp" />
 

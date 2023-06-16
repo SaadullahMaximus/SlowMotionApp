@@ -21,11 +21,24 @@ class SavedTrimFragment : Fragment() {
     ): View {
         _binding = FragmentSavedTrimBinding.inflate(inflater, container, false)
 
-        val videoAdapter = VideoAdapter(requireContext(), trimmedFiles)
+        if (trimmedFiles.isNotEmpty()) {
 
-        binding.recyclerView.apply {
-            layoutManager = GridLayoutManager(requireContext(), 3)
-            adapter = videoAdapter
+            binding.recyclerView.visibility = View.VISIBLE
+
+            binding.lottieAnimationView.visibility = View.GONE
+            binding.btnCreateNew.visibility = View.GONE
+            binding.title.visibility = View.GONE
+
+            val videoAdapter = VideoAdapter(requireContext(), trimmedFiles)
+
+            binding.recyclerView.apply {
+                layoutManager = GridLayoutManager(requireContext(), 3)
+                adapter = videoAdapter
+            }
+        }
+
+        binding.btnCreateNew.setOnClickListener {
+
         }
 
         return binding.root

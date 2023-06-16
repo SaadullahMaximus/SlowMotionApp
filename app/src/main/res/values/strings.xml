@@ -36,6 +36,10 @@
     <string name="_1_1">1:1</string>
     <string name="_16_9">16:9</string>
     <string name="ok">OK</string>
+    <string name="permissions">Permissions</string>
+    <string name="not_now">Not now</string>
+    <string name="my_text">My studio is empty\nLet\'s create your magical videos</string>
+    <string name="my_text2">Ooops\!\!\!\nYour studio is empty</string>
 
-
+    <string name="create_new">Create New</string>
 </resources>
