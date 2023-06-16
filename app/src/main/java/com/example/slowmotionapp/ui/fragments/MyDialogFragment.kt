@@ -52,7 +52,7 @@ class MyDialogFragment : DialogFragment() {
         }
 
         openGallery.setOnClickListener {
-            (activity as? MainActivity)?.checkPermissionGallery(Constants.PERMISSION_GALLERY)
+            (activity as? MainActivity)?.checkPermissionGallery()
             isFromTrim = true
             dismiss()
         }

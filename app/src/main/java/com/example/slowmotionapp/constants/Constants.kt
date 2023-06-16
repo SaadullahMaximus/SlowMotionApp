@@ -43,6 +43,7 @@ class Constants {
 
         const val TYPE = "TYPE"
 
+        const val GALLERY_PERMISSION_CODE = 100
         const val VIDEO_GALLERY = 101
         const val RECORD_VIDEO = 102
         const val AUDIO_GALLERY = 103

@@ -38,7 +38,8 @@
     <!-- styles.xml -->
     <style name="FullScreenDialogStyle" parent="Theme.AppCompat.Dialog">
         <item name="android:windowIsFloating">false</item>
-        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 
 

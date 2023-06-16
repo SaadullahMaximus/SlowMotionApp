@@ -3,10 +3,8 @@ package com.example.slowmotionapp.ui.activities
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
-import android.app.Activity
-import android.content.Context
+import android.app.Dialog
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
@@ -16,10 +14,9 @@ import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
@@ -34,8 +31,6 @@ class MainActivity : AppCompatActivity() {
     private var isExpanded = false
     private var videoFile: File? = null
     private var videoUri: Uri? = null
-    private var permissionList: ArrayList<String> = ArrayList()
-    private lateinit var preferences: SharedPreferences
     private var masterVideoFile: File? = null
     private var playbackPosition: Long = 0
     private var currentWindow: Int = 0
@@ -70,6 +65,10 @@ class MainActivity : AppCompatActivity() {
         var justEffects = false
 
         var backSave = false
+
+        var permissionAllowed = false
+
+        var cameraPermission = false
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,16 +77,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         Utils.createCacheTempFile(this)
-
-        preferences = this.getSharedPreferences("fetch_permission", Context.MODE_PRIVATE)
-
-        requestPermissions(
-            arrayOf(
-                "android.permission.WRITE_EXTERNAL_STORAGE",
-                "android.permission.READ_MEDIA_VIDEO",
-                "android.permission.READ_MEDIA_AUDIO"
-            ), 101
-        )
 
         binding.animationView.setOnClickListener {
             binding.imageCreate.visibility = View.VISIBLE
@@ -106,7 +95,6 @@ class MainActivity : AppCompatActivity() {
             }, 100)
 
         }
-
 
         binding.imageCreate.setOnClickListener {
             collapseButtons()
@@ -135,11 +123,13 @@ class MainActivity : AppCompatActivity() {
 
         binding.selectVideoBtn.setOnClickListener {
             isFromTrim = false
-            checkPermissionGallery(Constants.PERMISSION_GALLERY)
+            checkPermissionGallery()
         }
 
         binding.btnSaved.setOnClickListener {
-            startActivity(Intent(this, SavedActivity::class.java))
+            requestPermissions(
+                Constants.PERMISSION_GALLERY, 100
+            )
         }
 
         binding.btnTrim.setOnClickListener {
@@ -162,10 +152,214 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun checkPermissionGallery(permissionGallery: Array<String>) {
-        openGallery(permissionGallery)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        val allPermissionsGranted = grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+
+        if (allPermissionsGranted) {
+            when (requestCode) {
+                Constants.GALLERY_PERMISSION_CODE -> {
+                    startActivity(Intent(this, SavedActivity::class.java))
+                }
+                Constants.VIDEO_GALLERY -> {
+                    //call the gallery intent
+                    Utils.refreshGalleryAlone(this)
+                    val i = Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
+                    i.type = "video/*"
+                    i.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("video/*"))
+                    permissionAllowed = true
+                    startActivityForResult(i, Constants.VIDEO_GALLERY)
+                }
+                Constants.RECORD_VIDEO -> {
+                    val cameraIntent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
+                    videoFile = Utils.createVideoFile()
+                    videoUri = FileProvider.getUriForFile(
+                        this,
+                        Constants.provider, videoFile!!
+                    )
+                    cameraIntent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 240) //4 minutes
+                    cameraIntent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1)
+                    cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoUri)
+                    cameraPermission = true
+                    startActivityForResult(cameraIntent, Constants.RECORD_VIDEO)
+                }
+            }
+        } else {
+            showPermissionDeniedMessage(requestCode)
+        }
     }
 
+    private fun showPermissionDeniedMessage(requestCode: Int) {
+        val dialog = Dialog(this, R.style.FullScreenDialogStyle)
+        dialog.setContentView(R.layout.permission_denied_dialog)
+
+        val btnYes = dialog.findViewById<TextView>(R.id.yesBtn)
+        val btnNo = dialog.findViewById<TextView>(R.id.noBtn)
+
+        btnYes.setOnClickListener {
+            val intent = Intent()
+            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+            val uri = Uri.fromParts("package", this.applicationContext.packageName, null)
+            intent.data = uri
+            Log.d("PERMISSIONS", "showPermissionDeniedMessage: Yes Click $requestCode")
+            startActivityForResult(intent, requestCode)
+            dialog.dismiss()
+        }
+
+        btnNo.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
+
+    fun startCamera() {
+        requestPermissions(Constants.PERMISSION_CAMERA, Constants.RECORD_VIDEO)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        when (requestCode) {
+
+            Constants.VIDEO_GALLERY -> {
+                if (permissionAllowed) {
+                    data?.let {
+                        setFilePath(it)
+                    }
+                } else {
+                    requestPermissions(
+                        Constants.PERMISSION_GALLERY, Constants.VIDEO_GALLERY
+                    )
+                }
+
+            }
+
+            Constants.RECORD_VIDEO -> {
+                if (cameraPermission) {
+                    if (justEffects) {
+                        val intent = Intent(this, EffectActivity::class.java)
+                        intent.putExtra("VideoUri", videoUri.toString())
+                        intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
+                        startActivity(intent)
+                    } else {
+                        if (trimOrCrop) {
+                            val intent = Intent(this, CropActivity::class.java)
+                            intent.putExtra("VideoUri", videoUri.toString())
+                            intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
+                            startActivity(intent)
+                        } else {
+                            val intent = Intent(this, TrimVideoActivity::class.java)
+                            intent.putExtra("VideoUri", videoUri.toString())
+                            intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
+                            startActivity(intent)
+                        }
+                    }
+                } else {
+                    requestPermissions(Constants.PERMISSION_CAMERA, Constants.RECORD_VIDEO)
+                }
+            }
+
+            Constants.GALLERY_PERMISSION_CODE -> {
+                startActivity(Intent(this, SavedActivity::class.java))
+            }
+        }
+
+    }
+
+    private fun setFilePath(data: Intent) {
+
+        try {
+            val selectedImage = data.data
+            val filePathColumn = arrayOf(MediaStore.MediaColumns.DATA)
+            val cursor = this.contentResolver
+                .query(selectedImage!!, filePathColumn, null, null, null)
+            if (cursor != null) {
+                cursor.moveToFirst()
+                val columnIndex = cursor
+                    .getColumnIndex(filePathColumn[0])
+                val filePath = cursor.getString(columnIndex)
+                cursor.close()
+                masterVideoFile = File(filePath)
+
+                val extension = Utils.getFileExtension(masterVideoFile!!.absolutePath)
+
+                val timeInMillis = Utils.getVideoDuration(this, masterVideoFile!!)
+                val duration = Utils.convertDurationInMin(timeInMillis)
+
+                //check if video is more than 4 minutes
+                if (duration < Constants.VIDEO_LIMIT) {
+                    //check video format before playing into exoplayer
+                    if (extension == Constants.AVI_FORMAT) {
+                        convertAviToMp4() //avi format is not supported in exoplayer
+                    } else {
+                        if (justEffects) {
+                            val intent = Intent(this, EffectActivity::class.java)
+                            intent.putExtra("VideoUri", filePath)
+                            intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
+                            startActivity(intent)
+                        } else {
+                            if (trimOrCrop) {
+                                val intent = Intent(this, CropActivity::class.java)
+                                intent.putExtra("VideoUri", filePath)
+                                intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
+                                startActivity(intent)
+                            } else {
+                                playbackPosition = 0
+                                currentWindow = 0
+                                val uri = Uri.fromFile(masterVideoFile)
+                                val intent = Intent(this, TrimVideoActivity::class.java)
+                                intent.putExtra("VideoUri", filePath)
+                                intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
+                                intent.putExtra(
+                                    "VideoDuration",
+                                    Utils.getMediaDuration(this, uri)
+                                )
+                                startActivity(intent)
+                            }
+                        }
+                    }
+                } else {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.error_select_smaller_video),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    if (justEffects) {
+                        val intent = Intent(this, EffectActivity::class.java)
+                        intent.putExtra("VideoUri", filePath)
+                        intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
+                        startActivity(intent)
+                    } else {
+
+                        if (trimOrCrop) {
+                            val intent = Intent(this, CropActivity::class.java)
+                            intent.putExtra("VideoUri", filePath)
+                            intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
+                            startActivity(intent)
+                        } else {
+                            isLargeVideo = true
+                            val uri = Uri.fromFile(masterVideoFile)
+                            val intent = Intent(this, TrimVideoActivity::class.java)
+                            intent.putExtra("VideoPath", filePath)
+                            intent.putExtra(
+                                "VideoDuration",
+                                Utils.getMediaDuration(this, uri)
+                            )
+                            startActivityForResult(intent, Constants.MAIN_VIDEO_TRIM)
+                        }
+                    }
+                }
+            }
+        } catch (_: Exception) {
+
+        }
+    }
 
     private fun expandButtons() {
         isExpanded = true
@@ -191,233 +385,18 @@ class MainActivity : AppCompatActivity() {
             .start()
     }
 
-
-    fun startCamera() {
-        val blockedPermission = checkHasPermission(this, Constants.PERMISSION_CAMERA)
-        if (blockedPermission != null && blockedPermission.size > 0) {
-            Log.d("Maximus", "startCamera: If $blockedPermission")
-            val isBlocked = isPermissionBlocked(this, blockedPermission)
-            if (isBlocked) {
-                callPermissionSettings()
-            } else {
-                requestPermissions(Constants.PERMISSION_CAMERA, Constants.RECORD_VIDEO)
-            }
-        } else {
-            Log.d("Maximus", "startCamera: else")
-
-            val cameraIntent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
-            videoFile = Utils.createVideoFile()
-            Log.v("Maximus", "videoPath1: " + videoFile!!.absolutePath)
-            videoUri = FileProvider.getUriForFile(
-                this,
-                Constants.provider, videoFile!!
-            )
-            cameraIntent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 240) //4 minutes
-            cameraIntent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1)
-            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoUri)
-            startActivityForResult(cameraIntent, Constants.RECORD_VIDEO)
-        }
+    private fun openGallery() {
+        requestPermissions(
+            Constants.PERMISSION_GALLERY, Constants.VIDEO_GALLERY
+        )
     }
 
-    private fun openGallery(permissionGallery: Array<String>) {
-        for (permission in permissionGallery) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this as Activity, permission)) {
-                Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show()
-                break
-            } else {
-                if (ActivityCompat.checkSelfPermission(
-                        this as Activity,
-                        permission
-                    ) == PackageManager.PERMISSION_GRANTED
-                ) {
-                    //call the gallery intent
-                    Utils.refreshGalleryAlone(this)
-                    val i = Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
-                    i.type = "video/*"
-                    i.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("video/*"))
-                    startActivityForResult(i, Constants.VIDEO_GALLERY)
-                } else {
-                    callPermissionSettings()
-                }
-            }
-        }
-    }
-
-
-    private var isFirstTimePermission: Boolean
-        get() = preferences.getBoolean("isFirstTimePermission", false)
-        set(isFirstTime) = preferences.edit().putBoolean("isFirstTimePermission", isFirstTime)
-            .apply()
-
-    private fun checkHasPermission(
-        context: Activity?,
-        permissions: Array<String>?
-    ): ArrayList<String> {
-        permissionList = ArrayList()
-        if (context != null && permissions != null) {
-            for (permission in permissions) {
-                if (ContextCompat.checkSelfPermission(
-                        context,
-                        permission
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    permissionList.add(permission)
-                }
-            }
-        }
-        return permissionList
-    }
-
-    private fun isPermissionBlocked(context: Activity?, permissions: ArrayList<String>?): Boolean {
-        if (context != null && permissions != null && isFirstTimePermission) {
-            for (permission in permissions) {
-                if (!ActivityCompat.shouldShowRequestPermissionRationale(context, permission)) {
-                    return true
-                }
-            }
-        }
-        return false
-    }
-
-    private fun callPermissionSettings() {
-        val intent = Intent()
-        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-        val uri = Uri.fromParts("package", this.applicationContext.packageName, null)
-        intent.data = uri
-        startActivityForResult(intent, 300)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        when (requestCode) {
-
-            Constants.VIDEO_GALLERY -> {
-                data?.let {
-                    setFilePath(resultCode, it, Constants.VIDEO_GALLERY)
-                }
-            }
-
-            Constants.RECORD_VIDEO -> {
-                if (justEffects) {
-                    val intent = Intent(this, EffectActivity::class.java)
-                    intent.putExtra("VideoUri", videoUri.toString())
-                    intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
-                    startActivity(intent)
-                } else {
-                    if (trimOrCrop) {
-                        val intent = Intent(this, CropActivity::class.java)
-                        intent.putExtra("VideoUri", videoUri.toString())
-                        intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
-                        startActivity(intent)
-                    } else {
-                        val intent = Intent(this, TrimVideoActivity::class.java)
-                        intent.putExtra("VideoUri", videoUri.toString())
-                        intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
-                        startActivity(intent)
-                    }
-                }
-            }
-        }
-
-    }
-
-    private fun setFilePath(resultCode: Int, data: Intent, mode: Int) {
-
-        if (resultCode == RESULT_OK) {
-            try {
-                val selectedImage = data.data
-                Log.e("selectedImage==>", "" + selectedImage)
-                val filePathColumn = arrayOf(MediaStore.MediaColumns.DATA)
-                val cursor = this.contentResolver
-                    .query(selectedImage!!, filePathColumn, null, null, null)
-                if (cursor != null) {
-                    cursor.moveToFirst()
-                    val columnIndex = cursor
-                        .getColumnIndex(filePathColumn[0])
-                    val filePath = cursor.getString(columnIndex)
-                    cursor.close()
-                    if (mode == Constants.VIDEO_GALLERY) {
-                        Log.v("GalleryVideo", "filePath: $filePath")
-                        masterVideoFile = File(filePath)
-
-                        val extension = Utils.getFileExtension(masterVideoFile!!.absolutePath)
-
-                        val timeInMillis = Utils.getVideoDuration(this, masterVideoFile!!)
-                        val duration = Utils.convertDurationInMin(timeInMillis)
-
-                        //check if video is more than 4 minutes
-                        if (duration < Constants.VIDEO_LIMIT) {
-                            //check video format before playing into exoplayer
-                            if (extension == Constants.AVI_FORMAT) {
-                                convertAviToMp4() //avi format is not supported in exoplayer
-                            } else {
-                                if (justEffects) {
-                                    val intent = Intent(this, EffectActivity::class.java)
-                                    intent.putExtra("VideoUri", filePath)
-                                    intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
-                                    startActivity(intent)
-                                } else {
-                                    if (trimOrCrop) {
-                                        val intent = Intent(this, CropActivity::class.java)
-                                        intent.putExtra("VideoUri", filePath)
-                                        intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
-                                        startActivity(intent)
-                                    } else {
-                                        playbackPosition = 0
-                                        currentWindow = 0
-                                        val uri = Uri.fromFile(masterVideoFile)
-                                        val intent = Intent(this, TrimVideoActivity::class.java)
-                                        intent.putExtra("VideoUri", filePath)
-                                        intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
-                                        intent.putExtra(
-                                            "VideoDuration",
-                                            Utils.getMediaDuration(this, uri)
-                                        )
-                                        startActivity(intent)
-                                    }
-                                }
-                            }
-                        } else {
-                            Toast.makeText(
-                                this,
-                                getString(R.string.error_select_smaller_video),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            if (justEffects) {
-                                val intent = Intent(this, EffectActivity::class.java)
-                                intent.putExtra("VideoUri", filePath)
-                                intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
-                                startActivity(intent)
-                            } else {
-
-                                if (trimOrCrop) {
-                                    val intent = Intent(this, CropActivity::class.java)
-                                    intent.putExtra("VideoUri", filePath)
-                                    intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
-                                    startActivity(intent)
-                                } else {
-                                    isLargeVideo = true
-                                    val uri = Uri.fromFile(masterVideoFile)
-                                    val intent = Intent(this, TrimVideoActivity::class.java)
-                                    intent.putExtra("VideoPath", filePath)
-                                    intent.putExtra(
-                                        "VideoDuration",
-                                        Utils.getMediaDuration(this, uri)
-                                    )
-                                    startActivityForResult(intent, Constants.MAIN_VIDEO_TRIM)
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (_: Exception) {
-
-            }
-        }
+    fun checkPermissionGallery() {
+        openGallery()
     }
 
     private fun convertAviToMp4() {
 
     }
+
 }
