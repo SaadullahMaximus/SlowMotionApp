@@ -8,8 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.slowmotionapp.adapters.VideoAdapter
 import com.example.slowmotionapp.databinding.FragmentSavedEditedBinding
-import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.croppedFiles
-import com.example.slowmotionapp.utils.Utils
+import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.editedFiles
 
 class SavedEditedFragment : Fragment() {
 
@@ -21,7 +20,7 @@ class SavedEditedFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val videoAdapter =
-            VideoAdapter(requireContext(), croppedFiles)
+            VideoAdapter(requireContext(), editedFiles)
 
         _binding = FragmentSavedEditedBinding.inflate(inflater, container, false)
         binding.recyclerView.apply {

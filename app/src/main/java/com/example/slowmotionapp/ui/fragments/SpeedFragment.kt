@@ -34,18 +34,14 @@ class SpeedFragment : Fragment() {
     private var videoPlayerState: VideoPlayerState = VideoPlayerState()
 
     private lateinit var sharedViewModel: SharedViewModel
-
-    // Get a reference to the shared ViewModel
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        // Inflate the layout for this fragment
         _binding = FragmentSpeedBinding.inflate(inflater, container, false)
 
         videoPlayerState.setFilename(mainCachedFile)
@@ -227,8 +223,7 @@ class SpeedFragment : Fragment() {
 
     private fun executeFFMPEG(strArr: Array<String>, str: String) {
         sharedViewModel.pauseVideo(true)
-        val progressDialog =
-            ProgressDialog(requireContext(), R.style.CustomDialog)
+        val progressDialog = ProgressDialog(requireContext(), R.style.CustomDialog)
         progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
         progressDialog.isIndeterminate = true
         progressDialog.setCancelable(false)
@@ -239,8 +234,7 @@ class SpeedFragment : Fragment() {
             ffmpegCommand
         ) { _, returnCode ->
             Log.d(
-                "TAG",
-                String.format("FFMPEG process exited with rc %d.", returnCode)
+                "TAG", String.format("FFMPEG process exited with rc %d.", returnCode)
             )
             Log.d("TAG", "FFMPEG process output:")
             Config.printLastCommandOutput(Log.INFO)
@@ -258,9 +252,7 @@ class SpeedFragment : Fragment() {
                         File(str).delete()
                         Utils.deleteFromGallery(str, requireContext())
                         Toast.makeText(
-                            requireContext(),
-                            "Error Creating Video",
-                            Toast.LENGTH_LONG
+                            requireContext(), "Error Creating Video", Toast.LENGTH_LONG
                         ).show()
                     } catch (th: Throwable) {
                         th.printStackTrace()
@@ -272,9 +264,7 @@ class SpeedFragment : Fragment() {
                         File(str).delete()
                         Utils.deleteFromGallery(str, requireContext())
                         Toast.makeText(
-                            requireContext(),
-                            "Error Creating Video",
-                            Toast.LENGTH_LONG
+                            requireContext(), "Error Creating Video", Toast.LENGTH_LONG
                         ).show()
                     } catch (th: Throwable) {
                         th.printStackTrace()

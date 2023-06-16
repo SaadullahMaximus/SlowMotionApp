@@ -32,6 +32,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/_20sdp"
+        android:contentDescription="@string/content_settings"
         android:src="@drawable/setting_ic"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -121,7 +122,6 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/capture_ic" />
 
-
         </LinearLayout>
 
         <LinearLayout
@@ -173,8 +173,8 @@
             android:orientation="vertical">
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/_17sdp"
+                android:layout_height="@dimen/_17sdp"
                 android:layout_marginBottom="@dimen/_5sdp"
                 android:src="@drawable/saved_ic" />
 
@@ -203,8 +203,8 @@
             android:orientation="vertical">
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/_17sdp"
+                android:layout_height="@dimen/_17sdp"
                 android:layout_marginBottom="@dimen/_5sdp"
                 android:src="@drawable/trim_ic" />
 
@@ -233,8 +233,8 @@
             android:orientation="vertical">
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/_17sdp"
+                android:layout_height="@dimen/_17sdp"
                 android:layout_marginBottom="@dimen/_5sdp"
                 android:src="@drawable/crop_ic" />
 
@@ -245,8 +245,6 @@
                 android:text="@string/crop"
                 android:textColor="@color/white"
                 android:textSize="@dimen/_11sdp" />
-
-
         </LinearLayout>
 
         <View
@@ -263,8 +261,8 @@
             android:orientation="vertical">
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/_17sdp"
+                android:layout_height="@dimen/_17sdp"
                 android:layout_marginBottom="@dimen/_5sdp"
                 android:src="@drawable/movies_ic" />
 
@@ -272,10 +270,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/fredokaregular"
-                android:text="Effect"
+                android:text="@string/effect"
                 android:textColor="@color/white"
                 android:textSize="@dimen/_11sdp" />
-
 
         </LinearLayout>
 

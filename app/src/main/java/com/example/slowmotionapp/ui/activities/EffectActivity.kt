@@ -1,11 +1,15 @@
 package com.example.slowmotionapp.ui.activities
 
+import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.ViewGroup
 import android.widget.RelativeLayout
+import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,6 +24,8 @@ import com.example.slowmotionapp.effects.FilterAdapter
 import com.example.slowmotionapp.effects.FilterType
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.utils.Utils
+import com.example.slowmotionapp.utils.Utils.player
+import com.google.android.exoplayer2.Player
 
 class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
 
@@ -30,6 +36,17 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
 
     private lateinit var adapter: FilterAdapter
     private lateinit var filterTypes: List<FilterType>
+
+    private val mHandler = Handler(Looper.getMainLooper())
+    private lateinit var handler: Handler
+    private lateinit var runnable: Runnable
+
+    private var mStartPosition = 0
+    private var mDuration = 0
+    private var mEndPosition = 0
+    private var mTimeVideo = 0
+    private val mMaxDuration = 120
+    private var mDurationWithoutEdit = 0
 
     companion object {
         var exoPLayerView: EPlayerView? = null
@@ -62,10 +79,92 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
         adapter = FilterAdapter(filterTypes, this, lifecycleScope)
         binding.recyclerView.adapter = adapter
 
+        player!!.addListener(object : Player.Listener {
+            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+                if (playbackState == Player.STATE_READY && playWhenReady) {
+                    // ExoPlayer is ready to play
+                    // You can start playing the media here
+                    binding.seekBar.max = player!!.duration.toInt()
+
+                    player!!.playWhenReady = true
+
+                    // Initialize handler and runnable
+                    handler = Handler(Looper.getMainLooper())
+                    runnable = Runnable { updateSeekBar() }
+                }
+                if (playbackState == Player.STATE_ENDED) {
+                    binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
+                    player!!.seekTo(0)
+                    player!!.pause()
+                }
+            }
+        })
+
+        binding.seekBar.isEnabled = false
+
+        binding.playPauseButton.setOnClickListener {
+            if (player!!.isPlaying) {
+                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
+                player!!.pause()
+                // Stop tracking the seek bar progress
+                stopTrackingSeekBar()
+            } else {
+                binding.playPauseButton.setImageResource(R.drawable.baseline_pause)
+                player!!.play()
+                startTrackingSeekBar()
+            }
+        }
+
+
         binding.saveBtn.setOnClickListener {
             saveVideoWithFilter()
         }
 
+        binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {}
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+                mHandler.removeCallbacks(mUpdateTimeTask)
+                binding.seekBar.max = mTimeVideo * 1000
+                binding.seekBar.progress = 0
+                player?.seekTo((mStartPosition * 1000).toLong())
+                player?.pause()
+                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                mHandler.removeCallbacks(mUpdateTimeTask)
+
+                player?.seekTo((mStartPosition * 1000 + seekBar.progress).toLong())
+            }
+        })
+
+        binding.playPauseButton.setOnClickListener {
+            if (player?.isPlaying!!) {
+                player?.pause()
+                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
+            } else {
+                videoPlay()
+            }
+        }
+
+    }
+
+    private val mUpdateTimeTask: Runnable = object : Runnable {
+        @SuppressLint("SetTextI18n")
+        override fun run() {
+            if (binding.seekBar.progress >= binding.seekBar.max) {
+                binding.seekBar.progress =
+                    (player?.currentPosition!! - mStartPosition * 1000).toInt()
+                player?.seekTo((mStartPosition * 1000).toLong())
+                player?.pause()
+                binding.seekBar.progress = 0
+                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
+            } else {
+                binding.seekBar.progress =
+                    (player?.currentPosition?.minus(mStartPosition * 1000))!!.toInt()
+                mHandler.postDelayed(this, 100)
+            }
+        }
     }
 
     private fun saveVideoWithFilter() {
@@ -116,11 +215,20 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
         }
     }
 
+    private fun videoPlay() {
+        player?.play()
+        binding.playPauseButton.setImageResource(R.drawable.baseline_pause)
+        updateProgressBar()
+    }
+
+    private fun updateProgressBar() {
+        mHandler.postDelayed(mUpdateTimeTask, 100)
+    }
 
     private fun setUoGlPlayerView() {
         exoPLayerView =
             EPlayerView(this)
-        exoPLayerView!!.setSimpleExoPlayer(Utils.player)
+        exoPLayerView!!.setSimpleExoPlayer(player)
 
         val videoSize = Utils.getVideoSize(this, Uri.parse(mainCachedFile))
         if (videoSize != null) {
@@ -166,6 +274,24 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
         )
         effectPosition = position
 
+    }
+
+    private fun updateSeekBar() {
+        // Update the seek bar progress with the current position of the player
+        binding.seekBar.progress = player!!.currentPosition.toInt()
+
+        // Schedule the next update after a certain delay
+        handler.postDelayed(runnable, 1000) // Update every second (adjust as needed)
+    }
+
+    private fun startTrackingSeekBar() {
+        // Start updating the seek bar progress
+        handler.postDelayed(runnable, 0)
+    }
+
+    private fun stopTrackingSeekBar() {
+        // Stop updating the seek bar progress
+        handler.removeCallbacks(runnable)
     }
 
 }

@@ -42,13 +42,10 @@ class VideoAdapter(val context: Context, private val videos: List<File>) :
         titleTextView.text = title ?: "Untitled"
 
         holder.itemView.setOnClickListener {
-            // Handle video playback
             playVideo = videoFile.path
             context.startActivity(Intent(context, PlayerActivity::class.java))
         }
     }
-
-
 
     override fun getItemCount(): Int {
         return videos.size

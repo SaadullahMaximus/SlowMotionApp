@@ -45,7 +45,6 @@ class MainActivity : AppCompatActivity() {
 
         var isFromTrim: Boolean = false
 
-        // Define properties and functions here
         var knobPosition: Float = 700F
 
         lateinit var trimFilePath: String
@@ -96,7 +95,7 @@ class MainActivity : AppCompatActivity() {
 
             // Create the ObjectAnimator for rotation animation
             val animator = ObjectAnimator.ofFloat(binding.imageCreate, View.ROTATION, 0f, 90f)
-            animator.duration = 800 // Animation duration in milliseconds
+            animator.duration = 300 // Animation duration in milliseconds
 
             // Start the animation
             animator.start()

@@ -28,6 +28,14 @@
     <string name="_0">0</string>
     <string name="speaker">Speaker</string>
     <string name="move_pointer_to_select_the_speed_of_video">Move pointer to select the speed of video</string>
+    <string name="effect">Effect</string>
+    <string name="content_settings">Content Settings</string>
+    <string name="click_to_crop">Click to Crop</string>
+    <string name="_9_16">9:16</string>
+    <string name="free">Free</string>
+    <string name="_1_1">1:1</string>
+    <string name="_16_9">16:9</string>
+    <string name="ok">OK</string>
 
 
 </resources>

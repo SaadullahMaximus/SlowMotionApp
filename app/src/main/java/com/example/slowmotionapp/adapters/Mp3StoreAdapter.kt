@@ -27,7 +27,7 @@ class Mp3StoreAdapter(
     private var progressDialog: ProgressDialog? = null
 
     private var isClickable = true
-    private val clickDelay = 500 // Set the desired delay in milliseconds
+    private val clickDelay = 500
     private val clickHandler = Handler(Looper.getMainLooper())
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -77,7 +77,7 @@ class Mp3StoreAdapter(
                 notifyItemChanged(previousPosition)
                 notifyItemChanged(selectedPosition)
 
-                progressDialog?.dismiss() // Dismiss any previous progress dialog
+                progressDialog?.dismiss()
 
                 progressDialog = ProgressDialog(holder.itemView.context)
                 progressDialog?.setMessage("Preparing music...")
@@ -114,5 +114,4 @@ class Mp3StoreAdapter(
     fun dialogDismiss() {
         progressDialog!!.dismiss()
     }
-
 }

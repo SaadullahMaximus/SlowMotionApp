@@ -9,8 +9,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.example.slowmotionapp.adapters.VideoAdapter
 import com.example.slowmotionapp.databinding.FragmentSavedTrimBinding
 import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.trimmedFiles
-import com.example.slowmotionapp.utils.Utils.fetchVideosFromDirectory
-import com.example.slowmotionapp.utils.Utils.trimmedDir
 
 class SavedTrimFragment : Fragment() {
 
