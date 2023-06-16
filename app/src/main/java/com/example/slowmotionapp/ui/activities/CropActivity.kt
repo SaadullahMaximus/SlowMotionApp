@@ -83,13 +83,20 @@ class CropActivity : AppCompatActivity() {
         binding = ActivityCropBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        screenWidth = Utils.getScreenWidth()
 
         // Fetch the videoUri from the intent
         videoUri = intent.getStringExtra("VideoUri")
         type = intent.getIntExtra(Constants.TYPE, 0)
 
+
+        binding.videoView.setVideoURI(Uri.parse(videoUri))
+
+
         mainCachedFile = videoUri!!
+
+        screenWidth = Utils.getScreenWidth()
+
+        Log.d("HELLO", "onCreate: screenWidth: $screenWidth")
 
         val layoutParams = binding.frameLayout.layoutParams
         layoutParams.width = screenWidth
@@ -97,8 +104,6 @@ class CropActivity : AppCompatActivity() {
         binding.frameLayout.layoutParams = layoutParams
 
         cropViewDisplay()
-
-        binding.videoView.setVideoURI(Uri.parse(videoUri))
 
         binding.videoView.setOnPreparedListener { mediaPlayer: MediaPlayer? ->
             mediaPlayer?.let {
@@ -222,20 +227,75 @@ class CropActivity : AppCompatActivity() {
             binding.cropView.visibility = View.GONE
         }
         binding.btnOk.setOnClickListener {
-            binding.imageViewFree.setImageResource(R.drawable.crop_unselect)
-            binding.imageView11.setImageResource(R.drawable.crop_unselect)
-            binding.imageViewPortrait.setImageResource(R.drawable.crop_unselect)
-            binding.imageViewLandScape.setImageResource(R.drawable.crop_unselect)
-            if (binding.videoView.isPlaying) {
-                binding.videoView.pause()
-                binding.videoView.seekTo(0)
-                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
-            }
             getDimension()
             startCrop()
         }
 
     }
+
+    private fun cropViewDisplay() {
+        val mediaMetadataRetriever = MediaMetadataRetriever()
+        mediaMetadataRetriever.setDataSource(this, Uri.parse(mainCachedFile))
+
+        keyCodeR = Integer.valueOf(mediaMetadataRetriever.extractMetadata(19)!!).toInt()
+        keyCodeQ = Integer.valueOf(mediaMetadataRetriever.extractMetadata(18)!!).toInt()
+        keyCodeW = 0
+
+
+        val layoutParams = binding.cropView.layoutParams as FrameLayout.LayoutParams
+
+        Log.d("KEYCODE", "cropViewDisplay: $keyCodeR $keyCodeQ $keyCodeW $screenWidth")
+
+        if (keyCodeW == 90 || keyCodeW == 270) {
+            if (keyCodeR >= keyCodeQ) {
+                if (keyCodeR >= screenWidth) {
+                    layoutParams.height = screenWidth
+                    layoutParams.width =
+                        (screenWidth.toFloat() / (keyCodeR.toFloat() / keyCodeQ.toFloat())).toInt()
+                } else {
+                    layoutParams.width = screenWidth
+                    layoutParams.height =
+                        (keyCodeQ.toFloat() * (screenWidth.toFloat() / keyCodeR.toFloat())).toInt()
+                }
+            } else if (keyCodeQ >= screenWidth) {
+                layoutParams.width = screenWidth
+                layoutParams.height =
+                    (screenWidth.toFloat() / (keyCodeQ.toFloat() / keyCodeR.toFloat())).toInt()
+            } else {
+                layoutParams.width =
+                    (keyCodeR.toFloat() * (screenWidth.toFloat() / keyCodeQ.toFloat())).toInt()
+                layoutParams.height = screenWidth
+            }
+        } else if (keyCodeR >= keyCodeQ) {
+            if (keyCodeR >= screenWidth) {
+                layoutParams.width = screenWidth
+                layoutParams.height =
+                    (screenWidth.toFloat() / (keyCodeR.toFloat() / keyCodeQ.toFloat())).toInt()
+            } else {
+                layoutParams.width = screenWidth
+                layoutParams.height =
+                    (keyCodeQ.toFloat() * (screenWidth.toFloat() / keyCodeR.toFloat())).toInt()
+            }
+        } else if (keyCodeQ >= screenWidth) {
+            layoutParams.width =
+                (screenWidth.toFloat() / (keyCodeQ.toFloat() / keyCodeR.toFloat())).toInt()
+            layoutParams.height = screenWidth
+        } else {
+            layoutParams.width =
+                (keyCodeR.toFloat() * (screenWidth.toFloat() / keyCodeQ.toFloat())).toInt()
+            layoutParams.height = screenWidth
+        }
+        binding.cropView.layoutParams = layoutParams
+
+        binding.cropView.setImageBitmap(
+            Bitmap.createBitmap(
+                layoutParams.width,
+                layoutParams.height,
+                Bitmap.Config.ARGB_8888
+            )
+        )
+    }
+
 
     private fun getDimension() {
         if (keyCodeW == 90 || keyCodeW == 270) {
@@ -378,6 +438,17 @@ class CropActivity : AppCompatActivity() {
         progressDialog.setCancelable(false)
         progressDialog.setMessage("Please Wait")
         progressDialog.show()
+
+        binding.imageViewFree.setImageResource(R.drawable.crop_unselect)
+        binding.imageView11.setImageResource(R.drawable.crop_unselect)
+        binding.imageViewPortrait.setImageResource(R.drawable.crop_unselect)
+        binding.imageViewLandScape.setImageResource(R.drawable.crop_unselect)
+        if (binding.videoView.isPlaying) {
+            binding.videoView.pause()
+            binding.videoView.seekTo(0)
+            binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
+        }
+
         val ffmpegCommand: String = Utils.commandsGenerator(strArr)
         FFmpeg.executeAsync(
             ffmpegCommand
@@ -428,72 +499,6 @@ class CropActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateVideoUri(path: String) {
-        binding.videoView.setVideoURI(Uri.parse(path))
-    }
-
-    private fun cropViewDisplay() {
-        val mediaMetadataRetriever = MediaMetadataRetriever()
-        mediaMetadataRetriever.setDataSource(mainCachedFile)
-
-        keyCodeR = Integer.valueOf(mediaMetadataRetriever.extractMetadata(18)!!).toInt()
-        keyCodeQ = Integer.valueOf(mediaMetadataRetriever.extractMetadata(19)!!).toInt()
-        keyCodeW = Integer.valueOf(mediaMetadataRetriever.extractMetadata(24)!!).toInt()
-
-
-        val layoutParams = binding.cropView.layoutParams as FrameLayout.LayoutParams
-
-        Log.d("KEYCODE", "cropViewDisplay: $keyCodeR $keyCodeQ $keyCodeW $screenWidth")
-
-        if (keyCodeW == 90 || keyCodeW == 270) {
-            if (keyCodeR >= keyCodeQ) {
-                if (keyCodeR >= screenWidth) {
-                    layoutParams.height = screenWidth
-                    layoutParams.width =
-                        (screenWidth.toFloat() / (keyCodeR.toFloat() / keyCodeQ.toFloat())).toInt()
-                } else {
-                    layoutParams.width = screenWidth
-                    layoutParams.height =
-                        (keyCodeQ.toFloat() * (screenWidth.toFloat() / keyCodeR.toFloat())).toInt()
-                }
-            } else if (keyCodeQ >= screenWidth) {
-                layoutParams.width = screenWidth
-                layoutParams.height =
-                    (screenWidth.toFloat() / (keyCodeQ.toFloat() / keyCodeR.toFloat())).toInt()
-            } else {
-                layoutParams.width =
-                    (keyCodeR.toFloat() * (screenWidth.toFloat() / keyCodeQ.toFloat())).toInt()
-                layoutParams.height = screenWidth
-            }
-        } else if (keyCodeR >= keyCodeQ) {
-            if (keyCodeR >= screenWidth) {
-                layoutParams.width = screenWidth
-                layoutParams.height =
-                    (screenWidth.toFloat() / (keyCodeR.toFloat() / keyCodeQ.toFloat())).toInt()
-            } else {
-                layoutParams.width = screenWidth
-                layoutParams.height =
-                    (keyCodeQ.toFloat() * (screenWidth.toFloat() / keyCodeR.toFloat())).toInt()
-            }
-        } else if (keyCodeQ >= screenWidth) {
-            layoutParams.width =
-                (screenWidth.toFloat() / (keyCodeQ.toFloat() / keyCodeR.toFloat())).toInt()
-            layoutParams.height = screenWidth
-        } else {
-            layoutParams.width =
-                (keyCodeR.toFloat() * (screenWidth.toFloat() / keyCodeQ.toFloat())).toInt()
-            layoutParams.height = screenWidth
-        }
-        binding.cropView.layoutParams = layoutParams
-
-        binding.cropView.setImageBitmap(
-            Bitmap.createBitmap(
-                layoutParams.width,
-                layoutParams.height,
-                Bitmap.Config.ARGB_8888
-            )
-        )
-    }
 
     private fun cropSelect(newValue: Int) {
         when (newValue) {

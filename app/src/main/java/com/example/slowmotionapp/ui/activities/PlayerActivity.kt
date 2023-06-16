@@ -76,7 +76,7 @@ class PlayerActivity : AppCompatActivity() {
             }
         })
 
-        binding.videoView.setOnClickListener {
+        binding.overlayLayout.setOnClickListener {
             if (visible) {
                 hideViews()
             } else {

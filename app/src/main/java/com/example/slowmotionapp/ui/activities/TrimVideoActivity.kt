@@ -356,7 +356,7 @@ class TrimVideoActivity : AppCompatActivity() {
 
     private fun timeLineNumbersSet(mDuration: Int) {
         val parts = mDuration / 6.0
-        val decimalFormat = DecimalFormat("#.00")
+        val decimalFormat = DecimalFormat("#.0")
         binding.tv1.text = decimalFormat.format(parts)
         binding.tv2.text = decimalFormat.format(parts * 2)
         binding.tv3.text = decimalFormat.format(parts * 3)
