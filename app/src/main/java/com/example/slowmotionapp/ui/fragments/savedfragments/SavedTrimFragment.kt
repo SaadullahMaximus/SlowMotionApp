@@ -8,16 +8,15 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.slowmotionapp.adapters.VideoAdapter
 import com.example.slowmotionapp.databinding.FragmentSavedTrimBinding
+import com.example.slowmotionapp.ui.activities.SavedActivity
 import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.adapterShowing
-import com.example.slowmotionapp.utils.Utils.fetchVideosFromDirectory
-import com.example.slowmotionapp.utils.Utils.trimmedDir
+import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.trimmedFiles
 
 class SavedTrimFragment : Fragment() {
 
     private var _binding: FragmentSavedTrimBinding? = null
     private val binding get() = _binding!!
 
-    var trimmedFiles = fetchVideosFromDirectory(trimmedDir)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,7 +37,7 @@ class SavedTrimFragment : Fragment() {
         }
 
         binding.btnCreateNew.setOnClickListener {
-
+            (activity as? SavedActivity)?.openGallery()
         }
 
         return binding.root

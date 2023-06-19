@@ -35,7 +35,7 @@ class SavedEditedFragment : Fragment() {
         }
 
         binding.btnCreateNew.setOnClickListener {
-
+            (activity as? SavedActivity)?.openGallery()
         }
 
         return binding.root
