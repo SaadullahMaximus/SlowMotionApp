@@ -74,6 +74,7 @@ class MainActivity : AppCompatActivity() {
         var permissionAllowed = false
 
         var cameraPermission = false
+        val namePattern = "[a-zA-Z0-9_]+"
 
     }
 

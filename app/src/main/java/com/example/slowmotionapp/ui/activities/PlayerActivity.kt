@@ -1,23 +1,24 @@
 package com.example.slowmotionapp.ui.activities
 
 import android.app.Dialog
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
-import android.widget.FrameLayout
-import android.widget.SeekBar
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.slowmotionapp.R
+import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.ActivityPlayerBinding
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
 import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.adapterShowing
 import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.positionClicked
+import com.example.slowmotionapp.utils.Utils
 import com.example.slowmotionapp.utils.Utils.deleteVideoFile
 import com.example.slowmotionapp.utils.Utils.milliSecondsToTimer
+import java.io.File
 
 class PlayerActivity : AppCompatActivity() {
 
@@ -31,6 +32,8 @@ class PlayerActivity : AppCompatActivity() {
     private var visible = true
 
     private var duration: Int = 0
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityPlayerBinding.inflate(layoutInflater)
@@ -152,7 +155,17 @@ class PlayerActivity : AppCompatActivity() {
         val overLayout = dialog.findViewById<FrameLayout>(R.id.overlay_layout)
 
         btnEdit.setOnClickListener {
-            Toast.makeText(this, "Edit", Toast.LENGTH_SHORT).show()
+            pauseVideo()
+            val uri = Uri.parse(playVideo)
+            val intent = Intent(this, TrimVideoActivity::class.java)
+            intent.putExtra("VideoUri", playVideo)
+            intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
+            intent.putExtra(
+                "VideoDuration",
+                Utils.getMediaDuration(this, uri)
+            )
+            finish()
+            startActivity(intent)
             dialog.dismiss()
         }
 
@@ -163,7 +176,7 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         btnRename.setOnClickListener {
-            Toast.makeText(this, "Rename", Toast.LENGTH_SHORT).show()
+            showRenameDialog()
             pauseVideo()
             dialog.dismiss()
         }
@@ -181,6 +194,34 @@ class PlayerActivity : AppCompatActivity() {
         overLayout.setOnClickListener {
             Toast.makeText(this, "Over layout", Toast.LENGTH_SHORT).show()
             pauseVideo()
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun showRenameDialog() {
+        val dialog = Dialog(this, R.style.FullScreenDialogStyle)
+        dialog.setContentView(R.layout.rename_dialog)
+
+        val fileName = dialog.findViewById<EditText>(R.id.fileName)
+        val btnOk = dialog.findViewById<TextView>(R.id.okBtn)
+        val btnCancel = dialog.findViewById<TextView>(R.id.cancelBtn)
+
+
+        btnOk.setOnClickListener {
+            val text = fileName.text.toString()
+            if (text.isNotEmpty()) {
+                // The EditText has non-empty text
+                // Perform your desired actions here
+                File(playVideo).renameTo(File(File(playVideo).parent, "$text.mp4"))
+            } else {
+                Toast.makeText(this, "Please enter a valid name!", Toast.LENGTH_SHORT).show()
+            }
+            dialog.dismiss()
+        }
+
+        btnCancel.setOnClickListener {
             dialog.dismiss()
         }
 

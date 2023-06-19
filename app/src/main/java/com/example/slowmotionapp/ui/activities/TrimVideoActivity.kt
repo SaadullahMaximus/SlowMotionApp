@@ -181,9 +181,14 @@ class TrimVideoActivity : AppCompatActivity() {
                     File(videoUri!!)
                 }
 
+
+
                 try {
                     //output file is generated and send to video processing
                     outputFile = createTrimmedFile()
+
+                    Log.d("HELLO", "onCreate: ${file.toString()} ")
+                    Log.d("HELLO", "onCreate:Output ${outputFile.toString()} ")
 
                     trimVideo(
                         this,
@@ -195,19 +200,15 @@ class TrimVideoActivity : AppCompatActivity() {
                             file.toString(),
                             "-t",
                             mEndPosition.toString(),
-                            "-vcodec",
-                            "mpeg4",
-                            "-b:v",
-                            "2097152",
-                            "-b:a",
-                            "48000",
-                            "-ac",
-                            "2",
-                            "-ar",
-                            "22050",
+                            "-c:v",
+                            "copy",
+                            "-c:a",
+                            "copy",
                             outputFile.toString()
-                        ), outputFile.toString()
+                        ),
+                        outputFile.toString()
                     )
+
 
                 } catch (e: Throwable) {
                     Objects.requireNonNull(Thread.getDefaultUncaughtExceptionHandler())

@@ -54,6 +54,10 @@ class SavedActivity : AppCompatActivity() {
 
         val viewPagerAdapter = ViewPagerSetter(supportFragmentManager)
 
+        croppedFiles = fetchVideosFromDirectory(croppedDir)
+        editedFiles = fetchVideosFromDirectory(editedDir)
+        trimmedFiles = fetchVideosFromDirectory(trimmedDir)
+
         viewPagerAdapter.addFragment(SavedEditedFragment(), "Edited")
         viewPagerAdapter.addFragment(SavedTrimFragment(), "Trimmed")
         viewPagerAdapter.addFragment(SavedCropFragment(), "Cropped")
@@ -233,6 +237,7 @@ class SavedActivity : AppCompatActivity() {
                         getString(R.string.error_select_smaller_video),
                         Toast.LENGTH_SHORT
                     ).show()
+                    finish()
                 }
             }
         } catch (_: Exception) {

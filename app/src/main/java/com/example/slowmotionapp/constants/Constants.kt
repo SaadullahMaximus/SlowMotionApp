@@ -8,12 +8,10 @@ class Constants {
     companion object {
         val PERMISSION_CAMERA = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
             arrayOf(
-                Manifest.permission.CAMERA,
                 Manifest.permission.READ_MEDIA_VIDEO, Manifest.permission.READ_MEDIA_AUDIO
             )
         } else {
-            arrayOf(
-                Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            arrayOf( Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE
             )
         }
