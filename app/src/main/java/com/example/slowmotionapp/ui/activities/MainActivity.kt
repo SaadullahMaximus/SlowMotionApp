@@ -23,6 +23,13 @@ import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.ActivityMainBinding
 import com.example.slowmotionapp.ui.fragments.MyDialogFragment
 import com.example.slowmotionapp.utils.Utils
+import com.example.slowmotionapp.utils.Utils.convertDurationInMin
+import com.example.slowmotionapp.utils.Utils.createCacheTempFile
+import com.example.slowmotionapp.utils.Utils.createVideoFile
+import com.example.slowmotionapp.utils.Utils.getFileExtension
+import com.example.slowmotionapp.utils.Utils.getMediaDuration
+import com.example.slowmotionapp.utils.Utils.getVideoDuration
+import com.example.slowmotionapp.utils.Utils.refreshGalleryAlone
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
@@ -76,7 +83,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        Utils.createCacheTempFile(this)
+        createCacheTempFile(this)
 
         binding.animationView.setOnClickListener {
             binding.imageCreate.visibility = View.VISIBLE
@@ -186,7 +193,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 Constants.VIDEO_GALLERY -> {
                     //call the gallery intent
-                    Utils.refreshGalleryAlone(this)
+                    refreshGalleryAlone(this)
                     val i = Intent(Intent.ACTION_PICK)
                     i.setDataAndType(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, "video/*")
 
@@ -196,7 +203,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 Constants.RECORD_VIDEO -> {
                     val cameraIntent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
-                    videoFile = Utils.createVideoFile()
+                    videoFile = createVideoFile()
                     videoUri = FileProvider.getUriForFile(
                         this,
                         Constants.provider, videoFile!!
@@ -225,7 +232,6 @@ class MainActivity : AppCompatActivity() {
             intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
             val uri = Uri.fromParts("package", this.applicationContext.packageName, null)
             intent.data = uri
-            Log.d("PERMISSIONS", "showPermissionDeniedMessage: Yes Click $requestCode")
             startActivityForResult(intent, requestCode)
             dialog.dismiss()
         }
@@ -305,10 +311,10 @@ class MainActivity : AppCompatActivity() {
                 cursor.close()
                 masterVideoFile = File(filePath)
 
-                val extension = Utils.getFileExtension(masterVideoFile!!.absolutePath)
+                val extension = getFileExtension(masterVideoFile!!.absolutePath)
 
-                val timeInMillis = Utils.getVideoDuration(this, masterVideoFile!!)
-                val duration = Utils.convertDurationInMin(timeInMillis)
+                val timeInMillis = getVideoDuration(this, masterVideoFile!!)
+                val duration = convertDurationInMin(timeInMillis)
 
                 //check if video is more than 4 minutes
                 if (duration < Constants.VIDEO_LIMIT) {
@@ -336,7 +342,7 @@ class MainActivity : AppCompatActivity() {
                                 intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
                                 intent.putExtra(
                                     "VideoDuration",
-                                    Utils.getMediaDuration(this, uri)
+                                    getMediaDuration(this, uri)
                                 )
                                 startActivity(intent)
                             }
@@ -367,7 +373,7 @@ class MainActivity : AppCompatActivity() {
                             intent.putExtra("VideoPath", filePath)
                             intent.putExtra(
                                 "VideoDuration",
-                                Utils.getMediaDuration(this, uri)
+                                getMediaDuration(this, uri)
                             )
                             startActivityForResult(intent, Constants.MAIN_VIDEO_TRIM)
                         }

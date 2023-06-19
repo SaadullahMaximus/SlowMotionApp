@@ -65,11 +65,9 @@ class CropFragment : Fragment() {
         }
 
         binding.btnCancel.setOnClickListener {
-            Toast.makeText(requireContext(), "Canceled", Toast.LENGTH_SHORT).show()
             sharedViewModel.switchFragmentB(true)
         }
         binding.btnOk.setOnClickListener {
-            Toast.makeText(requireContext(), "Ok", Toast.LENGTH_SHORT).show()
             sharedViewModel.startCrop(true)
         }
 

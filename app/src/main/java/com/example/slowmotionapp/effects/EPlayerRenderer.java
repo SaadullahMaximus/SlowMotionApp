@@ -6,13 +6,14 @@ import static android.opengl.GLES20.GL_MAX_TEXTURE_SIZE;
 import static android.opengl.GLES20.GL_NEAREST;
 import static android.opengl.GLES20.GL_TEXTURE_2D;
 import static android.opengl.GLES20.glViewport;
+
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.Surface;
+
 import com.daasuu.mp4compose.filter.GlFilter;
 import com.daasuu.mp4compose.filter.GlLookUpTableFilter;
 import com.daasuu.mp4compose.gl.GlFramebufferObject;
@@ -22,9 +23,6 @@ import com.google.android.exoplayer2.ExoPlayer;
 import javax.microedition.khronos.egl.EGLConfig;
 
 class EPlayerRenderer extends EFrameBufferObjectRenderer implements SurfaceTexture.OnFrameAvailableListener {
-
-    private static final String TAG = EPlayerRenderer.class.getSimpleName();
-
     private ESurfaceTexture previewTexture;
     private boolean updateSurface = false;
 
@@ -113,7 +111,6 @@ class EPlayerRenderer extends EFrameBufferObjectRenderer implements SurfaceTextu
 
     @Override
     public void onSurfaceChanged(final int width, final int height) {
-        Log.d(TAG, "onSurfaceChanged width = " + width + "  height = " + height);
         filterFramebufferObject.setup(width, height);
         previewFilter.setFrameSize(width, height);
         if (glFilter != null) {

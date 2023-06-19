@@ -92,7 +92,7 @@
         android:id="@+id/expanded_buttons_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/_30sdp"
+        android:layout_marginEnd="@dimen/_20sdp"
         android:layout_marginBottom="@dimen/_50sdp"
         android:orientation="horizontal"
         android:visibility="gone"
@@ -103,7 +103,7 @@
             android:id="@+id/captureVideoBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/_40sdp"
+            android:layout_marginEnd="@dimen/_30sdp"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical">

@@ -38,7 +38,6 @@ class VideoAdapter(val context: Context, private val videos: List<File>) :
         val title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
             ?: getVideoTitleFromMediaStore(videoFile)
 
-        Log.d("TITLE", "onBindViewHolder: $title")
         titleTextView.text = title ?: "Untitled"
 
         holder.itemView.setOnClickListener {

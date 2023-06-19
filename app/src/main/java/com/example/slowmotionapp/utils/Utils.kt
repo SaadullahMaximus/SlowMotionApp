@@ -11,7 +11,6 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
-import android.util.Log
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.interfaces.MyListener
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.backSave
@@ -320,11 +319,7 @@ object Utils {
     }
 
     fun getScreenWidth(): Int {
-        val screenWidth = Resources.getSystem().displayMetrics.widthPixels
-
-        Log.d("screenWidth", "getScreenWidth: $screenWidth")
-
-        return screenWidth
+        return Resources.getSystem().displayMetrics.widthPixels
     }
 
     fun setUpSimpleExoPlayer(context: Context) {
@@ -338,7 +333,6 @@ object Utils {
             .build()
         player!!.addMediaItem(MediaItem.fromUri(Uri.parse(mainCachedFile)))
         player!!.prepare()
-        Log.d("EXOPLAYER", "onCreateView: setUpSimpleExoPlayer")
     }
 
     fun getVideoSize(context: Context, uri: Uri): Pair<Int, Int>? {

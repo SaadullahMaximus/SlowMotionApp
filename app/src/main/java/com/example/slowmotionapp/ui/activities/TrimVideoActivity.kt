@@ -26,7 +26,11 @@ import com.example.slowmotionapp.ui.activities.MainActivity.Companion.isFromTrim
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.trimFilePath
-import com.example.slowmotionapp.utils.Utils
+import com.example.slowmotionapp.utils.Utils.commandsGenerator
+import com.example.slowmotionapp.utils.Utils.convertContentUriToFilePath
+import com.example.slowmotionapp.utils.Utils.createCacheCopy
+import com.example.slowmotionapp.utils.Utils.createTrimmedFile
+import com.example.slowmotionapp.utils.Utils.deleteFromGallery
 import com.example.slowmotionapp.utils.Utils.milliSecondsToTimer
 import java.io.File
 import java.text.DecimalFormat
@@ -86,7 +90,6 @@ class TrimVideoActivity : AppCompatActivity() {
         // Fetch the videoUri from the intent
         videoUri = intent.getStringExtra("VideoUri")
         type = intent.getIntExtra(Constants.TYPE, 0)
-        Log.d("MaximusTech", "onCreate: $videoUri")
 
         binding.backBtn.setOnClickListener {
             finish()
@@ -155,39 +158,6 @@ class TrimVideoActivity : AppCompatActivity() {
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   --->  " + mStartPosition * 1000 + " <-----> " + seekBar.progress + " <-----> " + binding.seekBar.progress
-                )
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   --->  " + mDuration * 1000 + " <-----> " + binding.seekBar.progress
-                )
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   --->  " + (mStartPosition * 1000 - binding.seekBar.progress)
-                )
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   --->  " + (mDuration * 1000 - binding.seekBar.progress)
-                )
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   mVideoView--->  " + binding.trimVideoView.duration
-                )
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   seekBar--->  " + seekBar.progress
-                )
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   mStartPosition--->  " + mStartPosition * 1000
-                )
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   mEndPosition--->  " + mEndPosition * 1000
-                )
-
                 mHandler.removeCallbacks(mUpdateTimeTask)
 
                 binding.trimVideoView.seekTo(mStartPosition * 1000 + seekBar.progress)
@@ -206,14 +176,14 @@ class TrimVideoActivity : AppCompatActivity() {
                 val mediaMetadataRetriever = MediaMetadataRetriever()
                 mediaMetadataRetriever.setDataSource(this, Uri.parse(videoUri))
                 file = if (type == Constants.RECORD_VIDEO) {
-                    File(Utils.convertContentUriToFilePath(videoUri!!))
+                    File(convertContentUriToFilePath(videoUri!!))
                 } else {
                     File(videoUri!!)
                 }
 
                 try {
                     //output file is generated and send to video processing
-                    outputFile = Utils.createTrimmedFile()
+                    outputFile = createTrimmedFile()
 
                     trimVideo(
                         this,
@@ -371,15 +341,10 @@ class TrimVideoActivity : AppCompatActivity() {
         progressDialog.setCancelable(false)
         progressDialog.setMessage("Please Wait")
         progressDialog.show()
-        val ffmpegCommand: String = Utils.commandsGenerator(strArr)
+        val ffmpegCommand: String = commandsGenerator(strArr)
         FFmpeg.executeAsync(
             ffmpegCommand
         ) { _, returnCode ->
-            Log.d(
-                "TAG",
-                String.format("FFMPEG process exited with rc %d.", returnCode)
-            )
-            Log.d("TAG", "FFMPEG process output:")
             Config.printLastCommandOutput(Log.INFO)
             progressDialog.dismiss()
             when (returnCode) {
@@ -387,16 +352,15 @@ class TrimVideoActivity : AppCompatActivity() {
                     progressDialog.dismiss()
                     trimFilePath = str
                     mainCachedFile =
-                        Utils.createCacheCopy(this, trimFilePath)
+                        createCacheCopy(this, trimFilePath)
                             .toString()
                     playVideo = str
                     switchActivity(str)
                 }
                 Config.RETURN_CODE_CANCEL -> {
-                    Log.d("FFMPEFailure", str)
                     try {
                         File(str).delete()
-                        Utils.deleteFromGallery(str, context)
+                        deleteFromGallery(str, context)
                         Toast.makeText(context, "Error Creating Video", Toast.LENGTH_SHORT)
                             .show()
                     } catch (th: Throwable) {
@@ -410,7 +374,7 @@ class TrimVideoActivity : AppCompatActivity() {
                 else -> {
                     try {
                         File(str).delete()
-                        Utils.deleteFromGallery(str, context)
+                        deleteFromGallery(str, context)
                         Toast.makeText(context, "Error Creating Video", Toast.LENGTH_SHORT)
                             .show()
                     } catch (th: Throwable) {

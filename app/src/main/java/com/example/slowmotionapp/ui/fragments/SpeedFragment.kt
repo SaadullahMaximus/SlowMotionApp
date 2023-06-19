@@ -19,8 +19,9 @@ import com.example.slowmotionapp.databinding.FragmentSpeedBinding
 import com.example.slowmotionapp.extras.VideoPlayerState
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.knobPosition
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
-import com.example.slowmotionapp.ui.activities.MainActivity.Companion.tempCacheName
-import com.example.slowmotionapp.utils.Utils
+import com.example.slowmotionapp.utils.Utils.commandsGenerator
+import com.example.slowmotionapp.utils.Utils.createCacheTempFile
+import com.example.slowmotionapp.utils.Utils.deleteFromGallery
 import com.example.slowmotionapp.utils.Utils.getVideoDuration
 import com.example.slowmotionapp.viewmodel.SharedViewModel
 import java.io.File
@@ -55,7 +56,6 @@ class SpeedFragment : Fragment() {
             override fun onKnobPositionChanged(knobValue: Int) {
                 // Handle the knob value change here
                 // You can display it in a TextView or perform any other actions
-                Log.d("Knob", "onKnobPositionChanged: $knobValue")
             }
 
             override fun onKnobStopped(knobValue: Int) {
@@ -70,12 +70,9 @@ class SpeedFragment : Fragment() {
 
     private fun handleKnobStopMoving(knobValue: Int) {
         // Handle the event when the user stops moving the knob
-        Log.d("Saad", "handleKnobStopMoving: Stop Moving")
 
         knobPosition = knobValue * 100F
-        Log.d("Saad", "handleKnobStopMoving: FileName $tempCacheName")
-        Log.d("Saad", "handleKnobStopMoving: KnobValue $knobValue")
-        val tempPath = Utils.createCacheTempFile(requireContext())
+        val tempPath = createCacheTempFile(requireContext())
         videoSpeedChange(tempPath, knobValue)
     }
 
@@ -137,7 +134,6 @@ class SpeedFragment : Fragment() {
         }
 
         val valueOf2: String = java.lang.String.valueOf(this.videoPlayerState.getDuration() * f2)
-        Log.d("valueOf2", "videoMotionCommand: $valueOf2 value $value")
 
         when (value) {
             1 -> {
@@ -229,14 +225,11 @@ class SpeedFragment : Fragment() {
         progressDialog.setCancelable(false)
         progressDialog.setMessage("Please Wait")
         progressDialog.show()
-        val ffmpegCommand: String = Utils.commandsGenerator(strArr)
+        val ffmpegCommand: String = commandsGenerator(strArr)
         FFmpeg.executeAsync(
             ffmpegCommand
         ) { _, returnCode ->
-            Log.d(
-                "TAG", String.format("FFMPEG process exited with rc %d.", returnCode)
-            )
-            Log.d("TAG", "FFMPEG process output:")
+
             Config.printLastCommandOutput(Log.INFO)
             progressDialog.dismiss()
             when (returnCode) {
@@ -247,10 +240,9 @@ class SpeedFragment : Fragment() {
                     updateVideoUri(str)
                 }
                 Config.RETURN_CODE_CANCEL -> {
-                    Log.d("FFMPEFailure", str)
                     try {
                         File(str).delete()
-                        Utils.deleteFromGallery(str, requireContext())
+                        deleteFromGallery(str, requireContext())
                         Toast.makeText(
                             requireContext(), "Error Creating Video", Toast.LENGTH_LONG
                         ).show()
@@ -259,10 +251,9 @@ class SpeedFragment : Fragment() {
                     }
                 }
                 else -> {
-                    Log.d("FFMPEFailure", str)
                     try {
                         File(str).delete()
-                        Utils.deleteFromGallery(str, requireContext())
+                        deleteFromGallery(str, requireContext())
                         Toast.makeText(
                             requireContext(), "Error Creating Video", Toast.LENGTH_LONG
                         ).show()

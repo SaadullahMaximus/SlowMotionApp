@@ -37,7 +37,14 @@ import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCached
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.myMusic
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.myMusicUri
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
-import com.example.slowmotionapp.utils.Utils
+import com.example.slowmotionapp.utils.Utils.commandsGenerator
+import com.example.slowmotionapp.utils.Utils.createCacheTempFile
+import com.example.slowmotionapp.utils.Utils.createCroppedFile
+import com.example.slowmotionapp.utils.Utils.deleteFromGallery
+import com.example.slowmotionapp.utils.Utils.getAudioFilePathFromUri
+import com.example.slowmotionapp.utils.Utils.getVideoDuration
+import com.example.slowmotionapp.utils.Utils.refreshAudioGallery
+import com.example.slowmotionapp.utils.Utils.saveEditedVideo
 import com.example.slowmotionapp.viewmodel.SharedViewModel
 import com.google.android.material.tabs.TabLayout
 import java.io.File
@@ -178,7 +185,7 @@ class EffectMusicFragment : Fragment() {
                     ) == PackageManager.PERMISSION_GRANTED
                 ) {
                     //call the gallery intent
-                    Utils.refreshAudioGallery(requireContext())
+                    refreshAudioGallery(requireContext())
                     val i = Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
                     i.type = "audio/*"
                     i.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("audio/*"))
@@ -195,16 +202,14 @@ class EffectMusicFragment : Fragment() {
 
         if (requestCode == Constants.AUDIO_GALLERY && resultCode == Activity.RESULT_OK) {
             // Handle the selected video here
-            Log.d("AUDIO", "onActivityResult: ${data?.data}")
             // Perform any required operations with the selected video
 
-            setupFragment(Utils.getAudioFilePathFromUri(requireContext(), data?.data!!))
+            setupFragment(getAudioFilePathFromUri(requireContext(), data?.data!!))
         }
     }
 
     private fun setupFragment(data: String?) {
         myMusicUri = data!!
-        Log.d("myMusicUri", "setupFragment: $data")
         myMusic = true
         sharedViewModel.musicSetCheck(true)
         binding.myMusicConstraint.visibility = View.GONE
@@ -248,7 +253,7 @@ class EffectMusicFragment : Fragment() {
         progressDialog.show()
 
         if (filterPosition != 0) {
-            val outputFile = Utils.createCroppedFile().toString()
+            val outputFile = createCroppedFile().toString()
             val filter = FilterType.createGlFilter(
                 FilterType.createFilterList()[filterPosition],
                 requireContext()
@@ -259,23 +264,20 @@ class EffectMusicFragment : Fragment() {
                 .filter(filter)
                 .listener(object : Mp4Composer.Listener {
                     override fun onProgress(progress: Double) {
-                        Log.d(Constants.APP_NAME, "onProgress Filter = " + progress * 100)
                     }
 
                     override fun onCompleted() {
-                        Log.d(Constants.APP_NAME, "onCompleted() Filter : $outputFile")
                         mainCachedFile = outputFile
                         progressDialog.dismiss()
                         if (MusicApplied) {
                             audioVideoMixer()
                         } else {
-                            Utils.saveEditedVideo(requireContext())
+                            saveEditedVideo(requireContext())
                         }
                     }
 
                     override fun onCanceled() {
                         progressDialog.dismiss()
-                        Log.d(Constants.APP_NAME, "onCanceled")
                     }
 
                     override fun onFailed(exception: Exception) {
@@ -289,16 +291,16 @@ class EffectMusicFragment : Fragment() {
             if (MusicApplied) {
                 audioVideoMixer()
             } else {
-                Utils.saveEditedVideo(requireContext())
+                saveEditedVideo(requireContext())
             }
         }
     }
 
     private fun audioVideoMixer() {
 
-        val outputFile = Utils.createCacheTempFile(requireContext())
+        val outputFile = createCacheTempFile(requireContext())
 
-        val duration: Int = Utils.getVideoDuration(requireContext(), File(mainCachedFile)).toInt()
+        val duration: Int = getVideoDuration(requireContext(), File(mainCachedFile)).toInt()
 
         executeFFMPEG(
             arrayOf(
@@ -340,15 +342,10 @@ class EffectMusicFragment : Fragment() {
             progressDialog.setCancelable(false)
             progressDialog.setMessage("Please Wait")
             progressDialog.show()
-            val ffmpegCommand: String = Utils.commandsGenerator(strArr)
+            val ffmpegCommand: String = commandsGenerator(strArr)
             FFmpeg.executeAsync(
                 ffmpegCommand
             ) { _, returnCode ->
-                Log.d(
-                    "TAG",
-                    String.format("FFMPEG process exited with rc %d.", returnCode)
-                )
-                Log.d("TAG", "FFMPEG process output:")
                 Config.printLastCommandOutput(Log.INFO)
                 progressDialog.dismiss()
                 when (returnCode) {
@@ -356,13 +353,12 @@ class EffectMusicFragment : Fragment() {
                         progressDialog.dismiss()
                         playVideo = str
                         mainCachedFile = str
-                        Utils.saveEditedVideo(requireContext())
+                        saveEditedVideo(requireContext())
                     }
                     Config.RETURN_CODE_CANCEL -> {
-                        Log.d("FFMPEFailure", str)
                         try {
                             File(str).delete()
-                            Utils.deleteFromGallery(str, requireContext())
+                            deleteFromGallery(str, requireContext())
                             Toast.makeText(
                                 requireContext(),
                                 "Error Creating Video",
@@ -373,10 +369,9 @@ class EffectMusicFragment : Fragment() {
                         }
                     }
                     else -> {
-                        Log.d("FFMPEFailure", str)
                         try {
                             File(str).delete()
-                            Utils.deleteFromGallery(str, requireContext())
+                            deleteFromGallery(str, requireContext())
                             Toast.makeText(
                                 requireContext(),
                                 "Error Creating Video",

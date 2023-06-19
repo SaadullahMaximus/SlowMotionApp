@@ -30,7 +30,6 @@ class EditorActivity : AppCompatActivity() {
         videoUri = intent.getStringExtra("VideoUri")
         mainCachedFile = videoUri!!
         type = intent.getIntExtra(Constants.TYPE, 0)
-        Log.d("MaximusTech", "onCreate: $videoUri")
     }
 
 }

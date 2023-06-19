@@ -28,10 +28,16 @@ import com.example.slowmotionapp.ui.activities.MainActivity.Companion.backSave
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.musicReady
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.myMusicUri
-import com.example.slowmotionapp.ui.activities.MainActivity.Companion.trimFilePath
 import com.example.slowmotionapp.utils.Utils
+import com.example.slowmotionapp.utils.Utils.commandsGenerator
+import com.example.slowmotionapp.utils.Utils.createCacheTempFile
+import com.example.slowmotionapp.utils.Utils.deleteFromGallery
+import com.example.slowmotionapp.utils.Utils.getScreenWidth
+import com.example.slowmotionapp.utils.Utils.getVideoDuration
 import com.example.slowmotionapp.utils.Utils.getVideoSize
 import com.example.slowmotionapp.utils.Utils.player
+import com.example.slowmotionapp.utils.Utils.saveEditedVideo
+import com.example.slowmotionapp.utils.Utils.setUpSimpleExoPlayer
 import com.example.slowmotionapp.viewmodel.SharedViewModel
 import com.google.android.exoplayer2.Player
 import java.io.File
@@ -126,7 +132,7 @@ class CropSpeedFragment : Fragment(), MyListener {
 
         layoutMovieWrapper = view.findViewById(R.id.layout_movie_wrapper)
 
-        Utils.setUpSimpleExoPlayer(requireContext())
+        setUpSimpleExoPlayer(requireContext())
         setUoGlPlayerView()
 
         // Observe the video URI LiveData
@@ -148,10 +154,8 @@ class CropSpeedFragment : Fragment(), MyListener {
         sharedViewModel.booleanCropVisible.observe(viewLifecycleOwner) { newValue ->
             if (newValue == true) {
                 cropView.visibility = View.VISIBLE
-                Toast.makeText(requireContext(), "Crop View Visible", Toast.LENGTH_SHORT).show()
             } else {
                 cropView.visibility = View.GONE
-                Toast.makeText(requireContext(), "Crop View GONE", Toast.LENGTH_SHORT).show()
             }
         }
         // Observe the cropSelected
@@ -238,7 +242,6 @@ class CropSpeedFragment : Fragment(), MyListener {
             )
         layoutMovieWrapper.addView(ePlayerView)
         ePlayerView!!.onResume()
-        Log.d("EXOPLAYER", "onCreateView: setUoGlPlayerView")
 
     }
 
@@ -250,14 +253,11 @@ class CropSpeedFragment : Fragment(), MyListener {
 
         Utils.setListener(this)
 
-        screenWidth = Utils.getScreenWidth()
+        screenWidth = getScreenWidth()
 
         binding.videoView.setVideoURI(Uri.parse(mainCachedFile))
 
         cropViewDisplay()
-
-        Log.d("Hello", "onCreateView: TrimFilePath $trimFilePath")
-        Log.d("Hello", "onCreateView: MainCachedFile $mainCachedFile")
 
         binding.videoView.setOnPreparedListener { mediaPlayer: MediaPlayer? ->
             mediaPlayer?.let {
@@ -281,39 +281,6 @@ class CropSpeedFragment : Fragment(), MyListener {
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   --->  " + mStartPosition * 1000 + " <-----> " + seekBar.progress + " <-----> " + binding.seekBar.progress
-                )
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   --->  " + mDuration * 1000 + " <-----> " + binding.seekBar.progress
-                )
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   --->  " + (mStartPosition * 1000 - binding.seekBar.progress)
-                )
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   --->  " + (mDuration * 1000 - binding.seekBar.progress)
-                )
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   mVideoView--->  " + binding.videoView.duration
-                )
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   seekBar--->  " + seekBar.progress
-                )
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   mStartPosition--->  " + mStartPosition * 1000
-                )
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   mEndPosition--->  " + mEndPosition * 1000
-                )
-
                 mHandler.removeCallbacks(mUpdateTimeTask)
 
                 binding.videoView.seekTo(mStartPosition * 1000 + seekBar.progress)
@@ -352,7 +319,7 @@ class CropSpeedFragment : Fragment(), MyListener {
 
             binding.totalDurationTextView.visibility = View.GONE
 
-            Utils.setUpSimpleExoPlayer(requireContext())
+            setUpSimpleExoPlayer(requireContext())
             setUoGlPlayerView()
 
             binding.videoView.stopPlayback()
@@ -361,8 +328,6 @@ class CropSpeedFragment : Fragment(), MyListener {
             player!!.addListener(object : Player.Listener {
                 override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                     if (playbackState == Player.STATE_READY && playWhenReady) {
-                        // ExoPlayer is ready to play
-                        // You can start playing the media here
                         binding.seekBar2.max = player!!.duration.toInt()
 
                         player!!.playWhenReady = true
@@ -385,8 +350,6 @@ class CropSpeedFragment : Fragment(), MyListener {
             })
 
             binding.seekBar2.isEnabled = false
-
-            Log.d("EXOPLAYER", "onCreateView: Exoplayer true")
 
             sharedViewModel.cropViewVisible(false)
             childFragmentManager!!.beginTransaction()
@@ -438,7 +401,7 @@ class CropSpeedFragment : Fragment(), MyListener {
             if (enhanced) {
                 sharedViewModel.enhanced(true)
             } else {
-                Utils.saveEditedVideo(requireContext())
+                saveEditedVideo(requireContext())
             }
         }
 
@@ -464,14 +427,11 @@ class CropSpeedFragment : Fragment(), MyListener {
     }
 
     private fun rotateVideoCommand(rotateValue: Int) {
-
-        Log.d("HelloHello", "rotateVideoCommand: $rotateValue")
-
         val sb3 = StringBuilder()
 
         sb3.append("[0:v]transpose=$rotateValue[out]")
 
-        val tempFile = Utils.createCacheTempFile(requireContext())
+        val tempFile = createCacheTempFile(requireContext())
 
         executeFFMPEG(
             arrayOf(
@@ -479,7 +439,7 @@ class CropSpeedFragment : Fragment(), MyListener {
                 "-ss",
                 "0",
                 "-t",
-                "${Utils.getVideoDuration(requireContext(), mainCachedFile)}",
+                "${getVideoDuration(requireContext(), mainCachedFile)}",
                 "-i",
                 mainCachedFile,
                 "-vf",
@@ -500,15 +460,10 @@ class CropSpeedFragment : Fragment(), MyListener {
         progressDialog.setCancelable(false)
         progressDialog.setMessage("Please Wait")
         progressDialog.show()
-        val ffmpegCommand: String = Utils.commandsGenerator(strArr)
+        val ffmpegCommand: String = commandsGenerator(strArr)
         FFmpeg.executeAsync(
             ffmpegCommand
         ) { _, returnCode ->
-            Log.d(
-                "TAG",
-                String.format("FFMPEG process exited with rc %d.", returnCode)
-            )
-            Log.d("TAG", "FFMPEG process output:")
             Config.printLastCommandOutput(Log.INFO)
             progressDialog.dismiss()
             when (returnCode) {
@@ -525,10 +480,9 @@ class CropSpeedFragment : Fragment(), MyListener {
                     }
                 }
                 Config.RETURN_CODE_CANCEL -> {
-                    Log.d("FFMPEFailure", str)
                     try {
                         File(str).delete()
-                        Utils.deleteFromGallery(str, requireContext())
+                        deleteFromGallery(str, requireContext())
                         Toast.makeText(
                             requireContext(),
                             "Error Creating Video",
@@ -539,10 +493,9 @@ class CropSpeedFragment : Fragment(), MyListener {
                     }
                 }
                 else -> {
-                    Log.d("FFMPEFailure", str)
                     try {
                         File(str).delete()
-                        Utils.deleteFromGallery(str, requireContext())
+                        deleteFromGallery(str, requireContext())
                         Toast.makeText(
                             requireContext(),
                             "Error Creating Video",
@@ -686,8 +639,6 @@ class CropSpeedFragment : Fragment(), MyListener {
 
         val layoutParams = binding.cropperView.layoutParams as FrameLayout.LayoutParams
 
-        Log.d("KEYCODE", "cropViewDisplay: $keyCodeR $keyCodeQ $keyCodeW $screenWidth")
-
         if (keyCodeW == 90 || keyCodeW == 270) {
             if (keyCodeR >= keyCodeQ) {
                 if (keyCodeR >= screenWidth) {
@@ -792,10 +743,10 @@ class CropSpeedFragment : Fragment(), MyListener {
                 }
             }
         }
-        cropVideoDuration = Utils.getVideoDuration(requireContext(), mainCachedFile).toString()
+        cropVideoDuration = getVideoDuration(requireContext(), mainCachedFile).toString()
 
 
-        cropOutputFilePath = Utils.createCacheTempFile(requireContext())
+        cropOutputFilePath = createCacheTempFile(requireContext())
 
         try {
             val sb = java.lang.StringBuilder()

@@ -23,8 +23,11 @@ import com.example.slowmotionapp.effects.EPlayerView
 import com.example.slowmotionapp.effects.FilterAdapter
 import com.example.slowmotionapp.effects.FilterType
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
-import com.example.slowmotionapp.utils.Utils
+import com.example.slowmotionapp.utils.Utils.createCacheTempFile
+import com.example.slowmotionapp.utils.Utils.getVideoSize
 import com.example.slowmotionapp.utils.Utils.player
+import com.example.slowmotionapp.utils.Utils.saveEditedVideo
+import com.example.slowmotionapp.utils.Utils.setUpSimpleExoPlayer
 import com.google.android.exoplayer2.Player
 
 class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
@@ -42,11 +45,7 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
     private lateinit var runnable: Runnable
 
     private var mStartPosition = 0
-    private var mDuration = 0
-    private var mEndPosition = 0
     private var mTimeVideo = 0
-    private val mMaxDuration = 120
-    private var mDurationWithoutEdit = 0
 
     companion object {
         var exoPLayerView: EPlayerView? = null
@@ -68,7 +67,7 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
             finish()
         }
 
-        Utils.setUpSimpleExoPlayer(this)
+        setUpSimpleExoPlayer(this)
         setUoGlPlayerView()
 
         filterTypes = FilterType.createFilterList()
@@ -169,8 +168,7 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
 
     private fun saveVideoWithFilter() {
 
-        val progressDialog =
-            ProgressDialog(this, R.style.CustomDialog)
+        val progressDialog = ProgressDialog(this, R.style.CustomDialog)
         progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
         progressDialog.isIndeterminate = true
         progressDialog.setCancelable(false)
@@ -178,38 +176,31 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
         progressDialog.show()
 
         if (effectPosition != 0) {
-            val outputFile = Utils.createCacheTempFile(this)
+            val outputFile = createCacheTempFile(this)
             val filter = FilterType.createGlFilter(
-                FilterType.createFilterList()[effectPosition],
-                this
+                FilterType.createFilterList()[effectPosition], this
             )
-            Mp4Composer(mainCachedFile, outputFile)
-                .rotation(Rotation.NORMAL)
-                .fillMode(FillMode.PRESERVE_ASPECT_FIT)
-                .filter(filter)
+            Mp4Composer(mainCachedFile, outputFile).rotation(Rotation.NORMAL)
+                .fillMode(FillMode.PRESERVE_ASPECT_FIT).filter(filter)
                 .listener(object : Mp4Composer.Listener {
                     override fun onProgress(progress: Double) {
-                        Log.d(Constants.APP_NAME, "onProgress Filter = " + progress * 100)
                     }
 
                     override fun onCompleted() {
-                        Log.d(Constants.APP_NAME, "onCompleted() Filter : $outputFile")
                         mainCachedFile = outputFile
                         progressDialog.dismiss()
-                        Utils.saveEditedVideo(this@EffectActivity)
+                        saveEditedVideo(this@EffectActivity)
                     }
 
                     override fun onCanceled() {
                         progressDialog.dismiss()
-                        Log.d(Constants.APP_NAME, "onCanceled")
                     }
 
                     override fun onFailed(exception: Exception) {
                         progressDialog.dismiss()
                         Log.e(Constants.APP_NAME, "onFailed() Filter", exception)
                     }
-                })
-                .start()
+                }).start()
         } else {
             progressDialog.dismiss()
         }
@@ -226,18 +217,16 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
     }
 
     private fun setUoGlPlayerView() {
-        exoPLayerView =
-            EPlayerView(this)
+        exoPLayerView = EPlayerView(this)
         exoPLayerView!!.setSimpleExoPlayer(player)
 
-        val videoSize = Utils.getVideoSize(this, Uri.parse(mainCachedFile))
+        val videoSize = getVideoSize(this, Uri.parse(mainCachedFile))
         if (videoSize != null) {
             val videoWidth = videoSize.first
             val videoHeight = videoSize.second
 
             val layoutParams = RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
             )
 
             // Calculate the desired height based on the video aspect ratio
@@ -249,18 +238,14 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
 
             exoPLayerView!!.layoutParams = layoutParams
         } else {
-            exoPLayerView!!.layoutParams =
-                RelativeLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
+            exoPLayerView!!.layoutParams = RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            )
         }
 
-        exoPLayerView!!.layoutParams =
-            RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
+        exoPLayerView!!.layoutParams = RelativeLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
+        )
         binding.frameLayout.addView(exoPLayerView)
         exoPLayerView!!.onResume()
     }
@@ -268,8 +253,7 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
     override fun onItemClick(position: Int) {
         exoPLayerView!!.setGlFilter(
             FilterType.createGlFilter(
-                filterTypes[position],
-                this
+                filterTypes[position], this
             )
         )
         effectPosition = position
