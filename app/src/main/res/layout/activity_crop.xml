@@ -47,9 +47,7 @@
             android:id="@+id/videoView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/_8sdp"
-            android:layout_marginBottom="@dimen/_8sdp" />
+            android:layout_gravity="center" />
 
         <com.edmodo.cropper.CropImageView
             android:id="@+id/cropView"

@@ -112,9 +112,7 @@
             android:id="@+id/videoView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/_8sdp"
-            android:layout_marginBottom="@dimen/_8sdp" />
+            android:layout_gravity="center" />
 
         <com.edmodo.cropper.CropImageView
             android:id="@+id/cropperView"
@@ -134,16 +132,16 @@
         android:layout_marginStart="@dimen/_40sdp"
         android:layout_marginTop="@dimen/_22sdp"
         android:src="@drawable/baseline_play_arrow"
-        app:layout_constraintTop_toBottomOf="@id/frameLayout"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/frameLayout" />
 
     <ImageView
         android:id="@+id/playPauseButton2"
-        android:visibility="gone"
         android:layout_width="@dimen/_20sdp"
         android:layout_height="@dimen/_20sdp"
         android:layout_marginStart="@dimen/_40sdp"
         android:src="@drawable/baseline_play_arrow"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
         app:layout_constraintStart_toStartOf="parent" />
 
