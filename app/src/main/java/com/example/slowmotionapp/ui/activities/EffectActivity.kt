@@ -23,12 +23,14 @@ import com.example.slowmotionapp.effects.EPlayerView
 import com.example.slowmotionapp.effects.FilterAdapter
 import com.example.slowmotionapp.effects.FilterType
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
+import com.example.slowmotionapp.utils.Utils
 import com.example.slowmotionapp.utils.Utils.createCacheTempFile
 import com.example.slowmotionapp.utils.Utils.getVideoSize
 import com.example.slowmotionapp.utils.Utils.player
 import com.example.slowmotionapp.utils.Utils.saveEditedVideo
 import com.example.slowmotionapp.utils.Utils.setUpSimpleExoPlayer
 import com.google.android.exoplayer2.Player
+import java.io.File
 
 class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
 
@@ -47,6 +49,8 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
     private var mStartPosition = 0
     private var mTimeVideo = 0
 
+    private lateinit var file: File
+
     companion object {
         var exoPLayerView: EPlayerView? = null
         var effectPosition = 0
@@ -61,7 +65,13 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
         videoUri = intent.getStringExtra("VideoUri")
         type = intent.getIntExtra(Constants.TYPE, 0)
 
-        mainCachedFile = videoUri!!
+        file = if (type == Constants.RECORD_VIDEO) {
+            File(Utils.convertContentUriToFilePath(videoUri!!))
+        } else {
+            File(videoUri!!)
+        }
+
+        mainCachedFile = file.toString()
 
         binding.backBtn.setOnClickListener {
             finish()

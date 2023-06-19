@@ -3,7 +3,7 @@ package com.example.slowmotionapp.adapters
 import android.content.Context
 import android.content.Intent
 import android.media.MediaMetadataRetriever
-import android.provider.MediaStore
+import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -30,15 +30,13 @@ class VideoAdapter(val context: Context, private val videos: List<File>) :
         val titleTextView: TextView = holder.itemView.findViewById(R.id.videoTitle)
 
         val retriever = MediaMetadataRetriever()
-        retriever.setDataSource(videoFile.path)
+        Log.d("SAAD", "onBindViewHolder: ${videoFile.name}")
+        retriever.setDataSource(context, Uri.parse(videoFile.path))
 
         val thumbnail = retriever.frameAtTime
         thumbnailImageView.setImageBitmap(thumbnail)
 
-        val title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
-            ?: getVideoTitleFromMediaStore(videoFile)
-
-        titleTextView.text = title ?: "Untitled"
+        titleTextView.text = videoFile.nameWithoutExtension
 
         holder.itemView.setOnClickListener {
             playVideo = videoFile.path
@@ -51,29 +49,5 @@ class VideoAdapter(val context: Context, private val videos: List<File>) :
     }
 
     class VideoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
-
-    private fun getVideoTitleFromMediaStore(videoFile: File): String? {
-        val projection = arrayOf(MediaStore.Video.Media.TITLE)
-        val selection = "${MediaStore.Video.Media.DATA} = ?"
-        val selectionArgs = arrayOf(videoFile.path)
-        val cursor = context.contentResolver.query(
-            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-            projection,
-            selection,
-            selectionArgs,
-            null
-        )
-
-        var title: String? = null
-        cursor?.use {
-            if (it.moveToFirst()) {
-                val columnIndex = it.getColumnIndex(MediaStore.Video.Media.TITLE)
-                title = it.getString(columnIndex)
-            }
-        }
-
-        cursor?.close()
-        return title
-    }
 
 }
