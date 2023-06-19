@@ -12,7 +12,6 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import android.provider.Settings
-import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -22,7 +21,6 @@ import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.ActivityMainBinding
 import com.example.slowmotionapp.ui.fragments.MyDialogFragment
-import com.example.slowmotionapp.utils.Utils
 import com.example.slowmotionapp.utils.Utils.convertDurationInMin
 import com.example.slowmotionapp.utils.Utils.createCacheTempFile
 import com.example.slowmotionapp.utils.Utils.createVideoFile
@@ -76,6 +74,7 @@ class MainActivity : AppCompatActivity() {
         var permissionAllowed = false
 
         var cameraPermission = false
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

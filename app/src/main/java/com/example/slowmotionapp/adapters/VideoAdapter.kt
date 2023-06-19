@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.media.MediaMetadataRetriever
 import android.net.Uri
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,9 +13,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
 import com.example.slowmotionapp.ui.activities.PlayerActivity
+import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.positionClicked
 import java.io.File
 
-class VideoAdapter(val context: Context, private val videos: List<File>) :
+class VideoAdapter(val context: Context, private val videos: MutableList<File>) :
     RecyclerView.Adapter<VideoAdapter.VideoViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
@@ -30,7 +30,6 @@ class VideoAdapter(val context: Context, private val videos: List<File>) :
         val titleTextView: TextView = holder.itemView.findViewById(R.id.videoTitle)
 
         val retriever = MediaMetadataRetriever()
-        Log.d("SAAD", "onBindViewHolder: ${videoFile.name}")
         retriever.setDataSource(context, Uri.parse(videoFile.path))
 
         val thumbnail = retriever.frameAtTime
@@ -40,6 +39,7 @@ class VideoAdapter(val context: Context, private val videos: List<File>) :
 
         holder.itemView.setOnClickListener {
             playVideo = videoFile.path
+            positionClicked = position
             context.startActivity(Intent(context, PlayerActivity::class.java))
         }
     }
@@ -49,5 +49,10 @@ class VideoAdapter(val context: Context, private val videos: List<File>) :
     }
 
     class VideoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+
+    fun deleteItem(position: Int) {
+        videos.removeAt(position)
+        notifyItemRemoved(position)
+    }
 
 }

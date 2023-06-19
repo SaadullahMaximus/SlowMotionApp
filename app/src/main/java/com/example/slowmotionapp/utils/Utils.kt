@@ -50,7 +50,7 @@ object Utils {
         this.listener = listener
     }
 
-    fun fetchVideosFromDirectory(dir: File): List<File> {
+    fun fetchVideosFromDirectory(dir: File): MutableList<File> {
         val videosList = mutableListOf<File>()
 
         if (dir.exists() && dir.isDirectory) {
@@ -194,7 +194,6 @@ object Utils {
             e.printStackTrace()
         }
     }
-
 
     fun getFileExtension(filePath: String): String {
         return filePath.substring(filePath.lastIndexOf("."))
@@ -389,6 +388,13 @@ object Utils {
             }
         }
         return filePath
+    }
+
+    fun deleteVideoFile(filePath: String) {
+        val videoFile = File(filePath)
+        if (videoFile.exists()) {
+            videoFile.delete()
+        }
     }
 
 

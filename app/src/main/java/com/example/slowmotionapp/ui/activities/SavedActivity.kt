@@ -9,12 +9,15 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import com.example.slowmotionapp.R
+import com.example.slowmotionapp.adapters.VideoAdapter
 import com.example.slowmotionapp.databinding.ActivitySavedBinding
 import com.example.slowmotionapp.ui.fragments.savedfragments.SavedCropFragment
 import com.example.slowmotionapp.ui.fragments.savedfragments.SavedEditedFragment
 import com.example.slowmotionapp.ui.fragments.savedfragments.SavedTrimFragment
-import com.example.slowmotionapp.utils.Utils
+import com.example.slowmotionapp.utils.Utils.croppedDir
+import com.example.slowmotionapp.utils.Utils.editedDir
 import com.example.slowmotionapp.utils.Utils.fetchVideosFromDirectory
+import com.example.slowmotionapp.utils.Utils.trimmedDir
 import com.google.android.material.tabs.TabLayout
 
 class SavedActivity : AppCompatActivity() {
@@ -22,9 +25,12 @@ class SavedActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySavedBinding
 
     companion object {
-        val trimmedFiles = fetchVideosFromDirectory(Utils.trimmedDir)
-        val croppedFiles = fetchVideosFromDirectory(Utils.croppedDir)
-        val editedFiles = fetchVideosFromDirectory(Utils.editedDir)
+        lateinit var adapterShowing: VideoAdapter
+
+        var croppedFiles = fetchVideosFromDirectory(croppedDir)
+        var editedFiles = fetchVideosFromDirectory(editedDir)
+
+        var positionClicked = -1
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -93,6 +99,4 @@ class SavedActivity : AppCompatActivity() {
         textView.text = text
         return tabView
     }
-
-
 }

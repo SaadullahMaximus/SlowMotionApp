@@ -1,15 +1,22 @@
 package com.example.slowmotionapp.ui.activities
 
+import android.app.Dialog
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.SeekBar
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.databinding.ActivityPlayerBinding
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
+import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.adapterShowing
+import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.positionClicked
+import com.example.slowmotionapp.utils.Utils.deleteVideoFile
 import com.example.slowmotionapp.utils.Utils.milliSecondsToTimer
 
 class PlayerActivity : AppCompatActivity() {
@@ -24,7 +31,6 @@ class PlayerActivity : AppCompatActivity() {
     private var visible = true
 
     private var duration: Int = 0
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityPlayerBinding.inflate(layoutInflater)
@@ -52,6 +58,7 @@ class PlayerActivity : AppCompatActivity() {
         progressUpdateRunnable = Runnable {
             updateSeekBarProgress()
         }
+
         handler.postDelayed(progressUpdateRunnable, 100)
 
         binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -76,7 +83,7 @@ class PlayerActivity : AppCompatActivity() {
             }
         })
 
-        binding.overlayLayout.setOnClickListener {
+        binding.overlayLayoutPlayer.setOnClickListener {
             if (visible) {
                 hideViews()
             } else {
@@ -84,6 +91,11 @@ class PlayerActivity : AppCompatActivity() {
                 handler.removeCallbacks(hideViewsRunnable)
                 handler.postDelayed(hideViewsRunnable, 5000)
             }
+        }
+
+        binding.overlayLayoutPlayer.setOnLongClickListener {
+            showFullScreenDialog()
+            true
         }
 
         binding.playBtn.setOnClickListener {
@@ -126,6 +138,59 @@ class PlayerActivity : AppCompatActivity() {
 
         binding.backBtn.setOnClickListener {
             finish()
+        }
+    }
+
+    private fun showFullScreenDialog() {
+        val dialog = Dialog(this, R.style.FullScreenDialogStyle)
+        dialog.setContentView(R.layout.player_long_pressed_dialog)
+
+        val btnEdit = dialog.findViewById<TextView>(R.id.btnEdit)
+        val btnShare = dialog.findViewById<TextView>(R.id.btnShare)
+        val btnRename = dialog.findViewById<TextView>(R.id.btnRename)
+        val btnDelete = dialog.findViewById<TextView>(R.id.btnDelete)
+        val overLayout = dialog.findViewById<FrameLayout>(R.id.overlay_layout)
+
+        btnEdit.setOnClickListener {
+            Toast.makeText(this, "Edit", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+        }
+
+        btnShare.setOnClickListener {
+            Toast.makeText(this, "Share", Toast.LENGTH_SHORT).show()
+            pauseVideo()
+            dialog.dismiss()
+        }
+
+        btnRename.setOnClickListener {
+            Toast.makeText(this, "Rename", Toast.LENGTH_SHORT).show()
+            pauseVideo()
+            dialog.dismiss()
+        }
+
+        btnDelete.setOnClickListener {
+            pauseVideo()
+            deleteVideoFile(playVideo)
+            adapterShowing.deleteItem(positionClicked)
+
+            dialog.dismiss()
+            finish()
+        }
+
+
+        overLayout.setOnClickListener {
+            Toast.makeText(this, "Over layout", Toast.LENGTH_SHORT).show()
+            pauseVideo()
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun pauseVideo() {
+        if (binding.videoView.isPlaying) {
+            binding.playBtn.setImageResource(R.drawable.baseline_play_arrow)
+            binding.videoView.pause()
         }
     }
 

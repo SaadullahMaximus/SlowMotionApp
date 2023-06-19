@@ -8,9 +8,8 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.slowmotionapp.adapters.VideoAdapter
 import com.example.slowmotionapp.databinding.FragmentSavedCropBinding
-import com.example.slowmotionapp.ui.activities.MainActivity
+import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.adapterShowing
 import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.croppedFiles
-import com.example.slowmotionapp.ui.fragments.MyDialogFragment
 
 class SavedCropFragment : Fragment() {
 
@@ -31,12 +30,7 @@ class SavedCropFragment : Fragment() {
             binding.btnCreateNew.visibility = View.GONE
             binding.title.visibility = View.GONE
 
-            val videoAdapter = VideoAdapter(requireContext(), croppedFiles)
-
-            binding.recyclerView.apply {
-                layoutManager = GridLayoutManager(requireContext(), 3)
-                adapter = videoAdapter
-            }
+            adapterSet()
         }
 
         binding.btnCreateNew.setOnClickListener {
@@ -45,4 +39,16 @@ class SavedCropFragment : Fragment() {
 
         return binding.root
     }
+
+    private fun adapterSet(){
+        val videoAdapter = VideoAdapter(requireContext(), croppedFiles)
+
+        adapterShowing = videoAdapter
+
+        binding.recyclerView.apply {
+            layoutManager = GridLayoutManager(requireContext(), 3)
+            adapter = videoAdapter
+        }
+    }
+
 }

@@ -8,6 +8,8 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.slowmotionapp.adapters.VideoAdapter
 import com.example.slowmotionapp.databinding.FragmentSavedEditedBinding
+import com.example.slowmotionapp.ui.activities.SavedActivity
+import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.adapterShowing
 import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.editedFiles
 
 class SavedEditedFragment : Fragment() {
@@ -28,13 +30,8 @@ class SavedEditedFragment : Fragment() {
             binding.lottieAnimationView.visibility = View.GONE
             binding.btnCreateNew.visibility = View.GONE
             binding.title.visibility = View.GONE
+            adapterSet()
 
-            val videoAdapter = VideoAdapter(requireContext(), editedFiles)
-
-            binding.recyclerView.apply {
-                layoutManager = GridLayoutManager(requireContext(), 3)
-                adapter = videoAdapter
-            }
         }
 
         binding.btnCreateNew.setOnClickListener {
@@ -42,5 +39,17 @@ class SavedEditedFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+
+    private fun adapterSet() {
+        val videoAdapter = VideoAdapter(requireContext(), editedFiles)
+
+        adapterShowing = videoAdapter
+
+        binding.recyclerView.apply {
+            layoutManager = GridLayoutManager(requireContext(), 3)
+            adapter = videoAdapter
+        }
     }
 }
