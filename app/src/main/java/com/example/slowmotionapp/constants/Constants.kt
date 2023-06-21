@@ -11,7 +11,8 @@ class Constants {
                 Manifest.permission.READ_MEDIA_VIDEO, Manifest.permission.READ_MEDIA_AUDIO
             )
         } else {
-            arrayOf( Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            arrayOf(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE
             )
         }
@@ -22,7 +23,8 @@ class Constants {
             )
         } else {
             arrayOf(
-                Manifest.permission.READ_EXTERNAL_STORAGE
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
             )
         }
 

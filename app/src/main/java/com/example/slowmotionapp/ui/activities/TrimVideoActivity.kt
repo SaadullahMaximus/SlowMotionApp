@@ -187,8 +187,7 @@ class TrimVideoActivity : AppCompatActivity() {
                     //output file is generated and send to video processing
                     outputFile = createTrimmedFile()
 
-                    Log.d("HELLO", "onCreate: ${file.toString()} ")
-                    Log.d("HELLO", "onCreate:Output ${outputFile.toString()} ")
+                    val durationSeconds = (mEndPosition - mStartPosition)
 
                     trimVideo(
                         this,
@@ -199,7 +198,7 @@ class TrimVideoActivity : AppCompatActivity() {
                             "-i",
                             file.toString(),
                             "-t",
-                            mEndPosition.toString(),
+                            durationSeconds.toString(),
                             "-c:v",
                             "copy",
                             "-c:a",
