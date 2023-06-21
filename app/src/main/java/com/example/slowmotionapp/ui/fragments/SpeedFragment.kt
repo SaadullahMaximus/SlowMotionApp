@@ -203,8 +203,6 @@ class SpeedFragment : Fragment() {
                 valueOf2,
                 path
             )
-
-
             executeFFMPEG(strArr, path)
         } catch (unused: Exception) {
             val file = File(path)

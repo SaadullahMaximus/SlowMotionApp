@@ -9,7 +9,6 @@ import android.widget.FrameLayout
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.DialogFragment
 import com.example.slowmotionapp.R
-import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.ui.activities.MainActivity
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.isFromTrim
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.justEffects

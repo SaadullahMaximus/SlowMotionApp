@@ -74,8 +74,6 @@ class MainActivity : AppCompatActivity() {
         var permissionAllowed = false
 
         var cameraPermission = false
-        const val namePattern = "[a-zA-Z0-9_]+"
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

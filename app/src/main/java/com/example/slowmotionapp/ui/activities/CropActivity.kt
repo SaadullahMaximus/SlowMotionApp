@@ -218,9 +218,9 @@ class CropActivity : AppCompatActivity() {
         val mediaMetadataRetriever = MediaMetadataRetriever()
         mediaMetadataRetriever.setDataSource(this, Uri.parse(mainCachedFile))
 
-        keyCodeR = Integer.valueOf(mediaMetadataRetriever.extractMetadata(19)!!).toInt()
-        keyCodeQ = Integer.valueOf(mediaMetadataRetriever.extractMetadata(18)!!).toInt()
-        keyCodeW = 0
+        keyCodeR = Integer.valueOf(mediaMetadataRetriever.extractMetadata(18)!!).toInt()
+        keyCodeQ = Integer.valueOf(mediaMetadataRetriever.extractMetadata(19)!!).toInt()
+        keyCodeW = Integer.valueOf(mediaMetadataRetriever.extractMetadata(24)!!).toInt()
 
 
         val layoutParams = binding.cropView.layoutParams as FrameLayout.LayoutParams

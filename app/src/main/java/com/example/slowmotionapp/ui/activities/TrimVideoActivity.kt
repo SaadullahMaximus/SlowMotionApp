@@ -339,7 +339,7 @@ class TrimVideoActivity : AppCompatActivity() {
         progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
         progressDialog.isIndeterminate = true
         progressDialog.setCancelable(false)
-        progressDialog.setMessage("Please Wait")
+        progressDialog.setMessage("Video Trimming")
         progressDialog.show()
         val ffmpegCommand: String = commandsGenerator(strArr)
         FFmpeg.executeAsync(
