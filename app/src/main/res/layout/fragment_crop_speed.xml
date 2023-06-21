@@ -94,25 +94,24 @@
         android:id="@+id/frameLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="@dimen/_5sdp"
-        android:layout_marginBottom="@dimen/_8sdp"
-        app:layout_constraintBottom_toTopOf="@id/playPauseButton"
+        android:layout_marginTop="@dimen/_9sdp"
+        app:layout_constraintBottom_toTopOf="@+id/totalDurationTextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/linearLayoutBtnContainer">
+        app:layout_constraintTop_toBottomOf="@+id/backBtn">
 
         <FrameLayout
             android:id="@+id/layout_movie_wrapper"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:visibility="gone" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
 
         <VideoView
             android:id="@+id/videoView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center" />
+            android:layout_gravity="center"
+            android:visibility="gone" />
 
         <com.edmodo.cropper.CropImageView
             android:id="@+id/cropperView"
@@ -129,19 +128,22 @@
         android:id="@+id/playPauseButton"
         android:layout_width="@dimen/_20sdp"
         android:layout_height="@dimen/_20sdp"
-        android:layout_marginStart="@dimen/_40sdp"
-        android:layout_marginTop="@dimen/_22sdp"
+        android:layout_marginStart="@dimen/_65sdp"
+        android:layout_marginTop="@dimen/_3sdp"
+        android:layout_marginBottom="@dimen/_3sdp"
         android:src="@drawable/baseline_play_arrow"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/frameLayout" />
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
         android:id="@+id/playPauseButton2"
         android:layout_width="@dimen/_20sdp"
         android:layout_height="@dimen/_20sdp"
-        android:layout_marginStart="@dimen/_40sdp"
+        android:layout_marginStart="@dimen/_65sdp"
+        android:layout_marginTop="@dimen/_3sdp"
+        android:layout_marginBottom="@dimen/_3sdp"
         android:src="@drawable/baseline_play_arrow"
-        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -151,15 +153,15 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_10sdp"
-        android:layout_marginTop="@dimen/_24sdp"
+        android:layout_marginTop="@dimen/_3sdp"
         android:layout_marginEnd="@dimen/_10sdp"
-        android:layout_marginBottom="@dimen/_20sdp"
+        android:layout_marginBottom="@dimen/_3sdp"
         android:progressDrawable="@drawable/custom_seekbar_progress"
         android:thumb="@drawable/custom_seekbar_thumb"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
         app:layout_constraintEnd_toStartOf="@+id/totalDurationTextView"
-        app:layout_constraintStart_toEndOf="@+id/playPauseButton"
-        app:layout_constraintTop_toBottomOf="@id/frameLayout" />
+        app:layout_constraintStart_toEndOf="@+id/playPauseButton" />
 
     <SeekBar
         android:id="@+id/seekBar2"
@@ -167,36 +169,34 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_10sdp"
-        android:layout_marginTop="@dimen/_24sdp"
-        android:layout_marginEnd="@dimen/_40sdp"
-        android:layout_marginBottom="@dimen/_20sdp"
+        android:layout_marginTop="@dimen/_3sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
+        android:layout_marginBottom="@dimen/_3sdp"
         android:progressDrawable="@drawable/custom_seekbar_progress"
         android:thumb="@drawable/custom_seekbar_thumb"
-        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/playPauseButton2"
-        app:layout_constraintTop_toBottomOf="@id/frameLayout" />
+        app:layout_constraintEnd_toStartOf="@+id/totalDurationTextView"
+        app:layout_constraintStart_toEndOf="@+id/playPauseButton2" />
 
     <TextView
         android:id="@+id/totalDurationTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/seekBar"
-        android:layout_marginEnd="@dimen/_40sdp"
+        android:layout_marginTop="@dimen/_3sdp"
+        android:layout_marginEnd="@dimen/_50sdp"
+        android:layout_marginBottom="@dimen/_3sdp"
         android:fontFamily="@font/fredokalight"
         android:text="@string/_00_00_"
         android:textColor="@color/white"
-        android:textSize="@dimen/_14sdp"
+        android:textSize="@dimen/_11sdp"
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/frameLayout" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <FrameLayout
         android:id="@+id/fragment_container_main"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_180sdp"
-        android:layout_marginTop="@dimen/_8sdp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

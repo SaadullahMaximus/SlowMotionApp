@@ -10,9 +10,8 @@
     <TextView
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_13sdp"
-        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_height="wrap_content"        android:layout_margin="@dimen/_10sdp"
+
         android:fontFamily="@font/fredokaregular"
         android:text="Click to Crop"
         android:textColor="@color/white"
@@ -55,7 +54,7 @@
                 android:id="@+id/imageViewFree"
                 android:layout_width="@dimen/_20sdp"
                 android:layout_height="@dimen/_17sdp"
-                android:src="@drawable/crop_select" />
+                android:src="@drawable/crop_unselect" />
 
             <TextView
                 android:layout_width="wrap_content"

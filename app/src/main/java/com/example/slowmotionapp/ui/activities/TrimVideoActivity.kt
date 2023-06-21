@@ -249,9 +249,11 @@ class TrimVideoActivity : AppCompatActivity() {
             BarThumb.LEFT -> {
                 mStartPosition = (mDuration * value / 100L).toInt()
                 binding.trimVideoView.seekTo(mStartPosition * 1000)
+                binding.startTime.text = milliSecondsToTimer(((mStartPosition * 1000).toLong()))
             }
             BarThumb.RIGHT -> {
                 mEndPosition = (mDuration * value / 100L).toInt()
+                binding.endTime.text = milliSecondsToTimer(((mEndPosition * 1000).toLong()))
             }
         }
         mTimeVideo = mEndPosition - mStartPosition

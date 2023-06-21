@@ -1,344 +1,300 @@
-package com.ahmedbadereldin.videotrimmer.customVideoViews;
+package com.ahmedbadereldin.videotrimmer.customVideoViews
 
-import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.util.AttributeSet;
-import android.view.MotionEvent;
-import android.view.View;
+import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Rect
+import android.util.AttributeSet
+import android.view.MotionEvent
+import android.view.View
+import androidx.core.content.ContextCompat
+import com.ahmedbadereldin.videotrimmer.R
 
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
-
-import com.ahmedbadereldin.videotrimmer.R;
-
-import java.util.ArrayList;
-import java.util.List;
-
-
-public class CustomRangeSeekBar extends View {
-
-    private int mHeightTimeLine;
-    private List<BarThumb> mBarThumbs;
-    private List<OnRangeSeekBarChangeListener> mListeners;
-    private float mMaxWidth;
-    private float mThumbWidth;
-    private float mThumbHeight;
-    private int mViewWidth;
-    private float mPixelRangeMin;
-    private float mPixelRangeMax;
-    private float mScaleRangeMax;
-    private boolean mFirstRun;
-
-    private final Paint mShadow = new Paint();
-    private final Paint mLine = new Paint();
-
-    public CustomRangeSeekBar(@NonNull Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+class CustomRangeSeekBar @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet?,
+    defStyleAttr: Int = 0
+) : View(context, attrs, defStyleAttr) {
+    private var mHeightTimeLine = 0
+    private var mBarThumbs: List<BarThumb>? = null
+    private var mListeners: MutableList<OnRangeSeekBarChangeListener>? = null
+    private var mMaxWidth = 0f
+    private var mThumbWidth = 0f
+    private var mThumbHeight = 0f
+    private var mViewWidth = 0
+    private var mPixelRangeMin = 0f
+    private var mPixelRangeMax = 0f
+    private var mScaleRangeMax = 0f
+    private var mFirstRun = false
+    private val mShadow = Paint()
+    private val mLine = Paint()
+    private fun init() {
+        mBarThumbs = BarThumb.initThumbs(resources)
+        mThumbWidth = BarThumb.getWidthBitmap(mBarThumbs!!).toFloat()
+        mThumbHeight = BarThumb.getHeightBitmap(mBarThumbs!!).toFloat()
+        mScaleRangeMax = 100f
+        mHeightTimeLine = context.resources.getDimensionPixelOffset(R.dimen.frames_video_height)
+        isFocusable = true
+        isFocusableInTouchMode = true
+        mFirstRun = true
+        val shadowColor = ContextCompat.getColor(context, R.color.shadow_color)
+        mShadow.isAntiAlias = true
+        mShadow.color = shadowColor
+        mShadow.alpha = 177
+        val lineColor = ContextCompat.getColor(context, R.color.line_color)
+        mLine.isAntiAlias = true
+        mLine.color = lineColor
+        mLine.alpha = 200
     }
 
-    public CustomRangeSeekBar(@NonNull Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init();
+    fun initMaxWidth() {
+        mMaxWidth = mBarThumbs!![1].pos - mBarThumbs!![0].pos
+        onSeekStop(this, 0, mBarThumbs!![0].getVal())
+        onSeekStop(this, 1, mBarThumbs!![1].getVal())
     }
 
-    private void init() {
-        mBarThumbs = BarThumb.initThumbs(getResources());
-        mThumbWidth = BarThumb.getWidthBitmap(mBarThumbs);
-        mThumbHeight = BarThumb.getHeightBitmap(mBarThumbs);
-
-        mScaleRangeMax = 100;
-        mHeightTimeLine = getContext().getResources().getDimensionPixelOffset(R.dimen.frames_video_height);
-
-        setFocusable(true);
-        setFocusableInTouchMode(true);
-
-        mFirstRun = true;
-
-        int shadowColor = ContextCompat.getColor(getContext(), R.color.shadow_color);
-        mShadow.setAntiAlias(true);
-        mShadow.setColor(shadowColor);
-        mShadow.setAlpha(177);
-
-        int lineColor = ContextCompat.getColor(getContext(), R.color.line_color);
-        mLine.setAntiAlias(true);
-        mLine.setColor(lineColor);
-        mLine.setAlpha(200);
-    }
-
-    public void initMaxWidth() {
-        mMaxWidth = mBarThumbs.get(1).getPos() - mBarThumbs.get(0).getPos();
-
-        onSeekStop(this, 0, mBarThumbs.get(0).getVal());
-        onSeekStop(this, 1, mBarThumbs.get(1).getVal());
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
-        int minW = getPaddingLeft() + getPaddingRight() + getSuggestedMinimumWidth();
-        mViewWidth = resolveSizeAndState(minW, widthMeasureSpec, 1);
-
-        int minH = getPaddingBottom() + getPaddingTop() + (int) mThumbHeight;
-        int viewHeight = resolveSizeAndState(minH, heightMeasureSpec, 1);
-
-        setMeasuredDimension(mViewWidth, viewHeight);
-
-        mPixelRangeMin = 0;
-        mPixelRangeMax = mViewWidth - mThumbWidth;
-
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        val minW = paddingLeft + paddingRight + suggestedMinimumWidth
+        mViewWidth = resolveSizeAndState(minW, widthMeasureSpec, 1)
+        val minH = paddingBottom + paddingTop + mThumbHeight.toInt()
+        val viewHeight = resolveSizeAndState(minH, heightMeasureSpec, 1)
+        setMeasuredDimension(mViewWidth, viewHeight)
+        mPixelRangeMin = 0f
+        mPixelRangeMax = mViewWidth - mThumbWidth
         if (mFirstRun) {
-            for (int i = 0; i < mBarThumbs.size(); i++) {
-                BarThumb th = mBarThumbs.get(i);
-                th.setVal(mScaleRangeMax * i);
-                th.setPos(mPixelRangeMax * i);
+            for (i in mBarThumbs!!.indices) {
+                val th = mBarThumbs!![i]
+                th.setVal(mScaleRangeMax * i)
+                th.pos = mPixelRangeMax * i
             }
-            onCreate(this, currentThumb, getThumbValue(currentThumb));
-            mFirstRun = false;
+            onCreate(this, currentThumb, getThumbValue(currentThumb))
+            mFirstRun = false
         }
     }
 
-    @Override
-    protected void onDraw(@NonNull Canvas canvas) {
-        super.onDraw(canvas);
-
-        drawShadow(canvas);
-        drawThumbs(canvas);
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        drawShadow(canvas)
+        drawThumbs(canvas)
     }
 
-    private int currentThumb = 0;
+    private var currentThumb = 0
 
-    @Override
-    public boolean onTouchEvent(@NonNull MotionEvent ev) {
-        final BarThumb mBarThumb;
-        final BarThumb mBarThumb2;
-        final float coordinate = ev.getX();
-        final int action = ev.getAction();
+    init {
+        init()
+    }
 
-        switch (action) {
-            case MotionEvent.ACTION_DOWN: {
-                currentThumb = getClosestThumb(coordinate);
-
+    override fun onTouchEvent(ev: MotionEvent): Boolean {
+        val mBarThumb: BarThumb
+        val mBarThumb2: BarThumb
+        val coordinate = ev.x
+        when (ev.action) {
+            MotionEvent.ACTION_DOWN -> {
+                currentThumb = getClosestThumb(coordinate)
                 if (currentThumb == -1) {
-                    return false;
+                    return false
                 }
-
-                mBarThumb = mBarThumbs.get(currentThumb);
-                mBarThumb.setLastTouchX(coordinate);
-                onSeekStart(this, currentThumb, mBarThumb.getVal());
-                return true;
+                mBarThumb = mBarThumbs!![currentThumb]
+                mBarThumb.lastTouchX = coordinate
+                onSeekStart(this, currentThumb, mBarThumb.getVal())
+                return true
             }
-            case MotionEvent.ACTION_UP: {
-
+            MotionEvent.ACTION_UP -> {
                 if (currentThumb == -1) {
-                    return false;
+                    return false
                 }
-
-                mBarThumb = mBarThumbs.get(currentThumb);
-                onSeekStop(this, currentThumb, mBarThumb.getVal());
-                return true;
+                mBarThumb = mBarThumbs!![currentThumb]
+                onSeekStop(this, currentThumb, mBarThumb.getVal())
+                return true
             }
-
-            case MotionEvent.ACTION_MOVE: {
-                mBarThumb = mBarThumbs.get(currentThumb);
-                mBarThumb2 = mBarThumbs.get(currentThumb == 0 ? 1 : 0);
-                final float dx = coordinate - mBarThumb.getLastTouchX();
-                final float newX = mBarThumb.getPos() + dx;
-
+            MotionEvent.ACTION_MOVE -> {
+                mBarThumb = mBarThumbs!![currentThumb]
+                mBarThumb2 = mBarThumbs!![if (currentThumb == 0) 1 else 0]
+                val dx = coordinate - mBarThumb.lastTouchX
+                val newX = mBarThumb.pos + dx
                 if (currentThumb == 0) {
-
-                    if ((newX + mBarThumb.getWidthBitmap()) >= mBarThumb2.getPos()) {
-                        mBarThumb.setPos(mBarThumb2.getPos() - mBarThumb.getWidthBitmap());
+                    if (newX + mBarThumb.widthBitmap >= mBarThumb2.pos) {
+                        mBarThumb.pos = mBarThumb2.pos - mBarThumb.widthBitmap
                     } else if (newX <= mPixelRangeMin) {
-                        mBarThumb.setPos(mPixelRangeMin);
-                        if ((mBarThumb2.getPos() - (mBarThumb.getPos() + dx)) > mMaxWidth) {
-                            mBarThumb2.setPos(mBarThumb.getPos() + dx + mMaxWidth);
-                            setThumbPos(1, mBarThumb2.getPos());
+                        mBarThumb.pos = mPixelRangeMin
+                        if (mBarThumb2.pos - (mBarThumb.pos + dx) > mMaxWidth) {
+                            mBarThumb2.pos = mBarThumb.pos + dx + mMaxWidth
+                            setThumbPos(1, mBarThumb2.pos)
                         }
                     } else {
-                        if ((mBarThumb2.getPos() - (mBarThumb.getPos() + dx)) > mMaxWidth) {
-                            mBarThumb2.setPos(mBarThumb.getPos() + dx + mMaxWidth);
-                            setThumbPos(1, mBarThumb2.getPos());
+                        if (mBarThumb2.pos - (mBarThumb.pos + dx) > mMaxWidth) {
+                            mBarThumb2.pos = mBarThumb.pos + dx + mMaxWidth
+                            setThumbPos(1, mBarThumb2.pos)
                         }
-                        mBarThumb.setPos(mBarThumb.getPos() + dx);
-
-                        mBarThumb.setLastTouchX(coordinate);
+                        mBarThumb.pos = mBarThumb.pos + dx
+                        mBarThumb.lastTouchX = coordinate
                     }
-
                 } else {
-                    if (newX <= mBarThumb2.getPos() + mBarThumb2.getWidthBitmap()) {
-                        mBarThumb.setPos(mBarThumb2.getPos() + mBarThumb.getWidthBitmap());
+                    if (newX <= mBarThumb2.pos + mBarThumb2.widthBitmap) {
+                        mBarThumb.pos = mBarThumb2.pos + mBarThumb.widthBitmap
                     } else if (newX >= mPixelRangeMax) {
-                        mBarThumb.setPos(mPixelRangeMax);
-                        if (((mBarThumb.getPos() + dx) - mBarThumb2.getPos()) > mMaxWidth) {
-                            mBarThumb2.setPos(mBarThumb.getPos() + dx - mMaxWidth);
-                            setThumbPos(0, mBarThumb2.getPos());
+                        mBarThumb.pos = mPixelRangeMax
+                        if (mBarThumb.pos + dx - mBarThumb2.pos > mMaxWidth) {
+                            mBarThumb2.pos = mBarThumb.pos + dx - mMaxWidth
+                            setThumbPos(0, mBarThumb2.pos)
                         }
                     } else {
-                        if (((mBarThumb.getPos() + dx) - mBarThumb2.getPos()) > mMaxWidth) {
-                            mBarThumb2.setPos(mBarThumb.getPos() + dx - mMaxWidth);
-                            setThumbPos(0, mBarThumb2.getPos());
+                        if (mBarThumb.pos + dx - mBarThumb2.pos > mMaxWidth) {
+                            mBarThumb2.pos = mBarThumb.pos + dx - mMaxWidth
+                            setThumbPos(0, mBarThumb2.pos)
                         }
-                        mBarThumb.setPos(mBarThumb.getPos() + dx);
-                        mBarThumb.setLastTouchX(coordinate);
+                        mBarThumb.pos = mBarThumb.pos + dx
+                        mBarThumb.lastTouchX = coordinate
                     }
                 }
-
-                setThumbPos(currentThumb, mBarThumb.getPos());
-                invalidate();
-                return true;
+                setThumbPos(currentThumb, mBarThumb.pos)
+                invalidate()
+                return true
             }
         }
-        return false;
+        return false
     }
 
-
-    private float pixelToScale(int index, float pixelValue) {
-        float scale = (pixelValue * 100) / mPixelRangeMax;
-        if (index == 0) {
-            float pxThumb = (scale * mThumbWidth) / 100;
-            return scale + (pxThumb * 100) / mPixelRangeMax;
+    private fun pixelToScale(index: Int, pixelValue: Float): Float {
+        val scale = pixelValue * 100 / mPixelRangeMax
+        return if (index == 0) {
+            val pxThumb = scale * mThumbWidth / 100
+            scale + pxThumb * 100 / mPixelRangeMax
         } else {
-            float pxThumb = ((100 - scale) * mThumbWidth) / 100;
-            return scale - (pxThumb * 100) / mPixelRangeMax;
+            val pxThumb = (100 - scale) * mThumbWidth / 100
+            scale - pxThumb * 100 / mPixelRangeMax
         }
     }
 
-    private float scaleToPixel(int index, float scaleValue) {
-        float px = (scaleValue * mPixelRangeMax) / 100;
-        if (index == 0) {
-            float pxThumb = (scaleValue * mThumbWidth) / 100;
-            return px - pxThumb;
+    private fun scaleToPixel(index: Int, scaleValue: Float): Float {
+        val px = scaleValue * mPixelRangeMax / 100
+        return if (index == 0) {
+            val pxThumb = scaleValue * mThumbWidth / 100
+            px - pxThumb
         } else {
-            float pxThumb = ((100 - scaleValue) * mThumbWidth) / 100;
-            return px + pxThumb;
+            val pxThumb = (100 - scaleValue) * mThumbWidth / 100
+            px + pxThumb
         }
     }
 
-    private void calculateThumbValue(int index) {
-        if (index < mBarThumbs.size() && !mBarThumbs.isEmpty()) {
-            BarThumb th = mBarThumbs.get(index);
-            th.setVal(pixelToScale(index, th.getPos()));
-            onSeek(this, index, th.getVal());
+    private fun calculateThumbValue(index: Int) {
+        if (index < mBarThumbs!!.size && mBarThumbs!!.isNotEmpty()) {
+            val th = mBarThumbs!![index]
+            th.setVal(pixelToScale(index, th.pos))
+            onSeek(this, index, th.getVal())
         }
     }
 
-    private void calculateThumbPos(int index) {
-        if (index < mBarThumbs.size() && !mBarThumbs.isEmpty()) {
-            BarThumb th = mBarThumbs.get(index);
-            th.setPos(scaleToPixel(index, th.getVal()));
+    private fun calculateThumbPos(index: Int) {
+        if (index < mBarThumbs!!.size && mBarThumbs!!.isNotEmpty()) {
+            val th = mBarThumbs!![index]
+            th.pos = scaleToPixel(index, th.getVal())
         }
     }
 
-    private float getThumbValue(int index) {
-        return mBarThumbs.get(index).getVal();
+    private fun getThumbValue(index: Int): Float {
+        return mBarThumbs!![index].getVal()
     }
 
-    public void setThumbValue(int index, float value) {
-        mBarThumbs.get(index).setVal(value);
-        calculateThumbPos(index);
-        invalidate();
+    fun setThumbValue(index: Int, value: Float) {
+        mBarThumbs!![index].setVal(value)
+        calculateThumbPos(index)
+        invalidate()
     }
 
-    private void setThumbPos(int index, float pos) {
-        mBarThumbs.get(index).setPos(pos);
-        calculateThumbValue(index);
-        invalidate();
+    private fun setThumbPos(index: Int, pos: Float) {
+        mBarThumbs!![index].pos = pos
+        calculateThumbValue(index)
+        invalidate()
     }
 
-    private int getClosestThumb(float coordinate) {
-        int closest = -1;
-        if (!mBarThumbs.isEmpty()) {
-            for (int i = 0; i < mBarThumbs.size(); i++) {
-                final float v = mBarThumbs.get(i).getPos() + mThumbWidth;
-                if (coordinate >= mBarThumbs.get(i).getPos() && coordinate <= v) {
-                    closest = mBarThumbs.get(i).getIndex();
+    private fun getClosestThumb(coordinate: Float): Int {
+        var closest = -1
+        if (mBarThumbs!!.isNotEmpty()) {
+            for (i in mBarThumbs!!.indices) {
+                val v = mBarThumbs!![i].pos + mThumbWidth
+                if (coordinate >= mBarThumbs!![i].pos && coordinate <= v) {
+                    closest = mBarThumbs!![i].index
                 }
             }
         }
-        return closest;
+        return closest
     }
 
-    private void drawShadow(@NonNull Canvas canvas) {
-        if (!mBarThumbs.isEmpty()) {
-
-            for (BarThumb barThumb : mBarThumbs) {
-                final float x = barThumb.getPos();
-                if (barThumb.getIndex() == 0) {
+    private fun drawShadow(canvas: Canvas) {
+        if (mBarThumbs!!.isNotEmpty()) {
+            for (barThumb in mBarThumbs!!) {
+                val x = barThumb.pos
+                if (barThumb.index == 0) {
                     if (x > mPixelRangeMin) {
-                        Rect mRect = new Rect(0, (int) (mThumbHeight - mHeightTimeLine) / 2,
-                                (int) (x + (mThumbWidth / 2)), mHeightTimeLine + (int) (mThumbHeight - mHeightTimeLine) / 2);
-                        canvas.drawRect(mRect, mShadow);
+                        val mRect = Rect(
+                            0,
+                            (mThumbHeight - mHeightTimeLine).toInt() / 2,
+                            (x + mThumbWidth / 2).toInt(),
+                            mHeightTimeLine + (mThumbHeight - mHeightTimeLine).toInt() / 2
+                        )
+                        canvas.drawRect(mRect, mShadow)
                     }
                 } else {
                     if (x < mPixelRangeMax) {
-                        Rect mRect = new Rect((int) (x + (mThumbWidth / 2)), (int) (mThumbHeight - mHeightTimeLine) / 2,
-                                (mViewWidth), mHeightTimeLine + (int) (mThumbHeight - mHeightTimeLine) / 2);
-                        canvas.drawRect(mRect, mShadow);
+                        val mRect = Rect(
+                            (x + mThumbWidth / 2).toInt(),
+                            (mThumbHeight - mHeightTimeLine).toInt() / 2,
+                            mViewWidth,
+                            mHeightTimeLine + (mThumbHeight - mHeightTimeLine).toInt() / 2
+                        )
+                        canvas.drawRect(mRect, mShadow)
                     }
                 }
             }
         }
     }
 
-    private void drawThumbs(@NonNull Canvas canvas) {
-
-        if (!mBarThumbs.isEmpty()) {
-            for (BarThumb th : mBarThumbs) {
-                if (th.getIndex() == 0) {
-                    canvas.drawBitmap(th.getBitmap(), th.getPos() + getPaddingLeft(), getPaddingTop(), null);
+    private fun drawThumbs(canvas: Canvas) {
+        if (mBarThumbs!!.isNotEmpty()) {
+            for (th in mBarThumbs!!) {
+                if (th.index == 0) {
+                    canvas.drawBitmap(th.bitmap, th.pos + paddingLeft, paddingTop.toFloat(), null)
                 } else {
-                    canvas.drawBitmap(th.getBitmap(), th.getPos() - getPaddingRight(), getPaddingTop(), null);
+                    canvas.drawBitmap(th.bitmap, th.pos - paddingRight, paddingTop.toFloat(), null)
                 }
             }
         }
     }
 
-    public void addOnRangeSeekBarListener(OnRangeSeekBarChangeListener listener) {
-
+    fun addOnRangeSeekBarListener(listener: OnRangeSeekBarChangeListener) {
         if (mListeners == null) {
-            mListeners = new ArrayList<>();
+            mListeners = ArrayList()
         }
-
-        mListeners.add(listener);
+        mListeners!!.add(listener)
     }
 
-    private void onCreate(CustomRangeSeekBar CustomRangeSeekBar, int index, float value) {
-        if (mListeners == null)
-            return;
-
-        for (OnRangeSeekBarChangeListener item : mListeners) {
-            item.onCreate(CustomRangeSeekBar, index, value);
+    private fun onCreate(CustomRangeSeekBar: CustomRangeSeekBar, index: Int, value: Float) {
+        if (mListeners == null) return
+        for (item in mListeners!!) {
+            item.onCreate(CustomRangeSeekBar, index, value)
         }
     }
 
-    private void onSeek(CustomRangeSeekBar CustomRangeSeekBar, int index, float value) {
-        if (mListeners == null)
-            return;
-
-        for (OnRangeSeekBarChangeListener item : mListeners) {
-            item.onSeek(CustomRangeSeekBar, index, value);
+    private fun onSeek(CustomRangeSeekBar: CustomRangeSeekBar, index: Int, value: Float) {
+        if (mListeners == null) return
+        for (item in mListeners!!) {
+            item.onSeek(CustomRangeSeekBar, index, value)
         }
     }
 
-    private void onSeekStart(CustomRangeSeekBar CustomRangeSeekBar, int index, float value) {
-        if (mListeners == null)
-            return;
-
-        for (OnRangeSeekBarChangeListener item : mListeners) {
-            item.onSeekStart(CustomRangeSeekBar, index, value);
+    private fun onSeekStart(CustomRangeSeekBar: CustomRangeSeekBar, index: Int, value: Float) {
+        if (mListeners == null) return
+        for (item in mListeners!!) {
+            item.onSeekStart(CustomRangeSeekBar, index, value)
         }
     }
 
-    private void onSeekStop(CustomRangeSeekBar CustomRangeSeekBar, int index, float value) {
-        if (mListeners == null)
-            return;
-
-        for (OnRangeSeekBarChangeListener item : mListeners) {
-            item.onSeekStop(CustomRangeSeekBar, index, value);
+    private fun onSeekStop(CustomRangeSeekBar: CustomRangeSeekBar, index: Int, value: Float) {
+        if (mListeners == null) return
+        for (item in mListeners!!) {
+            item.onSeekStop(CustomRangeSeekBar, index, value)
         }
     }
-
 }

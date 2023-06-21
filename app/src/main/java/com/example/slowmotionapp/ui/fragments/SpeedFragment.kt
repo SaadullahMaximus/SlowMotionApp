@@ -23,6 +23,7 @@ import com.example.slowmotionapp.utils.Utils.commandsGenerator
 import com.example.slowmotionapp.utils.Utils.createCacheTempFile
 import com.example.slowmotionapp.utils.Utils.deleteFromGallery
 import com.example.slowmotionapp.utils.Utils.getVideoDuration
+import com.example.slowmotionapp.utils.Utils.player
 import com.example.slowmotionapp.viewmodel.SharedViewModel
 import java.io.File
 
@@ -31,6 +32,8 @@ class SpeedFragment : Fragment() {
 
     private var _binding: FragmentSpeedBinding? = null
     private val binding get() = _binding!!
+
+    private var knobFinalValue = 7
 
     private var videoPlayerState: VideoPlayerState = VideoPlayerState()
 
@@ -63,6 +66,13 @@ class SpeedFragment : Fragment() {
             }
         })
 
+        binding.btnOk.setOnClickListener {
+            if (knobFinalValue != 7) {
+                val tempPath = createCacheTempFile(requireContext())
+                videoMotionCommand(tempPath, knobFinalValue)
+            }
+        }
+
 
 
         return binding.root
@@ -72,12 +82,54 @@ class SpeedFragment : Fragment() {
         // Handle the event when the user stops moving the knob
 
         knobPosition = knobValue * 100F
-        val tempPath = createCacheTempFile(requireContext())
-        videoSpeedChange(tempPath, knobValue)
+        videoSpeedChange(knobValue)
     }
 
-    private fun videoSpeedChange(tempPath: String, knobValue: Int) {
-        videoMotionCommand(tempPath, knobValue)
+    private fun videoSpeedChange(knobValue: Int) {
+
+        knobFinalValue = knobValue
+
+        when (knobValue) {
+            1 -> {
+                player?.setPlaybackSpeed(0.1f)
+            }
+            2 -> {
+                player?.setPlaybackSpeed(0.25f)
+            }
+            3 -> {
+                player?.setPlaybackSpeed(0.40f)
+            }
+            4 -> {
+                player?.setPlaybackSpeed(0.55f)
+            }
+            5 -> {
+                player?.setPlaybackSpeed(0.70f)
+            }
+            6 -> {
+                player?.setPlaybackSpeed(0.85f)
+            }
+            7 -> {
+                player?.setPlaybackSpeed(1f)
+            }
+            8 -> {
+                player?.setPlaybackSpeed(1.3f)
+            }
+            9 -> {
+                player?.setPlaybackSpeed(1.6f)
+            }
+            10 -> {
+                player?.setPlaybackSpeed(2f)
+            }
+            11 -> {
+                player?.setPlaybackSpeed(2.3f)
+            }
+            12 -> {
+                player?.setPlaybackSpeed(2.6f)
+            }
+            13 -> {
+                player?.setPlaybackSpeed(3f)
+            }
+        }
     }
 
     private fun videoMotionCommand(path: String, value: Int) {

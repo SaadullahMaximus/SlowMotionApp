@@ -256,7 +256,7 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
         exoPLayerView!!.layoutParams = RelativeLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
         )
-        binding.frameLayout.addView(exoPLayerView)
+        binding.layoutMovieWrapper.addView(exoPLayerView)
         exoPLayerView!!.onResume()
     }
 

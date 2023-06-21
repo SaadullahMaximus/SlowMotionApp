@@ -35,6 +35,7 @@ import com.example.slowmotionapp.utils.Utils.deleteFromGallery
 import com.example.slowmotionapp.utils.Utils.getScreenWidth
 import com.example.slowmotionapp.utils.Utils.getVideoDuration
 import com.example.slowmotionapp.utils.Utils.getVideoSize
+import com.example.slowmotionapp.utils.Utils.milliSecondsToTimer
 import com.example.slowmotionapp.utils.Utils.player
 import com.example.slowmotionapp.utils.Utils.saveEditedVideo
 import com.example.slowmotionapp.utils.Utils.setUpSimpleExoPlayer
@@ -65,9 +66,14 @@ class CropSpeedFragment : Fragment(), MyListener {
 
     private lateinit var sharedViewModel: SharedViewModel
     private lateinit var videoView: VideoView
-    private lateinit var playPause: ImageView
     private lateinit var cropView: CropImageView
     private lateinit var layoutMovieWrapper: FrameLayout
+
+    private lateinit var seekBar1: SeekBar
+    private lateinit var seekBar2: SeekBar
+
+    private lateinit var playPauseButton1: ImageView
+    private lateinit var playPauseButton2: ImageView
 
     private var screenWidth = 0
 
@@ -103,8 +109,8 @@ class CropSpeedFragment : Fragment(), MyListener {
 
     private var cropOutputFilePath: String? = null
 
-    private lateinit var handler: Handler
-    private lateinit var runnable: Runnable
+    private var handler: Handler = Handler(Looper.getMainLooper())
+    private var runnable: Runnable = Runnable { updateSeekBar() }
 
     private var audioPlayer: MediaPlayer? = null
 
@@ -127,8 +133,13 @@ class CropSpeedFragment : Fragment(), MyListener {
 
         // Initialize and setup the VideoView
         videoView = view.findViewById(R.id.videoView)
-        playPause = view.findViewById(R.id.playPauseButton)
         cropView = view.findViewById(R.id.cropperView)
+
+        seekBar1 = view.findViewById(R.id.seekBar)
+        seekBar2 = view.findViewById(R.id.seekBar2)
+
+        playPauseButton1 = view.findViewById(R.id.playPauseButton)
+        playPauseButton2 = view.findViewById(R.id.playPauseButton2)
 
         layoutMovieWrapper = view.findViewById(R.id.layout_movie_wrapper)
 
@@ -139,6 +150,9 @@ class CropSpeedFragment : Fragment(), MyListener {
         sharedViewModel.videoPath.observe(viewLifecycleOwner) { path ->
             path?.let {
                 videoView.setVideoURI(Uri.parse(path))
+//                layoutMovieWrapper.removeAllViews()
+                setUpSimpleExoPlayer(requireContext())
+                setUoGlPlayerView()
             }
         }
 
@@ -147,19 +161,39 @@ class CropSpeedFragment : Fragment(), MyListener {
             if (newValue == true && videoView.isPlaying) {
                 videoView.pause()
                 videoView.seekTo(0)
-                playPause.setImageResource(R.drawable.baseline_play_arrow)
+                playPauseButton1.setImageResource(R.drawable.baseline_play_arrow)
             }
         }
         // Observe the booleanCropVisible
         sharedViewModel.booleanCropVisible.observe(viewLifecycleOwner) { newValue ->
             if (newValue == true) {
                 cropView.visibility = View.VISIBLE
+                videoView.visibility = View.VISIBLE
+                layoutMovieWrapper.visibility = View.GONE
+                seekBar1.visibility = View.VISIBLE
+                seekBar2.visibility = View.GONE
+
+                player?.pause()
+                player?.seekTo(0)
+                playPauseButton2.setImageResource(R.drawable.baseline_play_arrow)
+
+
+                playPauseButton1.visibility = View.VISIBLE
+                playPauseButton2.visibility = View.INVISIBLE
             } else {
                 cropView.visibility = View.GONE
+                videoView.visibility = View.GONE
+                layoutMovieWrapper.visibility = View.VISIBLE
+                seekBar1.visibility = View.GONE
+                seekBar2.visibility = View.VISIBLE
+
+                playPauseButton1.visibility = View.INVISIBLE
+                playPauseButton2.visibility = View.VISIBLE
             }
         }
         // Observe the cropSelected
         sharedViewModel.cropSelected.observe(viewLifecycleOwner) { newValue ->
+            cropViewDisplay()
             when (newValue) {
                 1 -> {
                     cropView.setFixedAspectRatio(false)
@@ -202,6 +236,21 @@ class CropSpeedFragment : Fragment(), MyListener {
             player!!.volume = it
         }
 
+        player?.addListener(object : Player.Listener {
+            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+                if (playbackState == Player.STATE_ENDED) {
+                    playPauseButton2.setImageResource(R.drawable.baseline_play_arrow)
+                    player!!.seekTo(0)
+                    player!!.pause()
+                    if (musicReady && audioPlayer!!.isPlaying) {
+                        audioPlayer!!.pause()
+                        audioPlayer!!.seekTo(0)
+                    }
+
+                }
+            }
+        })
+
     }
 
     private fun setUoGlPlayerView() {
@@ -211,12 +260,14 @@ class CropSpeedFragment : Fragment(), MyListener {
 
         val videoSize = getVideoSize(requireContext(), Uri.parse(mainCachedFile))
         if (videoSize != null) {
+            Log.d("setUoGlPlayerView", "setUoGlPlayerView: else")
+
             val videoWidth = videoSize.first
             val videoHeight = videoSize.second
 
             val layoutParams = RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
+                ViewGroup.LayoutParams.MATCH_PARENT
             )
 
             // Calculate the desired height based on the video aspect ratio
@@ -224,10 +275,11 @@ class CropSpeedFragment : Fragment(), MyListener {
             val desiredHeight = (ePlayerView!!.width / aspectRatio).toInt()
 
             layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
-            layoutParams.height = desiredHeight
+            layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
 
             ePlayerView!!.layoutParams = layoutParams
         } else {
+            Log.d("setUoGlPlayerView", "setUoGlPlayerView: else")
             ePlayerView!!.layoutParams =
                 RelativeLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -240,7 +292,9 @@ class CropSpeedFragment : Fragment(), MyListener {
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
+
         layoutMovieWrapper.addView(ePlayerView)
+
         ePlayerView!!.onResume()
 
     }
@@ -257,7 +311,9 @@ class CropSpeedFragment : Fragment(), MyListener {
 
         binding.videoView.setVideoURI(Uri.parse(mainCachedFile))
 
-        cropViewDisplay()
+        binding.totalDurationTextView.text =
+            milliSecondsToTimer(getVideoDuration(requireContext(), mainCachedFile).toLong() * 1000)
+
 
         binding.videoView.setOnPreparedListener { mediaPlayer: MediaPlayer? ->
             mediaPlayer?.let {
@@ -317,39 +373,11 @@ class CropSpeedFragment : Fragment(), MyListener {
             binding.seekBar2.visibility = View.VISIBLE
             binding.playPauseButton2.visibility = View.VISIBLE
 
-            binding.totalDurationTextView.visibility = View.GONE
-
             setUpSimpleExoPlayer(requireContext())
             setUoGlPlayerView()
 
             binding.videoView.stopPlayback()
             binding.layoutMovieWrapper.visibility = View.VISIBLE
-
-            player!!.addListener(object : Player.Listener {
-                override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-                    if (playbackState == Player.STATE_READY && playWhenReady) {
-                        binding.seekBar2.max = player!!.duration.toInt()
-
-                        player!!.playWhenReady = true
-
-                        // Initialize handler and runnable
-                        handler = Handler(Looper.getMainLooper())
-                        runnable = Runnable { updateSeekBar() }
-                    }
-                    if (playbackState == Player.STATE_ENDED) {
-                        binding.playPauseButton2.setImageResource(R.drawable.baseline_play_arrow)
-                        player!!.seekTo(0)
-                        player!!.pause()
-                        if (musicReady && audioPlayer!!.isPlaying) {
-                            audioPlayer!!.pause()
-                            audioPlayer!!.seekTo(0)
-                        }
-
-                    }
-                }
-            })
-
-            binding.seekBar2.isEnabled = false
 
             sharedViewModel.cropViewVisible(false)
             childFragmentManager!!.beginTransaction()
@@ -365,14 +393,14 @@ class CropSpeedFragment : Fragment(), MyListener {
                     audioPlayer!!.pause()
                 }
                 // Stop tracking the seek bar progress
-                stopTrackingSeekBar()
+//                stopTrackingSeekBar()
             } else {
                 binding.playPauseButton2.setImageResource(R.drawable.baseline_pause)
                 player!!.play()
                 if (musicReady) {
                     audioPlayer!!.start()
                 }
-                startTrackingSeekBar()
+//                startTrackingSeekBar()
             }
         }
 
@@ -416,15 +444,15 @@ class CropSpeedFragment : Fragment(), MyListener {
         handler.postDelayed(runnable, 1000) // Update every second (adjust as needed)
     }
 
-    private fun startTrackingSeekBar() {
-        // Start updating the seek bar progress
-        handler.postDelayed(runnable, 0)
-    }
-
-    private fun stopTrackingSeekBar() {
-        // Stop updating the seek bar progress
-        handler.removeCallbacks(runnable)
-    }
+//    private fun startTrackingSeekBar() {
+//        // Start updating the seek bar progress
+//        handler.postDelayed(runnable, 0)
+//    }
+//
+//    private fun stopTrackingSeekBar() {
+//        // Stop updating the seek bar progress
+//        handler.removeCallbacks(runnable)
+//    }
 
     private fun rotateVideoCommand(rotateValue: Int) {
         val sb3 = StringBuilder()
@@ -471,7 +499,8 @@ class CropSpeedFragment : Fragment(), MyListener {
                     progressDialog.dismiss()
                     Toast.makeText(requireContext(), "Success", Toast.LENGTH_SHORT).show()
                     mainCachedFile = str
-                    updateVideoUri(str)
+//                    updateVideoUri(str)
+                    sharedViewModel.setVideoUri(str)
                     when (valueCheck) {
                         1 -> {
                             cropViewDisplay()
@@ -509,10 +538,6 @@ class CropSpeedFragment : Fragment(), MyListener {
         }
     }
 
-    private fun updateVideoUri(path: String) {
-        videoView.setVideoURI(Uri.parse(path))
-    }
-
     override fun onDestroy() {
         super.onDestroy()
 
@@ -523,20 +548,20 @@ class CropSpeedFragment : Fragment(), MyListener {
     private fun videoPlay() {
         binding.videoView.start()
         binding.playPauseButton.setImageResource(R.drawable.baseline_pause)
-        if (binding.seekBar.progress == 0) {
-            "00:00".also { binding.totalDurationTextView.text = it }
-            updateProgressBar()
-        } else {
-            binding.totalDurationTextView.text = milliSecondsToTimer(
-                binding.seekBar.progress.toLong()
-            )
-            updateProgressBar()
-        }
+//        if (binding.seekBar.progress == 0) {
+//            "00:00".also { binding.totalDurationTextView.text = it }
+//            updateProgressBar()
+//        } else {
+//            binding.totalDurationTextView.text = milliSecondsToTimer(
+//                binding.seekBar.progress.toLong()
+//            )
+//            updateProgressBar()
+//        }
     }
 
-    private fun updateProgressBar() {
-        mHandler.postDelayed(mUpdateTimeTask, 100)
-    }
+//    private fun updateProgressBar() {
+//        mHandler.postDelayed(mUpdateTimeTask, 100)
+//    }
 
     private fun onVideoCompleted() {
         mHandler.removeCallbacks(mUpdateTimeTask)
@@ -552,50 +577,23 @@ class CropSpeedFragment : Fragment(), MyListener {
             if (binding.seekBar.progress >= binding.seekBar.max) {
                 binding.seekBar.progress =
                     binding.videoView.currentPosition - mStartPosition * 1000
-                binding.totalDurationTextView.text = milliSecondsToTimer(
-                    binding.seekBar.progress.toLong()
-                ) + ""
+//                binding.totalDurationTextView.text = milliSecondsToTimer(
+//                    binding.seekBar.progress.toLong()
+//                ) + ""
                 binding.videoView.seekTo(mStartPosition * 1000)
                 binding.videoView.pause()
                 binding.seekBar.progress = 0
-                binding.totalDurationTextView.text = "00:00"
+//                binding.totalDurationTextView.text = "00:00"
                 binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
             } else {
                 binding.seekBar.progress =
                     binding.videoView.currentPosition - mStartPosition * 1000
-                binding.totalDurationTextView.text = milliSecondsToTimer(
-                    binding.seekBar.progress.toLong()
-                ) + ""
+//                binding.totalDurationTextView.text = milliSecondsToTimer(
+//                    binding.seekBar.progress.toLong()
+//                ) + ""
                 mHandler.postDelayed(this, 100)
             }
         }
-    }
-
-    fun milliSecondsToTimer(milliseconds: Long): String {
-        var finalTimerString = ""
-        val secondsString: String
-        val minutesString: String
-        val hours = (milliseconds / (1000 * 60 * 60)).toInt()
-        val minutes = (milliseconds % (1000 * 60 * 60)).toInt() / (1000 * 60)
-        val seconds = (milliseconds % (1000 * 60 * 60) % (1000 * 60) / 1000).toInt()
-
-        if (hours > 0) {
-            finalTimerString = "$hours:"
-        }
-
-        secondsString = if (seconds < 10) {
-            "0$seconds"
-        } else {
-            "" + seconds
-        }
-        minutesString = if (minutes < 10) {
-            "0$minutes"
-        } else {
-            "" + minutes
-        }
-        finalTimerString = "$finalTimerString$minutesString:$secondsString"
-
-        return finalTimerString
     }
 
     private fun onVideoPrepared() {
@@ -870,8 +868,6 @@ class CropSpeedFragment : Fragment(), MyListener {
 
         binding.seekBar2.visibility = View.GONE
         binding.playPauseButton2.visibility = View.GONE
-
-        binding.totalDurationTextView.visibility = View.VISIBLE
 
         player!!.pause()
 

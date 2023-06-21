@@ -3,6 +3,7 @@ package com.ahmedbadereldin.videotrimmer.customVideoViews;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Handler;
@@ -14,7 +15,6 @@ import android.util.LongSparseArray;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-
 
 import com.ahmedbadereldin.videotrimmer.R;
 
@@ -105,9 +105,9 @@ public class TileView extends View {
 
     private void returnBitmaps(final LongSparseArray<Bitmap> thumbnailList) {
         new MainThreadExecutor().runTask("", () -> {
-            mBitmapList = thumbnailList;
-            invalidate();
-        }
+                    mBitmapList = thumbnailList;
+                    invalidate();
+                }
                 , 0L);
     }
 
@@ -123,12 +123,45 @@ public class TileView extends View {
                 Bitmap bitmap = mBitmapList.get(i);
 
                 if (bitmap != null) {
-                    canvas.drawBitmap(bitmap, x, 0, null);
-                    x = x + bitmap.getWidth();
+                    // Calculate the destination rectangle
+                    int left = x;
+                    int top = 0;
+                    int right = x + bitmap.getWidth();
+                    int bottom = mHeightView;
+
+                    // Calculate the source rectangle
+                    float sourceAspect = (float) bitmap.getWidth() / bitmap.getHeight();
+                    float targetAspect = (float) right / bottom;
+                    int sourceWidth;
+                    int sourceHeight;
+                    int sourceX;
+                    int sourceY;
+
+                    if (sourceAspect > targetAspect) {
+                        sourceWidth = (int) (bitmap.getHeight() * targetAspect);
+                        sourceHeight = bitmap.getHeight();
+                        sourceX = (bitmap.getWidth() - sourceWidth) / 2;
+                        sourceY = 0;
+                    } else {
+                        sourceWidth = bitmap.getWidth();
+                        sourceHeight = (int) (bitmap.getWidth() / targetAspect);
+                        sourceX = 0;
+                        sourceY = (bitmap.getHeight() - sourceHeight) / 2;
+                    }
+
+                    // Draw the bitmap with center-crop effect
+                    Rect srcRect = new Rect(sourceX, sourceY, sourceX + sourceWidth, sourceY + sourceHeight);
+                    Rect dstRect = new Rect(left, top, right, bottom);
+                    canvas.drawBitmap(bitmap, srcRect, dstRect, null);
+
+                    x = right;
                 }
             }
+
+            canvas.restore();
         }
     }
+
 
     public void setVideo(@NonNull Uri data) {
         mVideoUri = data;
@@ -152,7 +185,8 @@ public class TileView extends View {
 
         private final Map<String, Token> TOKENS = new HashMap<>();
 
-        private MainThreadExecutor() {}
+        private MainThreadExecutor() {
+        }
 
         public void runTask(String id, Runnable task, long delay) {
             if ("".equals(id)) {

@@ -3,6 +3,7 @@ package com.example.slowmotionapp.effects;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+
 import com.daasuu.mp4compose.filter.GlFilter;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Player;
@@ -14,7 +15,10 @@ public class EPlayerView extends GLSurfaceView implements Player.Listener {
     private ExoPlayer player;
 
     private float videoAspect = 1f;
-    private final PlayerScaleType playerScaleType = PlayerScaleType.RESIZE_FIT_WIDTH;
+    private final PlayerScaleType playerScaleType = PlayerScaleType.RESIZE_FIT;
+
+    private int videoWidth;
+    private int videoHeight;
 
     public EPlayerView(Context context) {
         this(context, null);
@@ -62,10 +66,18 @@ public class EPlayerView extends GLSurfaceView implements Player.Listener {
             case RESIZE_FIT_HEIGHT:
                 viewWidth = (int) (measuredHeight * videoAspect);
                 break;
+            case RESIZE_FIT:
+                float viewAspect = (float) measuredWidth / measuredHeight;
+                if (videoAspect > viewAspect) {
+                    viewHeight = (int) (measuredWidth / videoAspect);
+                } else {
+                    viewWidth = (int) (measuredHeight * videoAspect);
+                }
+                break;
         }
         setMeasuredDimension(viewWidth, viewHeight);
-
     }
+
 
     @Override
     public void onPause() {
@@ -75,11 +87,11 @@ public class EPlayerView extends GLSurfaceView implements Player.Listener {
 
     @Override
     public void onVideoSizeChanged(VideoSize videoSize) {
-        int width = videoSize.width;
-        int height = videoSize.height;
+        videoWidth = videoSize.width;
+        videoHeight = videoSize.height;
         float pixelWidthHeightRatio = videoSize.pixelWidthHeightRatio;
 
-        videoAspect = ((float) width / height) * pixelWidthHeightRatio;
+        videoAspect = ((float) videoWidth / videoHeight) * pixelWidthHeightRatio;
         requestLayout();
     }
 

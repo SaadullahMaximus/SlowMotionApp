@@ -74,10 +74,10 @@ public class BarThumb {
             BarThumb th = new BarThumb();
             th.setIndex(i);
             if (i == 0) {
-                int resImageLeft = R.drawable.time_line_a;
+                int resImageLeft = R.drawable.time_line_left;
                 th.setBitmap(BitmapFactory.decodeResource(resources, resImageLeft));
             } else {
-                int resImageRight = R.drawable.time_line_a;
+                int resImageRight = R.drawable.time_line_right;
                 th.setBitmap(BitmapFactory.decodeResource(resources, resImageRight));
             }
 
