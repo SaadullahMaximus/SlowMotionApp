@@ -1,5 +1,6 @@
 package com.example.slowmotionapp.ui.activities
 
+import android.app.Dialog
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
@@ -11,6 +12,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.SeekBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.ahmedbadereldin.videotrimmer.customVideoViews.BarThumb
@@ -60,20 +62,13 @@ class TrimVideoActivity : AppCompatActivity() {
             if (binding.seekBar.progress >= binding.seekBar.max) {
                 binding.seekBar.progress =
                     binding.trimVideoView.currentPosition - mStartPosition * 1000
-                binding.totalDurationTextView.text = milliSecondsToTimer(
-                    binding.seekBar.progress.toLong()
-                )
                 binding.trimVideoView.seekTo(mStartPosition * 1000)
                 binding.trimVideoView.pause()
                 binding.seekBar.progress = 0
-                binding.totalDurationTextView.setText(R.string._00_00)
                 binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
             } else {
                 binding.seekBar.progress =
                     binding.trimVideoView.currentPosition - mStartPosition * 1000
-                binding.totalDurationTextView.text = milliSecondsToTimer(
-                    binding.seekBar.progress.toLong()
-                )
                 mHandler.postDelayed(this, 100)
             }
         }
@@ -89,7 +84,7 @@ class TrimVideoActivity : AppCompatActivity() {
         type = intent.getIntExtra(Constants.TYPE, 0)
 
         binding.backBtn.setOnClickListener {
-            finish()
+            exitDialog()
         }
 
         binding.timeLineView.post {
@@ -129,8 +124,7 @@ class TrimVideoActivity : AppCompatActivity() {
                 mHandler.removeCallbacks(mUpdateTimeTask)
                 binding.seekBar.progress = 0
                 binding.trimVideoView.seekTo(mStartPosition * 1000)
-                binding.trimVideoView.pause()
-                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
+                updateProgressBar()
             }
 
             override fun onSeekStop(
@@ -148,7 +142,6 @@ class TrimVideoActivity : AppCompatActivity() {
             override fun onStartTrackingTouch(seekBar: SeekBar) {
                 binding.seekBar.progress = 0
                 binding.trimVideoView.seekTo(mStartPosition * 1000)
-                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
@@ -216,23 +209,39 @@ class TrimVideoActivity : AppCompatActivity() {
                 binding.trimVideoView.start()
                 binding.playPauseButton.setImageResource(R.drawable.baseline_pause)
                 if (binding.seekBar.progress == 0) {
-                    binding.totalDurationTextView.setText(R.string._00_00)
                     updateProgressBar()
                 } else {
-                    binding.totalDurationTextView.text = milliSecondsToTimer(
-                        binding.seekBar.progress.toLong()
-                    )
                     updateProgressBar()
                 }
             }
         }
     }
 
+    private fun exitDialog() {
+        val dialog = Dialog(this, R.style.FullScreenDialogStyle)
+        dialog.setContentView(R.layout.exit_dialog)
+
+        val noBtn = dialog.findViewById<TextView>(R.id.noBtn)
+        val yesBtn = dialog.findViewById<TextView>(R.id.yesBtn)
+
+        yesBtn.setOnClickListener {
+            finish()
+            dialog.dismiss()
+        }
+
+        noBtn.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
     private fun updateProgressBar() {
         mHandler.postDelayed(mUpdateTimeTask, 100)
     }
 
-    private fun onStopSeekThumbs() {}
+    private fun onStopSeekThumbs() {
+
+    }
 
     private fun onSeekThumbs(index: Int, value: Float) {
         when (index) {
@@ -246,6 +255,8 @@ class TrimVideoActivity : AppCompatActivity() {
                 binding.endTime.text = milliSecondsToTimer(((mEndPosition * 1000).toLong()))
             }
         }
+        binding.totalDurationTextView.text =
+            milliSecondsToTimer((mEndPosition - mStartPosition) * 1000L)
         mTimeVideo = mEndPosition - mStartPosition
         binding.seekBar.progress = mStartPosition
         binding.seekBar.max = mTimeVideo * 1000
@@ -270,8 +281,7 @@ class TrimVideoActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
-        finish()
+        exitDialog()
     }
 
     private fun setBitmap(mVideoUri: String) {
@@ -280,6 +290,7 @@ class TrimVideoActivity : AppCompatActivity() {
 
     private fun onVideoPrepared() {
         mDuration = binding.trimVideoView.duration / 1000
+        binding.totalDurationTextView.text = milliSecondsToTimer(mDuration * 1000L)
         setSeekBarPosition()
     }
 

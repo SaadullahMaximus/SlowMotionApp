@@ -243,8 +243,26 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    private fun openCameraDialog() {
+        val dialog = Dialog(this, R.style.FullScreenDialogStyle)
+        dialog.setContentView(R.layout.camera_video_dialog)
+
+        val btnCancel = dialog.findViewById<TextView>(R.id.btnCancel)
+        val btnProceed = dialog.findViewById<TextView>(R.id.btnProceed)
+
+        btnProceed.setOnClickListener {
+            requestPermissions(Constants.PERMISSION_CAMERA, Constants.RECORD_VIDEO)
+            dialog.dismiss()
+        }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
     fun startCamera() {
-        requestPermissions(Constants.PERMISSION_CAMERA, Constants.RECORD_VIDEO)
+        openCameraDialog()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -394,10 +412,51 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun checkPermissionGallery() {
-        openGallery()
+        openGalleryDialog()
     }
+
+    private fun openGalleryDialog() {
+        val dialog = Dialog(this, R.style.FullScreenDialogStyle)
+        dialog.setContentView(R.layout.gallery_video_dialog)
+
+        val btnCancel = dialog.findViewById<TextView>(R.id.btnCancel)
+        val btnProceed = dialog.findViewById<TextView>(R.id.btnProceed)
+
+        btnProceed.setOnClickListener {
+            openGallery()
+            dialog.dismiss()
+        }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
 
     private fun convertAviToMp4() {
 
+    }
+
+    private fun openExitDialog() {
+        val dialog = Dialog(this, R.style.FullScreenDialogStyle)
+        dialog.setContentView(R.layout.main_exit_dialog)
+
+        val btnNo = dialog.findViewById<TextView>(R.id.btnNo)
+        val btnYes = dialog.findViewById<TextView>(R.id.btnYes)
+
+        btnYes.setOnClickListener {
+            finishAffinity()
+            dialog.dismiss()
+        }
+
+        btnNo.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
+    override fun onBackPressed() {
+        openExitDialog()
     }
 }

@@ -15,15 +15,30 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/signOut"
-        android:layout_width="@dimen/_30sdp"
-        android:layout_height="@dimen/_30sdp"
-        android:layout_marginTop="@dimen/_14sdp"
-        android:src="@drawable/sign_out"
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/animationView"
+        android:layout_width="@dimen/_150sdp"
+        android:layout_height="@dimen/_150sdp"
+        android:layout_marginTop="@dimen/_10sdp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/rectangle" />
+        app:layout_constraintTop_toBottomOf="@id/rectangle"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/main_animation" />
+
+    <TextView
+        android:id="@+id/TV2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_7sdp"
+        android:fontFamily="@font/fredokaregular"
+        android:text="Rate Us"
+        android:textColor="@color/white"
+        android:textSize="@dimen/_20sdp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/animationView" />
 
     <TextView
         android:id="@+id/TV"
@@ -31,43 +46,21 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/_7sdp"
         android:fontFamily="@font/fredokaregular"
-        android:text="Do you want to quit?"
-        android:textColor="@color/white"
-        android:textSize="@dimen/_14sdp"
+        android:gravity="center"
+        android:paddingStart="@dimen/_40sdp"
+        android:paddingEnd="@dimen/_40sdp"
+        android:text="Hi, take a minute to rate this app and help support to improve"
+        android:textColor="#919191"
+        android:textSize="@dimen/_12sdp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/signOut" />
-
-
-    <Button
-        android:id="@+id/btnYes"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_20sdp"
-        android:layout_marginTop="@dimen/_10sdp"
-        android:layout_marginBottom="@dimen/_40sdp"
-        android:backgroundTint="#747474"
-        android:fontFamily="@font/fredokamedium"
-        android:paddingStart="@dimen/_20sdp"
-        android:paddingTop="@dimen/_7sdp"
-        android:paddingEnd="@dimen/_20sdp"
-        android:paddingBottom="@dimen/_7sdp"
-        android:text="Yes"
-        android:textAllCaps="false"
-        android:textColor="@color/black"
-        android:textSize="@dimen/_12sdp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/btnNo"
-        app:layout_constraintStart_toStartOf="parent"
-
-        app:layout_constraintTop_toBottomOf="@id/TV" />
+        app:layout_constraintTop_toBottomOf="@id/TV2" />
 
     <Button
-        android:id="@+id/btnNo"
+        android:id="@+id/rateUs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/_10sdp"
-        android:layout_marginEnd="@dimen/_20sdp"
         android:layout_marginBottom="@dimen/_40sdp"
         android:backgroundTint="#FDC005"
         android:fontFamily="@font/fredokamedium"
@@ -75,13 +68,13 @@
         android:paddingTop="@dimen/_7sdp"
         android:paddingEnd="@dimen/_20sdp"
         android:paddingBottom="@dimen/_7sdp"
-        android:text="No"
+        android:text="Rate Us"
         android:textAllCaps="false"
         android:textColor="@color/black"
         android:textSize="@dimen/_12sdp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/btnYes"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/TV" />
 
 

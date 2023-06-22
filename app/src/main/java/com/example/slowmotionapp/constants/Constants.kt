@@ -55,5 +55,7 @@ class Constants {
 
         const val VIDEO_LIMIT = 4 //4 minutes
 
+        const val PRIVACY_URL= "https://sites.google.com/view/slowmotionvideomakereditorpp/home"
+
     }
 }

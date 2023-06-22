@@ -1,6 +1,7 @@
 package com.example.slowmotionapp.ui.activities
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.app.ProgressDialog
 import android.content.Intent
 import android.graphics.Bitmap
@@ -14,6 +15,7 @@ import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.SeekBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.arthenica.mobileffmpeg.Config
@@ -140,7 +142,7 @@ class CropActivity : AppCompatActivity() {
 
         binding.backBtn.setOnClickListener {
             trimOrCrop = false
-            finish()
+            exitDialog()
         }
 
         binding.playPauseButton.setOnClickListener {
@@ -580,8 +582,27 @@ class CropActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
+        exitDialog()
         trimOrCrop = false
     }
+
+    private fun exitDialog() {
+        val dialog = Dialog(this, R.style.FullScreenDialogStyle)
+        dialog.setContentView(R.layout.exit_dialog)
+
+        val noBtn = dialog.findViewById<TextView>(R.id.noBtn)
+        val yesBtn = dialog.findViewById<TextView>(R.id.yesBtn)
+
+        yesBtn.setOnClickListener {
+            finish()
+            dialog.dismiss()
+        }
+
+        noBtn.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
 
 }

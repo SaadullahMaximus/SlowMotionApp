@@ -1,5 +1,6 @@
 package com.example.slowmotionapp.ui.activities
 
+import android.app.Dialog
 import android.app.ProgressDialog
 import android.net.Uri
 import android.os.Bundle
@@ -8,6 +9,7 @@ import android.os.Looper
 import android.view.ViewGroup
 import android.widget.RelativeLayout
 import android.widget.SeekBar
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -70,7 +72,7 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
         mainCachedFile = file.toString()
 
         binding.backBtn.setOnClickListener {
-            finish()
+            exitDialog()
         }
 
         setUpSimpleExoPlayer(this)
@@ -105,8 +107,6 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
             }
         })
 
-//        binding.seekBar.isEnabled = false
-
         binding.playPauseButton.setOnClickListener {
             if (player!!.isPlaying) {
                 binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
@@ -135,16 +135,28 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
                 player?.seekTo((mStartPosition * 1000 + seekBar.progress).toLong())
             }
         })
+    }
 
-//        binding.playPauseButton.setOnClickListener {
-//            if (player?.isPlaying!!) {
-//                player?.pause()
-//                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
-//            } else {
-//                videoPlay()
-//            }
-//        }
+    override fun onBackPressed() {
+        exitDialog()
+    }
 
+    private fun exitDialog() {
+        val dialog = Dialog(this, R.style.FullScreenDialogStyle)
+        dialog.setContentView(R.layout.exit_dialog)
+
+        val noBtn = dialog.findViewById<TextView>(R.id.noBtn)
+        val yesBtn = dialog.findViewById<TextView>(R.id.yesBtn)
+
+        yesBtn.setOnClickListener {
+            finish()
+            dialog.dismiss()
+        }
+
+        noBtn.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.show()
     }
 
     private fun saveVideoWithFilter() {
@@ -199,7 +211,6 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
             )
 
-            // Calculate the desired height based on the video aspect ratio
             val aspectRatio = videoWidth.toFloat() / videoHeight.toFloat()
             val desiredHeight = (exoPLayerView!!.width / aspectRatio).toInt()
 
@@ -231,20 +242,16 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
     }
 
     private fun updateSeekBar() {
-        // Update the seek bar progress with the current position of the player
         binding.seekBar.progress = player!!.currentPosition.toInt()
 
-        // Schedule the next update after a certain delay
         handler.postDelayed(runnable, 1000) // Update every second (adjust as needed)
     }
 
     private fun startTrackingSeekBar() {
-        // Start updating the seek bar progress
         handler.postDelayed(runnable, 0)
     }
 
     private fun stopTrackingSeekBar() {
-        // Stop updating the seek bar progress
         handler.removeCallbacks(runnable)
     }
 

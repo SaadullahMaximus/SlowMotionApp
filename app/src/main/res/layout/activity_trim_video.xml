@@ -81,7 +81,7 @@
         android:layout_marginBottom="@dimen/_21sdp"
         android:fontFamily="@font/fredokalight"
         android:text="@string/_00_00_"
-        android:textColor="@color/white"
+        android:textColor="#FDC005"
         android:textSize="@dimen/_11sdp"
         app:layout_constraintBottom_toTopOf="@+id/sliderTV"
         app:layout_constraintEnd_toEndOf="parent" />

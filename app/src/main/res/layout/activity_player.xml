@@ -57,7 +57,7 @@
         android:layout_marginStart="@dimen/_17sdp"
         android:layout_marginTop="@dimen/_20sdp"
         android:fontFamily="@font/fredokaregular"
-        android:text="Video Name"
+        android:text="Video Player"
         android:textColor="@color/white"
         android:textSize="@dimen/_14sdp"
         app:layout_constraintStart_toEndOf="@id/backBtn"
