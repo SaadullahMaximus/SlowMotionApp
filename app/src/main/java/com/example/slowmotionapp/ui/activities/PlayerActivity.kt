@@ -147,6 +147,7 @@ class PlayerActivity : AppCompatActivity() {
     private fun showFullScreenDialog() {
         val dialog = Dialog(this, R.style.FullScreenDialogStyle)
         dialog.setContentView(R.layout.player_long_pressed_dialog)
+        pauseVideo()
 
         val btnEdit = dialog.findViewById<TextView>(R.id.btnEdit)
         val btnShare = dialog.findViewById<TextView>(R.id.btnShare)
@@ -155,7 +156,6 @@ class PlayerActivity : AppCompatActivity() {
         val overLayout = dialog.findViewById<FrameLayout>(R.id.overlay_layout)
 
         btnEdit.setOnClickListener {
-            pauseVideo()
             val uri = Uri.parse(playVideo)
             val intent = Intent(this, TrimVideoActivity::class.java)
             intent.putExtra("VideoUri", playVideo)
@@ -170,19 +170,16 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         btnShare.setOnClickListener {
-            Toast.makeText(this, "Share", Toast.LENGTH_SHORT).show()
-            pauseVideo()
+            shareVideo(playVideo)
             dialog.dismiss()
         }
 
         btnRename.setOnClickListener {
             showRenameDialog()
-            pauseVideo()
             dialog.dismiss()
         }
 
         btnDelete.setOnClickListener {
-            pauseVideo()
             deleteVideoFile(playVideo)
             adapterShowing.deleteItem(positionClicked)
 
@@ -192,8 +189,8 @@ class PlayerActivity : AppCompatActivity() {
 
 
         overLayout.setOnClickListener {
-            Toast.makeText(this, "Over layout", Toast.LENGTH_SHORT).show()
-            pauseVideo()
+            binding.playBtn.setImageResource(R.drawable.baseline_pause)
+            binding.videoView.start()
             dialog.dismiss()
         }
 
@@ -267,6 +264,31 @@ class PlayerActivity : AppCompatActivity() {
     override fun onBackPressed() {
         super.onBackPressed()
         finish()
+    }
+
+    fun shareVideo(videoPath: String) {
+        // Create the intent
+
+        // Create the intent
+        val shareIntent = Intent(Intent.ACTION_SEND)
+        shareIntent.type = "video/*"
+
+        // Set the path of the video file
+
+        // Set the path of the video file
+        val videoUri = Uri.parse(videoPath)
+        shareIntent.putExtra(Intent.EXTRA_STREAM, videoUri)
+
+        // Optionally, you can set a subject for the shared video
+
+        // Optionally, you can set a subject for the shared video
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Shared Video")
+
+        // Start the activity for sharing
+
+        // Start the activity for sharing
+        startActivity(Intent.createChooser(shareIntent, "Share Video"))
+
     }
 }
 

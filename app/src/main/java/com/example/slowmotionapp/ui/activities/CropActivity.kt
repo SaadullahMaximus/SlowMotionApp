@@ -101,12 +101,7 @@ class CropActivity : AppCompatActivity() {
             File(videoUri!!)
         }
 
-
-        Log.d("GG", "onCreate: $videoUri")
-
-
         binding.videoView.setVideoURI(Uri.parse(videoUri))
-
 
         mainCachedFile = videoUri!!
 
@@ -131,21 +126,15 @@ class CropActivity : AppCompatActivity() {
         binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {}
             override fun onStartTrackingTouch(seekBar: SeekBar) {
-                mHandler.removeCallbacks(mUpdateTimeTask)
                 binding.seekBar.max = mTimeVideo * 1000
                 binding.seekBar.progress = 0
                 binding.videoView.seekTo(mStartPosition * 1000)
-                binding.videoView.pause()
-                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
-                mHandler.removeCallbacks(mUpdateTimeTask)
-
                 binding.videoView.seekTo(mStartPosition * 1000 + seekBar.progress)
                 binding.totalDurationTextView.text =
                     milliSecondsToTimer(binding.seekBar.progress.toLong())
-
             }
         })
 

@@ -39,7 +39,6 @@ class MainActivity : AppCompatActivity() {
     private var masterVideoFile: File? = null
     private var playbackPosition: Long = 0
     private var currentWindow: Int = 0
-    private var isLargeVideo: Boolean? = false
 
     companion object {
 
@@ -153,6 +152,10 @@ class MainActivity : AppCompatActivity() {
             justEffects = true
             val myDialogFragment = MyDialogFragment()
             myDialogFragment.show(supportFragmentManager, "MyDialogFragment")
+        }
+
+        binding.settingBtn.setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
         }
 
     }
@@ -321,6 +324,7 @@ class MainActivity : AppCompatActivity() {
                         convertAviToMp4() //avi format is not supported in exoplayer
                     } else {
                         if (justEffects) {
+                            justEffects = false
                             val intent = Intent(this, EffectActivity::class.java)
                             intent.putExtra("VideoUri", filePath)
                             intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
@@ -352,30 +356,6 @@ class MainActivity : AppCompatActivity() {
                         getString(R.string.error_select_smaller_video),
                         Toast.LENGTH_SHORT
                     ).show()
-                    if (justEffects) {
-                        val intent = Intent(this, EffectActivity::class.java)
-                        intent.putExtra("VideoUri", filePath)
-                        intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
-                        startActivity(intent)
-                    } else {
-
-                        if (trimOrCrop) {
-                            val intent = Intent(this, CropActivity::class.java)
-                            intent.putExtra("VideoUri", filePath)
-                            intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
-                            startActivity(intent)
-                        } else {
-                            isLargeVideo = true
-                            val uri = Uri.fromFile(masterVideoFile)
-                            val intent = Intent(this, TrimVideoActivity::class.java)
-                            intent.putExtra("VideoPath", filePath)
-                            intent.putExtra(
-                                "VideoDuration",
-                                getMediaDuration(this, uri)
-                            )
-                            startActivityForResult(intent, Constants.MAIN_VIDEO_TRIM)
-                        }
-                    }
                 }
             }
         } catch (_: Exception) {

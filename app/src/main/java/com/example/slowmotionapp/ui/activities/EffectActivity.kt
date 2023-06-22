@@ -1,12 +1,10 @@
 package com.example.slowmotionapp.ui.activities
 
-import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.ViewGroup
 import android.widget.RelativeLayout
 import android.widget.SeekBar
@@ -42,12 +40,10 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
     private lateinit var adapter: FilterAdapter
     private lateinit var filterTypes: List<FilterType>
 
-    private val mHandler = Handler(Looper.getMainLooper())
-    private lateinit var handler: Handler
+    private var handler = Handler(Looper.getMainLooper())
     private lateinit var runnable: Runnable
 
     private var mStartPosition = 0
-    private var mTimeVideo = 0
 
     private lateinit var file: File
 
@@ -109,7 +105,7 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
             }
         })
 
-        binding.seekBar.isEnabled = false
+//        binding.seekBar.isEnabled = false
 
         binding.playPauseButton.setOnClickListener {
             if (player!!.isPlaying) {
@@ -132,48 +128,23 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
         binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {}
             override fun onStartTrackingTouch(seekBar: SeekBar) {
-                mHandler.removeCallbacks(mUpdateTimeTask)
-                binding.seekBar.max = mTimeVideo * 1000
-                binding.seekBar.progress = 0
-                player?.seekTo((mStartPosition * 1000).toLong())
-                player?.pause()
-                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
+                player?.seekTo((mStartPosition * 1000 + seekBar.progress).toLong())
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
-                mHandler.removeCallbacks(mUpdateTimeTask)
-
                 player?.seekTo((mStartPosition * 1000 + seekBar.progress).toLong())
             }
         })
 
-        binding.playPauseButton.setOnClickListener {
-            if (player?.isPlaying!!) {
-                player?.pause()
-                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
-            } else {
-                videoPlay()
-            }
-        }
+//        binding.playPauseButton.setOnClickListener {
+//            if (player?.isPlaying!!) {
+//                player?.pause()
+//                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
+//            } else {
+//                videoPlay()
+//            }
+//        }
 
-    }
-
-    private val mUpdateTimeTask: Runnable = object : Runnable {
-        @SuppressLint("SetTextI18n")
-        override fun run() {
-            if (binding.seekBar.progress >= binding.seekBar.max) {
-                binding.seekBar.progress =
-                    (player?.currentPosition!! - mStartPosition * 1000).toInt()
-                player?.seekTo((mStartPosition * 1000).toLong())
-                player?.pause()
-                binding.seekBar.progress = 0
-                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
-            } else {
-                binding.seekBar.progress =
-                    (player?.currentPosition?.minus(mStartPosition * 1000))!!.toInt()
-                mHandler.postDelayed(this, 100)
-            }
-        }
     }
 
     private fun saveVideoWithFilter() {
@@ -182,7 +153,7 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
         progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
         progressDialog.isIndeterminate = true
         progressDialog.setCancelable(false)
-        progressDialog.setMessage("Please Wait")
+        progressDialog.setMessage("Applying Filter")
         progressDialog.show()
 
         if (effectPosition != 0) {
@@ -208,22 +179,11 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
 
                     override fun onFailed(exception: Exception) {
                         progressDialog.dismiss()
-                        Log.e(Constants.APP_NAME, "onFailed() Filter", exception)
                     }
                 }).start()
         } else {
             progressDialog.dismiss()
         }
-    }
-
-    private fun videoPlay() {
-        player?.play()
-        binding.playPauseButton.setImageResource(R.drawable.baseline_pause)
-        updateProgressBar()
-    }
-
-    private fun updateProgressBar() {
-        mHandler.postDelayed(mUpdateTimeTask, 100)
     }
 
     private fun setUoGlPlayerView() {

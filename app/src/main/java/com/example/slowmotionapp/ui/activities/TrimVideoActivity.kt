@@ -1,6 +1,5 @@
 package com.example.slowmotionapp.ui.activities
 
-import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
@@ -57,31 +56,29 @@ class TrimVideoActivity : AppCompatActivity() {
     private val mHandler = Handler(Looper.getMainLooper())
 
     private val mUpdateTimeTask: Runnable = object : Runnable {
-        @SuppressLint("SetTextI18n")
         override fun run() {
             if (binding.seekBar.progress >= binding.seekBar.max) {
                 binding.seekBar.progress =
                     binding.trimVideoView.currentPosition - mStartPosition * 1000
                 binding.totalDurationTextView.text = milliSecondsToTimer(
                     binding.seekBar.progress.toLong()
-                ) + ""
+                )
                 binding.trimVideoView.seekTo(mStartPosition * 1000)
                 binding.trimVideoView.pause()
                 binding.seekBar.progress = 0
-                binding.totalDurationTextView.text = "00:00"
+                binding.totalDurationTextView.setText(R.string._00_00)
                 binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
             } else {
                 binding.seekBar.progress =
                     binding.trimVideoView.currentPosition - mStartPosition * 1000
                 binding.totalDurationTextView.text = milliSecondsToTimer(
                     binding.seekBar.progress.toLong()
-                ) + ""
+                )
                 mHandler.postDelayed(this, 100)
             }
         }
     }
 
-    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTrimVideoBinding.inflate(layoutInflater)
@@ -149,17 +146,12 @@ class TrimVideoActivity : AppCompatActivity() {
         binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {}
             override fun onStartTrackingTouch(seekBar: SeekBar) {
-                mHandler.removeCallbacks(mUpdateTimeTask)
-                binding.seekBar.max = mTimeVideo * 1000
                 binding.seekBar.progress = 0
                 binding.trimVideoView.seekTo(mStartPosition * 1000)
-                binding.trimVideoView.pause()
                 binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
-                mHandler.removeCallbacks(mUpdateTimeTask)
-
                 binding.trimVideoView.seekTo(mStartPosition * 1000 + seekBar.progress)
 
             }
@@ -180,8 +172,6 @@ class TrimVideoActivity : AppCompatActivity() {
                 } else {
                     File(videoUri!!)
                 }
-
-
 
                 try {
                     //output file is generated and send to video processing
@@ -257,7 +247,8 @@ class TrimVideoActivity : AppCompatActivity() {
             }
         }
         mTimeVideo = mEndPosition - mStartPosition
-        binding.seekBar.progress = 0
+        binding.seekBar.progress = mStartPosition
+        binding.seekBar.max = mTimeVideo * 1000
         binding.trimVideoView.seekTo(mStartPosition * 1000)
 
         var mStart: String = mStartPosition.toString() + ""
