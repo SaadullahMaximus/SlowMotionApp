@@ -56,24 +56,42 @@ class MainFragment : Fragment() {
             }
         }
 
-        // Register a broadcast receiver to listen for volume changes and audio becoming noisy
+        // Register a broadcast receiver to listen for volume changes
         volumeChangeReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 val action = intent.action
-                if (action == volumeChangedAction || action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
+                if (action == volumeChangedAction) {
                     updateSeekBar()
                 }
             }
         }
-        val filter = IntentFilter().apply {
-            addAction(volumeChangedAction)
-            addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
-        }
+        val filter = IntentFilter(volumeChangedAction)
         requireActivity().registerReceiver(volumeChangeReceiver, filter)
 
         // Update the SeekBar initially
         updateSeekBar()
+
+        // Set up a SeekBar change listener
+        binding.seekBarSpeaker.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+                    val volume = (maxVolume * progress) / 100
+                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding.seekBarSpeaker.setOnSeekBarChangeListener(null)
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -160,9 +178,5 @@ class MainFragment : Fragment() {
         binding.seekBarSpeaker.progress = progress
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        requireActivity().unregisterReceiver(volumeChangeReceiver)
-    }
 
 }

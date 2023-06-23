@@ -158,46 +158,7 @@ class TrimVideoActivity : AppCompatActivity() {
                     Toast.LENGTH_LONG
                 ).show()
             } else {
-                val mediaMetadataRetriever = MediaMetadataRetriever()
-                mediaMetadataRetriever.setDataSource(this, Uri.parse(videoUri))
-                file = if (type == Constants.RECORD_VIDEO) {
-                    File(convertContentUriToFilePath(videoUri!!))
-                } else {
-                    File(videoUri!!)
-                }
-
-                try {
-                    //output file is generated and send to video processing
-                    outputFile = createTrimmedFile()
-
-                    val durationSeconds = (mEndPosition - mStartPosition)
-
-                    trimVideo(
-                        this,
-                        arrayOf(
-                            "-ss",
-                            mStartPosition.toString(),
-                            "-y",
-                            "-i",
-                            file.toString(),
-                            "-t",
-                            durationSeconds.toString(),
-                            "-c:v",
-                            "copy",
-                            "-c:a",
-                            "copy",
-                            outputFile.toString()
-                        ),
-                        outputFile.toString()
-                    )
-
-
-                } catch (e: Throwable) {
-                    Objects.requireNonNull(Thread.getDefaultUncaughtExceptionHandler())
-                        .uncaughtException(
-                            Thread.currentThread(), e
-                        )
-                }
+                showTrimDialog()
             }
         }
 
@@ -215,6 +176,67 @@ class TrimVideoActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun startTrimming() {
+        val mediaMetadataRetriever = MediaMetadataRetriever()
+        mediaMetadataRetriever.setDataSource(this, Uri.parse(videoUri))
+        file = if (type == Constants.RECORD_VIDEO) {
+            File(convertContentUriToFilePath(videoUri!!))
+        } else {
+            File(videoUri!!)
+        }
+
+        try {
+            //output file is generated and send to video processing
+            outputFile = createTrimmedFile()
+
+            val durationSeconds = (mEndPosition - mStartPosition)
+
+            trimVideo(
+                this,
+                arrayOf(
+                    "-ss",
+                    mStartPosition.toString(),
+                    "-y",
+                    "-i",
+                    file.toString(),
+                    "-t",
+                    durationSeconds.toString(),
+                    "-c:v",
+                    "copy",
+                    "-c:a",
+                    "copy",
+                    outputFile.toString()
+                ),
+                outputFile.toString()
+            )
+
+
+        } catch (e: Throwable) {
+            Objects.requireNonNull(Thread.getDefaultUncaughtExceptionHandler())
+                .uncaughtException(
+                    Thread.currentThread(), e
+                )
+        }
+    }
+
+    private fun showTrimDialog() {
+        val dialog = Dialog(this, R.style.FullScreenDialogStyle)
+        dialog.setContentView(R.layout.trimmed_done)
+
+        val noBtn = dialog.findViewById<TextView>(R.id.noBtn)
+        val yesBtn = dialog.findViewById<TextView>(R.id.yesBtn)
+
+        yesBtn.setOnClickListener {
+            startTrimming()
+            dialog.dismiss()
+        }
+
+        noBtn.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.show()
     }
 
     private fun exitDialog() {

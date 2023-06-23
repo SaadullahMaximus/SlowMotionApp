@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.app.ProgressDialog
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
@@ -150,7 +151,8 @@ class CropSpeedFragment : Fragment(), MyListener {
         sharedViewModel.videoPath.observe(viewLifecycleOwner) { path ->
             path?.let {
                 videoView.setVideoURI(Uri.parse(path))
-//                layoutMovieWrapper.removeAllViews()
+                layoutMovieWrapper.removeAllViews()
+                player?.release()
                 setUpSimpleExoPlayer(requireContext())
                 setUoGlPlayerView()
             }
@@ -293,6 +295,9 @@ class CropSpeedFragment : Fragment(), MyListener {
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
 
+        layoutMovieWrapper.setBackgroundColor(Color.TRANSPARENT)
+        layoutMovieWrapper.invalidate()
+
         layoutMovieWrapper.addView(ePlayerView)
 
         ePlayerView!!.onResume()
@@ -372,6 +377,10 @@ class CropSpeedFragment : Fragment(), MyListener {
 
             binding.seekBar2.visibility = View.VISIBLE
             binding.playPauseButton2.visibility = View.VISIBLE
+
+            playPauseButton2.setImageResource(R.drawable.baseline_play_arrow)
+
+            player?.release()
 
             setUpSimpleExoPlayer(requireContext())
             setUoGlPlayerView()
@@ -868,8 +877,6 @@ class CropSpeedFragment : Fragment(), MyListener {
 
         binding.seekBar2.visibility = View.GONE
         binding.playPauseButton2.visibility = View.GONE
-
-        player!!.pause()
 
         binding.videoView.setVideoURI(Uri.parse(mainCachedFile))
 
