@@ -18,12 +18,15 @@ import androidx.fragment.app.FragmentPagerAdapter
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.adapters.VideoAdapter
 import com.example.slowmotionapp.constants.Constants
+import com.example.slowmotionapp.constants.Constants.Companion.VIDEO_LIMIT
+import com.example.slowmotionapp.constants.Constants.Companion.VIDEO_MIN_LIMIT
 import com.example.slowmotionapp.databinding.ActivitySavedBinding
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.permissionAllowed
 import com.example.slowmotionapp.ui.fragments.savedfragments.SavedCropFragment
 import com.example.slowmotionapp.ui.fragments.savedfragments.SavedEditedFragment
 import com.example.slowmotionapp.ui.fragments.savedfragments.SavedTrimFragment
 import com.example.slowmotionapp.utils.Utils
+import com.example.slowmotionapp.utils.Utils.convertDurationInSec
 import com.example.slowmotionapp.utils.Utils.croppedDir
 import com.example.slowmotionapp.utils.Utils.editedDir
 import com.example.slowmotionapp.utils.Utils.fetchVideosFromDirectory
@@ -179,7 +182,7 @@ class SavedActivity : AppCompatActivity() {
         when (requestCode) {
 
             Constants.VIDEO_GALLERY -> {
-                if (MainActivity.permissionAllowed) {
+                if (permissionAllowed) {
                     data?.let {
                         setFilePath(it)
                     }
@@ -212,10 +215,9 @@ class SavedActivity : AppCompatActivity() {
                 val extension = Utils.getFileExtension(masterVideoFile!!.absolutePath)
 
                 val timeInMillis = Utils.getVideoDuration(this, masterVideoFile!!)
-                val duration = Utils.convertDurationInMin(timeInMillis)
+                val duration = convertDurationInSec(timeInMillis)
 
-                //check if video is more than 4 minutes
-                if (duration < Constants.VIDEO_LIMIT) {
+                if (duration in (VIDEO_MIN_LIMIT + 1) until VIDEO_LIMIT) {
                     //check video format before playing into exoplayer
                     if (extension == Constants.AVI_FORMAT) {
                         convertAviToMp4() //avi format is not supported in exoplayer
@@ -234,10 +236,9 @@ class SavedActivity : AppCompatActivity() {
                 } else {
                     Toast.makeText(
                         this,
-                        getString(R.string.error_select_smaller_video),
+                        "Video duration should be between 4-240 seconds",
                         Toast.LENGTH_SHORT
                     ).show()
-                    finish()
                 }
             }
         } catch (_: Exception) {

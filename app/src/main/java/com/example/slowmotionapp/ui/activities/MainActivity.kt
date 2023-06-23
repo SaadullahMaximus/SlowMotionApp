@@ -19,9 +19,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
+import com.example.slowmotionapp.constants.Constants.Companion.VIDEO_LIMIT
+import com.example.slowmotionapp.constants.Constants.Companion.VIDEO_MIN_LIMIT
 import com.example.slowmotionapp.databinding.ActivityMainBinding
 import com.example.slowmotionapp.ui.fragments.MyDialogFragment
-import com.example.slowmotionapp.utils.Utils.convertDurationInMin
+import com.example.slowmotionapp.utils.Utils.convertDurationInSec
 import com.example.slowmotionapp.utils.Utils.createCacheTempFile
 import com.example.slowmotionapp.utils.Utils.createVideoFile
 import com.example.slowmotionapp.utils.Utils.getFileExtension
@@ -333,10 +335,10 @@ class MainActivity : AppCompatActivity() {
                 val extension = getFileExtension(masterVideoFile!!.absolutePath)
 
                 val timeInMillis = getVideoDuration(this, masterVideoFile!!)
-                val duration = convertDurationInMin(timeInMillis)
+                val duration = convertDurationInSec(timeInMillis)
 
                 //check if video is more than 4 minutes
-                if (duration < Constants.VIDEO_LIMIT) {
+                if (duration in (VIDEO_MIN_LIMIT + 1) until VIDEO_LIMIT) {
                     //check video format before playing into exoplayer
                     if (extension == Constants.AVI_FORMAT) {
                         convertAviToMp4() //avi format is not supported in exoplayer
@@ -371,7 +373,7 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     Toast.makeText(
                         this,
-                        getString(R.string.error_select_smaller_video),
+                        "Video duration should be between 4-240 seconds",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -433,7 +435,6 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
-
     private fun convertAviToMp4() {
 
     }
@@ -459,4 +460,5 @@ class MainActivity : AppCompatActivity() {
     override fun onBackPressed() {
         openExitDialog()
     }
+
 }

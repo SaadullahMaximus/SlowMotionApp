@@ -53,7 +53,8 @@ class Constants {
         const val VIDEO_FORMAT = ".mp4"
         const val AVI_FORMAT = ".avi"
 
-        const val VIDEO_LIMIT = 4 //4 minutes
+        const val VIDEO_LIMIT = 240 //4 minutes
+        const val VIDEO_MIN_LIMIT = 3 //3 sec
 
         const val PRIVACY_URL= "https://sites.google.com/view/slowmotionvideomakereditorpp/home"
 

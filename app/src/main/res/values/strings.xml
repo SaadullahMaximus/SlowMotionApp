@@ -42,4 +42,7 @@
     <string name="my_text2">Ooops\!\!\!\nYour studio is empty</string>
 
     <string name="create_new">Create New</string>
+    <string name="quick_effortless_safe"><![CDATA[Quick, Effortless & Safe]]></string>
+    <string name="slow_motion">Slow-Motion</string>
+    <string name="let_s_start">Let\'s Start</string>
 </resources>

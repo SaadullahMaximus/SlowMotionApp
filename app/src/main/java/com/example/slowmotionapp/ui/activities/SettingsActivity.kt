@@ -9,8 +9,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.slowmotionapp.R
-import com.example.slowmotionapp.constants.Constants.Companion.PRIVACY_URL
 import com.example.slowmotionapp.databinding.ActivitySettingsBinding
+import com.example.slowmotionapp.utils.Utils.openURL
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -36,7 +36,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         binding.policy.setOnClickListener {
-            openURL()
+            openURL(this)
         }
 
         binding.checkForUpdates.setOnClickListener {
@@ -175,12 +175,6 @@ class SettingsActivity : AppCompatActivity() {
             )
             startActivity(webIntent)
         }
-    }
-
-
-    private fun openURL() {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_URL))
-        startActivity(intent)
     }
 
     private fun checkForUpdates() {

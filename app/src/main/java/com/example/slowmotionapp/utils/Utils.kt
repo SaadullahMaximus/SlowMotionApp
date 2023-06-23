@@ -1,16 +1,26 @@
 package com.example.slowmotionapp.utils
 
 import android.app.Activity
+import android.app.Dialog
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
+import android.graphics.Color
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.TextPaint
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.view.View
+import android.widget.TextView
+import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.interfaces.MyListener
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.backSave
@@ -208,13 +218,8 @@ object Utils {
         return timeInMillis
     }
 
-    fun convertDurationInMin(duration: Long): Long {
-        val minutes = TimeUnit.MILLISECONDS.toMinutes(duration)
-        return if (minutes > 0) {
-            minutes
-        } else {
-            0
-        }
+    fun convertDurationInSec(duration: Long): Long {
+        return duration / 1000
     }
 
     fun getMediaDuration(context: Context?, uriOfFile: Uri?): Int {
@@ -397,5 +402,44 @@ object Utils {
         }
     }
 
+    fun openURL(context: Context) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(Constants.PRIVACY_URL))
+        context.startActivity(intent)
+    }
+
+    fun makeTextLink(
+        textView: TextView,
+        str: String,
+        underlined: Boolean,
+        color: Int?,
+        action: (() -> Unit)? = null
+    ) {
+        val spannableString = SpannableString(textView.text)
+        val textColor = color ?: textView.currentTextColor
+        val clickableSpan = object : ClickableSpan() {
+            override fun onClick(textView: View) {
+                action?.invoke()
+            }
+
+            override fun updateDrawState(drawState: TextPaint) {
+                super.updateDrawState(drawState)
+                drawState.isUnderlineText = underlined
+                drawState.color = textColor
+            }
+        }
+        var index = spannableString.indexOf(str)
+        if (index == -1) {
+            index = 0
+        }
+        spannableString.setSpan(
+            clickableSpan,
+            index,
+            index + str.length,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        textView.text = spannableString
+        textView.movementMethod = LinkMovementMethod.getInstance()
+        textView.highlightColor = Color.TRANSPARENT
+    }
 
 }
