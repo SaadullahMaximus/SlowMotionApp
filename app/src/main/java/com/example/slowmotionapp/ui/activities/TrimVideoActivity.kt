@@ -59,20 +59,16 @@ class TrimVideoActivity : AppCompatActivity() {
 
     private val mUpdateTimeTask: Runnable = object : Runnable {
         override fun run() {
-            if (binding.seekBar.progress >= binding.seekBar.max) {
-                binding.seekBar.progress =
-                    binding.trimVideoView.currentPosition - mStartPosition * 1000
+            if (binding.trimVideoView.currentPosition >= (mEndPosition * 1000)) {
                 binding.trimVideoView.seekTo(mStartPosition * 1000)
-                binding.trimVideoView.pause()
-                binding.seekBar.progress = 0
-                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
-            } else {
-                binding.seekBar.progress =
-                    binding.trimVideoView.currentPosition - mStartPosition * 1000
-                mHandler.postDelayed(this, 100)
+                binding.trimVideoView.start()
             }
+            binding.seekBar.progress =
+                binding.trimVideoView.currentPosition - (mStartPosition * 1000)
+            mHandler.postDelayed(this, 100)
         }
     }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,7 +94,7 @@ class TrimVideoActivity : AppCompatActivity() {
             }
         }
 
-        binding.trimVideoView.setOnCompletionListener { onVideoCompleted() }
+//        binding.trimVideoView.setOnCompletionListener { onVideoCompleted() }
 
         binding.timeLineBar.addOnRangeSeekBarListener(object : OnRangeSeekBarChangeListener {
             override fun onCreate(
@@ -294,14 +290,6 @@ class TrimVideoActivity : AppCompatActivity() {
         mEnd.toInt() % 60
     }
 
-    private fun onVideoCompleted() {
-        mHandler.removeCallbacks(mUpdateTimeTask)
-        binding.seekBar.progress = 0
-        binding.trimVideoView.seekTo(mStartPosition * 1000)
-        binding.trimVideoView.pause()
-        binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
-    }
-
     override fun onBackPressed() {
         exitDialog()
     }
@@ -314,7 +302,14 @@ class TrimVideoActivity : AppCompatActivity() {
         mDuration = binding.trimVideoView.duration / 1000
         binding.totalDurationTextView.text = milliSecondsToTimer(mDuration * 1000L)
         setSeekBarPosition()
+
+        // Start video playback and seekbar update
+        binding.trimVideoView.seekTo(mStartPosition * 1000)
+        binding.trimVideoView.start()
+        binding.playPauseButton.setImageResource(R.drawable.baseline_pause)
+        updateProgressBar()
     }
+
 
     private fun setSeekBarPosition() {
         if (mDuration >= mMaxDuration) {
