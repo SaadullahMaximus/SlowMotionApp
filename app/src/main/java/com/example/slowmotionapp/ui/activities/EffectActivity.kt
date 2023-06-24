@@ -1,7 +1,7 @@
 package com.example.slowmotionapp.ui.activities
 
 import android.app.Dialog
-import android.app.ProgressDialog
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -13,6 +13,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.basusingh.beautifulprogressdialog.BeautifulProgressDialog
 import com.daasuu.mp4compose.FillMode
 import com.daasuu.mp4compose.Rotation
 import com.daasuu.mp4compose.composer.Mp4Composer
@@ -160,13 +161,14 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
     }
 
     private fun saveVideoWithFilter() {
-
-        val progressDialog = ProgressDialog(this, R.style.CustomDialog)
-        progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
-        progressDialog.isIndeterminate = true
-        progressDialog.setCancelable(false)
-        progressDialog.setMessage("Applying Filter")
+        val progressDialog =
+            BeautifulProgressDialog(this, BeautifulProgressDialog.withLottie, "Please wait")
+        progressDialog.setLottieLocation("loading_dialog.json")
+        //Loop the Lottie Animation
+        progressDialog.setLayoutColor(Color.WHITE)
+        progressDialog.setLottieLoop(true)
         progressDialog.show()
+        progressDialog.setCancelable(false)
 
         if (effectPosition != 0) {
             val outputFile = createCacheTempFile(this)

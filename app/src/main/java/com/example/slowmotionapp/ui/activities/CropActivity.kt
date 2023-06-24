@@ -2,9 +2,9 @@ package com.example.slowmotionapp.ui.activities
 
 import android.annotation.SuppressLint
 import android.app.Dialog
-import android.app.ProgressDialog
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
@@ -20,6 +20,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.arthenica.mobileffmpeg.Config
 import com.arthenica.mobileffmpeg.FFmpeg
+import com.basusingh.beautifulprogressdialog.BeautifulProgressDialog
 import com.edmodo.cropper.cropwindow.edge.Edge
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
@@ -355,6 +356,7 @@ class CropActivity : AppCompatActivity() {
             sb.append(o)
             sb.append(":y=")
             sb.append(p)
+
             executeFFMPEG(
                 arrayOf(
                     "-y",
@@ -398,12 +400,14 @@ class CropActivity : AppCompatActivity() {
     }
 
     private fun executeFFMPEG(strArr: Array<String>, str: String) {
-        val progressDialog = ProgressDialog(this, R.style.CustomDialog)
-        progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
-        progressDialog.isIndeterminate = true
-        progressDialog.setCancelable(false)
-        progressDialog.setMessage("Please Wait")
+        val progressDialog =
+            BeautifulProgressDialog(this, BeautifulProgressDialog.withLottie, "Please wait")
+        progressDialog.setLottieLocation("loading_dialog.json")
+        //Loop the Lottie Animation
+        progressDialog.setLottieLoop(true)
+        progressDialog.setLayoutColor(Color.WHITE)
         progressDialog.show()
+        progressDialog.setCancelable(false)
 
         binding.imageViewFree.setImageResource(R.drawable.crop_unselect)
         binding.imageView11.setImageResource(R.drawable.crop_unselect)

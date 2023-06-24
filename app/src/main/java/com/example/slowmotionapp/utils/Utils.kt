@@ -19,7 +19,9 @@ import android.text.TextPaint
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.view.View
+import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.interfaces.MyListener
@@ -28,6 +30,7 @@ import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCached
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.tempCacheName
 import com.example.slowmotionapp.ui.activities.PlayerActivity
+import com.example.slowmotionapp.ui.activities.TrimVideoActivity
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
@@ -39,7 +42,6 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 object Utils {
 
@@ -440,6 +442,71 @@ object Utils {
         textView.text = spannableString
         textView.movementMethod = LinkMovementMethod.getInstance()
         textView.highlightColor = Color.TRANSPARENT
+    }
+
+    fun Context.shareVideo(videoPath: String) {
+        // Create the intent
+
+        // Create the intent
+        val shareIntent = Intent(Intent.ACTION_SEND)
+        shareIntent.type = "video/*"
+
+        // Set the path of the video file
+
+        // Set the path of the video file
+        val videoUri = Uri.parse(videoPath)
+        shareIntent.putExtra(Intent.EXTRA_STREAM, videoUri)
+
+        // Optionally, you can set a subject for the shared video
+
+        // Optionally, you can set a subject for the shared video
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Shared Video")
+
+        // Start the activity for sharing
+
+        // Start the activity for sharing
+        startActivity(Intent.createChooser(shareIntent, "Share Video"))
+
+    }
+
+    fun Context.showRenameDialog() {
+        val dialog = Dialog(this, R.style.FullScreenDialogStyle)
+        dialog.setContentView(R.layout.rename_dialog)
+
+        val fileName = dialog.findViewById<EditText>(R.id.fileName)
+        val btnOk = dialog.findViewById<TextView>(R.id.okBtn)
+        val btnCancel = dialog.findViewById<TextView>(R.id.cancelBtn)
+
+
+        btnOk.setOnClickListener {
+            val text = fileName.text.toString()
+            if (text.isNotEmpty()) {
+                // The EditText has non-empty text
+                // Perform your desired actions here
+                File(playVideo).renameTo(File(File(playVideo).parent, "$text.mp4"))
+            } else {
+                Toast.makeText(this, "Please enter a valid name!", Toast.LENGTH_SHORT).show()
+            }
+            dialog.dismiss()
+        }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    fun Context.editVideo() {
+        val uri = Uri.parse(playVideo)
+        val intent = Intent(this, TrimVideoActivity::class.java)
+        intent.putExtra("VideoUri", playVideo)
+        intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
+        intent.putExtra(
+            "VideoDuration",
+            getMediaDuration(this, uri)
+        )
+        startActivity(intent)
     }
 
 }

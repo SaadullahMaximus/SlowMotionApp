@@ -1,9 +1,9 @@
 package com.example.slowmotionapp.ui.activities
 
 import android.app.Dialog
-import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
@@ -20,6 +20,7 @@ import com.ahmedbadereldin.videotrimmer.customVideoViews.CustomRangeSeekBar
 import com.ahmedbadereldin.videotrimmer.customVideoViews.OnRangeSeekBarChangeListener
 import com.arthenica.mobileffmpeg.Config
 import com.arthenica.mobileffmpeg.FFmpeg
+import com.basusingh.beautifulprogressdialog.BeautifulProgressDialog
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.ActivityTrimVideoBinding
@@ -36,6 +37,7 @@ import com.example.slowmotionapp.utils.Utils.milliSecondsToTimer
 import java.io.File
 import java.text.DecimalFormat
 import java.util.*
+
 
 class TrimVideoActivity : AppCompatActivity() {
 
@@ -356,12 +358,15 @@ class TrimVideoActivity : AppCompatActivity() {
     }
 
     private fun trimVideo(context: Context, strArr: Array<String>, str: String) {
-        val progressDialog = ProgressDialog(context, R.style.CustomDialog)
-        progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
-        progressDialog.isIndeterminate = true
-        progressDialog.setCancelable(false)
-        progressDialog.setMessage("Video Trimming")
+        val progressDialog =
+            BeautifulProgressDialog(this, BeautifulProgressDialog.withLottie, "Please wait")
+        progressDialog.setLottieLocation("loading_dialog.json")
+        //Loop the Lottie Animation
+        progressDialog.setLayoutColor(Color.WHITE)
+        progressDialog.setLottieLoop(true)
         progressDialog.show()
+        progressDialog.setCancelable(false)
+
         val ffmpegCommand: String = commandsGenerator(strArr)
         FFmpeg.executeAsync(
             ffmpegCommand

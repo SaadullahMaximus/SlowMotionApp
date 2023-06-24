@@ -1,7 +1,7 @@
 package com.example.slowmotionapp.ui.fragments
 
 import android.animation.ValueAnimator
-import android.app.ProgressDialog
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,7 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.arthenica.mobileffmpeg.Config
 import com.arthenica.mobileffmpeg.FFmpeg
-import com.example.slowmotionapp.R
+import com.basusingh.beautifulprogressdialog.BeautifulProgressDialog
 import com.example.slowmotionapp.customviews.KnobView
 import com.example.slowmotionapp.databinding.FragmentSpeedBinding
 import com.example.slowmotionapp.extras.VideoPlayerState
@@ -269,12 +269,18 @@ class SpeedFragment : Fragment() {
 
     private fun executeFFMPEG(strArr: Array<String>, str: String) {
         sharedViewModel.pauseVideo(true)
-        val progressDialog = ProgressDialog(requireContext(), R.style.CustomDialog)
-        progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
-        progressDialog.isIndeterminate = true
-        progressDialog.setCancelable(false)
-        progressDialog.setMessage("Please Wait")
+        val progressDialog =
+            BeautifulProgressDialog(
+                requireActivity(),
+                BeautifulProgressDialog.withLottie,
+                "Please wait"
+            )
+        progressDialog.setLottieLocation("loading_dialog.json")
+        //Loop the Lottie Animation
+        progressDialog.setLayoutColor(Color.WHITE)
+        progressDialog.setLottieLoop(true)
         progressDialog.show()
+        progressDialog.setCancelable(false)
         val ffmpegCommand: String = commandsGenerator(strArr)
         FFmpeg.executeAsync(
             ffmpegCommand

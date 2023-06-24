@@ -2,7 +2,6 @@ package com.example.slowmotionapp.ui.fragments
 
 import android.annotation.SuppressLint
 import android.app.Dialog
-import android.app.ProgressDialog
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.media.MediaMetadataRetriever
@@ -19,6 +18,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import com.arthenica.mobileffmpeg.Config
 import com.arthenica.mobileffmpeg.FFmpeg
+import com.basusingh.beautifulprogressdialog.BeautifulProgressDialog
 import com.edmodo.cropper.CropImageView
 import com.edmodo.cropper.cropwindow.edge.Edge
 import com.example.slowmotionapp.R
@@ -256,25 +256,15 @@ class CropSpeedFragment : Fragment(), MyListener {
     }
 
     private fun setUoGlPlayerView() {
-        ePlayerView =
-            EPlayerView(requireContext())
+        ePlayerView = EPlayerView(requireContext())
         ePlayerView!!.setSimpleExoPlayer(player)
 
         val videoSize = getVideoSize(requireContext(), Uri.parse(mainCachedFile))
         if (videoSize != null) {
-            Log.d("setUoGlPlayerView", "setUoGlPlayerView: else")
-
-            val videoWidth = videoSize.first
-            val videoHeight = videoSize.second
 
             val layoutParams = RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
             )
-
-            // Calculate the desired height based on the video aspect ratio
-            val aspectRatio = videoWidth.toFloat() / videoHeight.toFloat()
-            val desiredHeight = (ePlayerView!!.width / aspectRatio).toInt()
 
             layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
             layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
@@ -282,18 +272,14 @@ class CropSpeedFragment : Fragment(), MyListener {
             ePlayerView!!.layoutParams = layoutParams
         } else {
             Log.d("setUoGlPlayerView", "setUoGlPlayerView: else")
-            ePlayerView!!.layoutParams =
-                RelativeLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
+            ePlayerView!!.layoutParams = RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            )
         }
 
-        ePlayerView!!.layoutParams =
-            RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
+        ePlayerView!!.layoutParams = RelativeLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
+        )
 
         layoutMovieWrapper.setBackgroundColor(Color.TRANSPARENT)
         layoutMovieWrapper.invalidate()
@@ -305,8 +291,7 @@ class CropSpeedFragment : Fragment(), MyListener {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentCropSpeedBinding.inflate(inflater, container, false)
 
@@ -359,8 +344,7 @@ class CropSpeedFragment : Fragment(), MyListener {
         }
 
         childFragmentManager!!.beginTransaction()
-            .add(R.id.fragment_container_main, currentChildFragment as MainFragment)
-            .commit()
+            .add(R.id.fragment_container_main, currentChildFragment as MainFragment).commit()
 
         binding.enhanceBtn.setOnClickListener {
             enhanced = true
@@ -490,13 +474,16 @@ class CropSpeedFragment : Fragment(), MyListener {
 
     private fun executeFFMPEG(strArr: Array<String>, str: String, valueCheck: Int) {
         sharedViewModel.pauseVideo(true)
-        val progressDialog =
-            ProgressDialog(requireContext(), R.style.CustomDialog)
-        progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
-        progressDialog.isIndeterminate = true
-        progressDialog.setCancelable(false)
-        progressDialog.setMessage("Please Wait")
+
+        val progressDialog = BeautifulProgressDialog(
+            requireActivity(), BeautifulProgressDialog.withLottie, "Please wait"
+        )
+        progressDialog.setLottieLocation("loading_dialog.json")
+        //Loop the Lottie Animation
+        progressDialog.setLayoutColor(Color.WHITE)
+        progressDialog.setLottieLoop(true)
         progressDialog.show()
+        progressDialog.setCancelable(false)
         val ffmpegCommand: String = commandsGenerator(strArr)
         FFmpeg.executeAsync(
             ffmpegCommand
@@ -522,9 +509,7 @@ class CropSpeedFragment : Fragment(), MyListener {
                         File(str).delete()
                         deleteFromGallery(str, requireContext())
                         Toast.makeText(
-                            requireContext(),
-                            "Error Creating Video",
-                            Toast.LENGTH_LONG
+                            requireContext(), "Error Creating Video", Toast.LENGTH_LONG
                         ).show()
                     } catch (th: Throwable) {
                         th.printStackTrace()
@@ -535,9 +520,7 @@ class CropSpeedFragment : Fragment(), MyListener {
                         File(str).delete()
                         deleteFromGallery(str, requireContext())
                         Toast.makeText(
-                            requireContext(),
-                            "Error Creating Video",
-                            Toast.LENGTH_LONG
+                            requireContext(), "Error Creating Video", Toast.LENGTH_LONG
                         ).show()
                     } catch (th: Throwable) {
                         th.printStackTrace()
@@ -584,8 +567,7 @@ class CropSpeedFragment : Fragment(), MyListener {
         @SuppressLint("SetTextI18n")
         override fun run() {
             if (binding.seekBar.progress >= binding.seekBar.max) {
-                binding.seekBar.progress =
-                    binding.videoView.currentPosition - mStartPosition * 1000
+                binding.seekBar.progress = binding.videoView.currentPosition - mStartPosition * 1000
 //                binding.totalDurationTextView.text = milliSecondsToTimer(
 //                    binding.seekBar.progress.toLong()
 //                ) + ""
@@ -595,8 +577,7 @@ class CropSpeedFragment : Fragment(), MyListener {
 //                binding.totalDurationTextView.text = "00:00"
                 binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
             } else {
-                binding.seekBar.progress =
-                    binding.videoView.currentPosition - mStartPosition * 1000
+                binding.seekBar.progress = binding.videoView.currentPosition - mStartPosition * 1000
 //                binding.totalDurationTextView.text = milliSecondsToTimer(
 //                    binding.seekBar.progress.toLong()
 //                ) + ""
@@ -689,9 +670,7 @@ class CropSpeedFragment : Fragment(), MyListener {
 
         binding.cropperView.setImageBitmap(
             Bitmap.createBitmap(
-                layoutParams.width,
-                layoutParams.height,
-                Bitmap.Config.ARGB_8888
+                layoutParams.width, layoutParams.height, Bitmap.Config.ARGB_8888
             )
         )
     }
@@ -881,8 +860,7 @@ class CropSpeedFragment : Fragment(), MyListener {
         binding.videoView.setVideoURI(Uri.parse(mainCachedFile))
 
         childFragmentManager!!.beginTransaction()
-            .replace(R.id.fragment_container_main, currentChildFragment as MainFragment)
-            .commit()
+            .replace(R.id.fragment_container_main, currentChildFragment as MainFragment).commit()
     }
 
     override fun onUtilityFunctionCalled() {

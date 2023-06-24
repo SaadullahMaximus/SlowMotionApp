@@ -1,24 +1,25 @@
 package com.example.slowmotionapp.ui.activities
 
 import android.app.Dialog
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
-import android.widget.*
+import android.widget.FrameLayout
+import android.widget.SeekBar
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.slowmotionapp.R
-import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.databinding.ActivityPlayerBinding
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
 import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.adapterShowing
 import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.positionClicked
-import com.example.slowmotionapp.utils.Utils
 import com.example.slowmotionapp.utils.Utils.deleteVideoFile
+import com.example.slowmotionapp.utils.Utils.editVideo
 import com.example.slowmotionapp.utils.Utils.milliSecondsToTimer
-import java.io.File
+import com.example.slowmotionapp.utils.Utils.shareVideo
+import com.example.slowmotionapp.utils.Utils.showRenameDialog
 
 class PlayerActivity : AppCompatActivity() {
 
@@ -156,17 +157,9 @@ class PlayerActivity : AppCompatActivity() {
         val overLayout = dialog.findViewById<FrameLayout>(R.id.overlay_layout)
 
         btnEdit.setOnClickListener {
-            val uri = Uri.parse(playVideo)
-            val intent = Intent(this, TrimVideoActivity::class.java)
-            intent.putExtra("VideoUri", playVideo)
-            intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
-            intent.putExtra(
-                "VideoDuration",
-                Utils.getMediaDuration(this, uri)
-            )
-            finish()
-            startActivity(intent)
+            editVideo()
             dialog.dismiss()
+            finish()
         }
 
         btnShare.setOnClickListener {
@@ -182,7 +175,6 @@ class PlayerActivity : AppCompatActivity() {
         btnDelete.setOnClickListener {
             deleteVideoFile(playVideo)
             adapterShowing.deleteItem(positionClicked)
-
             dialog.dismiss()
             finish()
         }
@@ -197,33 +189,6 @@ class PlayerActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun showRenameDialog() {
-        val dialog = Dialog(this, R.style.FullScreenDialogStyle)
-        dialog.setContentView(R.layout.rename_dialog)
-
-        val fileName = dialog.findViewById<EditText>(R.id.fileName)
-        val btnOk = dialog.findViewById<TextView>(R.id.okBtn)
-        val btnCancel = dialog.findViewById<TextView>(R.id.cancelBtn)
-
-
-        btnOk.setOnClickListener {
-            val text = fileName.text.toString()
-            if (text.isNotEmpty()) {
-                // The EditText has non-empty text
-                // Perform your desired actions here
-                File(playVideo).renameTo(File(File(playVideo).parent, "$text.mp4"))
-            } else {
-                Toast.makeText(this, "Please enter a valid name!", Toast.LENGTH_SHORT).show()
-            }
-            dialog.dismiss()
-        }
-
-        btnCancel.setOnClickListener {
-            dialog.dismiss()
-        }
-
-        dialog.show()
-    }
 
     private fun pauseVideo() {
         if (binding.videoView.isPlaying) {
@@ -262,33 +227,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
         finish()
-    }
-
-    fun shareVideo(videoPath: String) {
-        // Create the intent
-
-        // Create the intent
-        val shareIntent = Intent(Intent.ACTION_SEND)
-        shareIntent.type = "video/*"
-
-        // Set the path of the video file
-
-        // Set the path of the video file
-        val videoUri = Uri.parse(videoPath)
-        shareIntent.putExtra(Intent.EXTRA_STREAM, videoUri)
-
-        // Optionally, you can set a subject for the shared video
-
-        // Optionally, you can set a subject for the shared video
-        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Shared Video")
-
-        // Start the activity for sharing
-
-        // Start the activity for sharing
-        startActivity(Intent.createChooser(shareIntent, "Share Video"))
-
     }
 }
 

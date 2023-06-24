@@ -55,6 +55,9 @@
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+
+        android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
         android:layout_marginTop="@dimen/_4sdp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"

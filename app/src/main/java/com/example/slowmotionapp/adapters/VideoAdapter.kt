@@ -9,11 +9,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
 import com.example.slowmotionapp.ui.activities.PlayerActivity
 import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.positionClicked
+import com.example.slowmotionapp.utils.Utils.milliSecondsToTimer
 import java.io.File
 
 class VideoAdapter(val context: Context, private val videos: MutableList<File>) :
@@ -28,6 +30,8 @@ class VideoAdapter(val context: Context, private val videos: MutableList<File>) 
         val videoFile = videos[position]
         val thumbnailImageView: ImageView = holder.itemView.findViewById(R.id.videoThumbnail)
         val titleTextView: TextView = holder.itemView.findViewById(R.id.videoTitle)
+        val videoDuration: TextView = holder.itemView.findViewById(R.id.videoDuration)
+        val videoPlayer: CardView = holder.itemView.findViewById(R.id.videoPlayer)
 
         val retriever = MediaMetadataRetriever()
         retriever.setDataSource(context, Uri.parse(videoFile.path))
@@ -35,9 +39,12 @@ class VideoAdapter(val context: Context, private val videos: MutableList<File>) 
         val thumbnail = retriever.frameAtTime
         thumbnailImageView.setImageBitmap(thumbnail)
 
+        val time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong()
+
+        videoDuration.text = milliSecondsToTimer(time!!) + " min"
         titleTextView.text = videoFile.nameWithoutExtension
 
-        holder.itemView.setOnClickListener {
+        videoPlayer.setOnClickListener {
             playVideo = videoFile.path
             positionClicked = position
             context.startActivity(Intent(context, PlayerActivity::class.java))
