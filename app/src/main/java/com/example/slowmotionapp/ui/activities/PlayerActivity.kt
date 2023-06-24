@@ -1,25 +1,17 @@
 package com.example.slowmotionapp.ui.activities
 
-import android.app.Dialog
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
-import android.widget.FrameLayout
 import android.widget.SeekBar
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.databinding.ActivityPlayerBinding
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
-import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.adapterShowing
-import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.positionClicked
-import com.example.slowmotionapp.utils.Utils.deleteVideoFile
-import com.example.slowmotionapp.utils.Utils.editVideo
 import com.example.slowmotionapp.utils.Utils.milliSecondsToTimer
-import com.example.slowmotionapp.utils.Utils.shareVideo
-import com.example.slowmotionapp.utils.Utils.showRenameDialog
+import java.io.File
 
 class PlayerActivity : AppCompatActivity() {
 
@@ -49,6 +41,8 @@ class PlayerActivity : AppCompatActivity() {
         handler.postDelayed(hideViewsRunnable, 5000)
 
         binding.videoView.setVideoURI(Uri.parse(playVideo))
+
+        binding.videoName.text = File(playVideo).name
 
         binding.videoView.setOnPreparedListener { mediaPlayer ->
             duration = mediaPlayer.duration
@@ -97,10 +91,6 @@ class PlayerActivity : AppCompatActivity() {
             }
         }
 
-        binding.overlayLayoutPlayer.setOnLongClickListener {
-            showFullScreenDialog()
-            true
-        }
 
         binding.playBtn.setOnClickListener {
             if (binding.videoView.isPlaying) {
@@ -142,58 +132,6 @@ class PlayerActivity : AppCompatActivity() {
 
         binding.backBtn.setOnClickListener {
             finish()
-        }
-    }
-
-    private fun showFullScreenDialog() {
-        val dialog = Dialog(this, R.style.FullScreenDialogStyle)
-        dialog.setContentView(R.layout.player_long_pressed_dialog)
-        pauseVideo()
-
-        val btnEdit = dialog.findViewById<TextView>(R.id.btnEdit)
-        val btnShare = dialog.findViewById<TextView>(R.id.btnShare)
-        val btnRename = dialog.findViewById<TextView>(R.id.btnRename)
-        val btnDelete = dialog.findViewById<TextView>(R.id.btnDelete)
-        val overLayout = dialog.findViewById<FrameLayout>(R.id.overlay_layout)
-
-        btnEdit.setOnClickListener {
-            editVideo()
-            dialog.dismiss()
-            finish()
-        }
-
-        btnShare.setOnClickListener {
-            shareVideo(playVideo)
-            dialog.dismiss()
-        }
-
-        btnRename.setOnClickListener {
-            showRenameDialog()
-            dialog.dismiss()
-        }
-
-        btnDelete.setOnClickListener {
-            deleteVideoFile(playVideo)
-            adapterShowing.deleteItem(positionClicked)
-            dialog.dismiss()
-            finish()
-        }
-
-
-        overLayout.setOnClickListener {
-            binding.playBtn.setImageResource(R.drawable.baseline_pause)
-            binding.videoView.start()
-            dialog.dismiss()
-        }
-
-        dialog.show()
-    }
-
-
-    private fun pauseVideo() {
-        if (binding.videoView.isPlaying) {
-            binding.playBtn.setImageResource(R.drawable.baseline_play_arrow)
-            binding.videoView.pause()
         }
     }
 

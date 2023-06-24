@@ -16,7 +16,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import com.example.slowmotionapp.R
-import com.example.slowmotionapp.adapters.VideoAdapter
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.constants.Constants.Companion.VIDEO_LIMIT
 import com.example.slowmotionapp.constants.Constants.Companion.VIDEO_MIN_LIMIT
@@ -41,13 +40,9 @@ class SavedActivity : AppCompatActivity() {
 
 
     companion object {
-        lateinit var adapterShowing: VideoAdapter
-
         var croppedFiles = fetchVideosFromDirectory(croppedDir)
         var editedFiles = fetchVideosFromDirectory(editedDir)
         var trimmedFiles = fetchVideosFromDirectory(trimmedDir)
-
-        var positionClicked = -1
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

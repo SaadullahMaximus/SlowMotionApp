@@ -12,6 +12,8 @@ import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.text.SpannableString
 import android.text.Spanned
@@ -46,6 +48,8 @@ import java.util.*
 object Utils {
 
     var player: ExoPlayer? = null
+
+    val handler = Handler(Looper.getMainLooper())
 
     private val filepath =
         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
@@ -276,7 +280,7 @@ object Utils {
         query.close()
     }
 
-    private fun refreshGallery(str: String?, context: Context) {
+    fun refreshGallery(str: String?, context: Context) {
         val intent = Intent("android.intent.action.MEDIA_SCANNER_SCAN_FILE")
         intent.data = Uri.fromFile(File(str!!))
         context.sendBroadcast(intent)
@@ -469,7 +473,7 @@ object Utils {
 
     }
 
-    fun Context.showRenameDialog() {
+    fun Context.showRenameDialog(videoPath: String, action: () -> Unit) {
         val dialog = Dialog(this, R.style.FullScreenDialogStyle)
         dialog.setContentView(R.layout.rename_dialog)
 
@@ -483,7 +487,13 @@ object Utils {
             if (text.isNotEmpty()) {
                 // The EditText has non-empty text
                 // Perform your desired actions here
-                File(playVideo).renameTo(File(File(playVideo).parent, "$text.mp4"))
+                File(videoPath).renameTo(File(File(videoPath).parent, "$text.mp4"))
+                val runnable = Runnable {
+                    action.invoke()
+                }
+
+                // Post the runnable with the specified delay
+                handler.postDelayed(runnable, 100)
             } else {
                 Toast.makeText(this, "Please enter a valid name!", Toast.LENGTH_SHORT).show()
             }
@@ -497,8 +507,8 @@ object Utils {
         dialog.show()
     }
 
-    fun Context.editVideo() {
-        val uri = Uri.parse(playVideo)
+    fun Context.editVideo(videoPath: String) {
+        val uri = Uri.parse(videoPath)
         val intent = Intent(this, TrimVideoActivity::class.java)
         intent.putExtra("VideoUri", playVideo)
         intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
