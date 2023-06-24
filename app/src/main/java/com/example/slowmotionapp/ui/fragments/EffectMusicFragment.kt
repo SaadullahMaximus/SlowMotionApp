@@ -37,6 +37,8 @@ import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCached
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.myMusic
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.myMusicUri
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.wannaGoBack
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.wannaGoBackCheckViewModel
 import com.example.slowmotionapp.utils.Utils.commandsGenerator
 import com.example.slowmotionapp.utils.Utils.createCacheTempFile
 import com.example.slowmotionapp.utils.Utils.createCroppedFile
@@ -269,10 +271,16 @@ class EffectMusicFragment : Fragment() {
                     override fun onCompleted() {
                         mainCachedFile = outputFile
                         progressDialog.dismiss()
+
                         if (MusicApplied) {
                             audioVideoMixer()
                         } else {
-                            saveEditedVideo(requireContext())
+                            if (wannaGoBack) {
+                                wannaGoBackCheckViewModel.postValue(true)
+                                wannaGoBack = false
+                            } else {
+                                saveEditedVideo(requireContext())
+                            }
                         }
                     }
 
@@ -353,7 +361,14 @@ class EffectMusicFragment : Fragment() {
                         progressDialog.dismiss()
                         playVideo = str
                         mainCachedFile = str
-                        saveEditedVideo(requireContext())
+
+                        if (wannaGoBack) {
+                            wannaGoBack = false
+                            sharedViewModel.wannaGoBackCheckFunction(true)
+                        } else {
+                            saveEditedVideo(requireContext())
+                        }
+
                     }
                     Config.RETURN_CODE_CANCEL -> {
                         try {

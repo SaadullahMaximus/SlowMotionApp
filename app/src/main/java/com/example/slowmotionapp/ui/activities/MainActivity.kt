@@ -17,6 +17,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import androidx.lifecycle.MutableLiveData
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.constants.Constants.Companion.VIDEO_LIMIT
@@ -75,6 +76,10 @@ class MainActivity : AppCompatActivity() {
         var permissionAllowed = false
 
         var cameraPermission = false
+
+        var wannaGoBack = false
+
+        var wannaGoBackCheckViewModel: MutableLiveData<Boolean> = MutableLiveData(false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -181,9 +186,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
+        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
@@ -208,8 +211,7 @@ class MainActivity : AppCompatActivity() {
                     val cameraIntent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
                     videoFile = createVideoFile()
                     videoUri = FileProvider.getUriForFile(
-                        this,
-                        Constants.provider, videoFile!!
+                        this, Constants.provider, videoFile!!
                     )
                     cameraIntent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 240) //4 minutes
                     cameraIntent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1)
@@ -322,12 +324,11 @@ class MainActivity : AppCompatActivity() {
         try {
             val selectedImage = data.data
             val filePathColumn = arrayOf(MediaStore.MediaColumns.DATA)
-            val cursor = this.contentResolver
-                .query(selectedImage!!, filePathColumn, null, null, null)
+            val cursor =
+                this.contentResolver.query(selectedImage!!, filePathColumn, null, null, null)
             if (cursor != null) {
                 cursor.moveToFirst()
-                val columnIndex = cursor
-                    .getColumnIndex(filePathColumn[0])
+                val columnIndex = cursor.getColumnIndex(filePathColumn[0])
                 val filePath = cursor.getString(columnIndex)
                 cursor.close()
                 masterVideoFile = File(filePath)
@@ -363,8 +364,7 @@ class MainActivity : AppCompatActivity() {
                                 intent.putExtra("VideoUri", filePath)
                                 intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
                                 intent.putExtra(
-                                    "VideoDuration",
-                                    getMediaDuration(this, uri)
+                                    "VideoDuration", getMediaDuration(this, uri)
                                 )
                                 startActivity(intent)
                             }
@@ -372,9 +372,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 } else {
                     Toast.makeText(
-                        this,
-                        "Video duration should be between 4-240 seconds",
-                        Toast.LENGTH_SHORT
+                        this, "Video duration should be between 4-240 seconds", Toast.LENGTH_SHORT
                     ).show()
                 }
             }
@@ -387,24 +385,18 @@ class MainActivity : AppCompatActivity() {
         isExpanded = true
         binding.expandedButtonsContainer.visibility = View.VISIBLE
         binding.expandedButtonsContainer.alpha = 0f
-        binding.expandedButtonsContainer.animate()
-            .alpha(1f)
-            .setDuration(600)
-            .setListener(null)
+        binding.expandedButtonsContainer.animate().alpha(1f).setDuration(600).setListener(null)
             .start()
     }
 
     private fun collapseButtons() {
         isExpanded = false
-        binding.expandedButtonsContainer.animate()
-            .alpha(0f)
-            .setDuration(600)
+        binding.expandedButtonsContainer.animate().alpha(0f).setDuration(600)
             .setListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
                     binding.expandedButtonsContainer.visibility = View.GONE
                 }
-            })
-            .start()
+            }).start()
     }
 
     private fun openGallery() {

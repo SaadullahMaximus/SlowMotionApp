@@ -156,6 +156,8 @@ class TrimVideoActivity : AppCompatActivity() {
                     Toast.LENGTH_LONG
                 ).show()
             } else {
+                binding.trimVideoView.pause()
+                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
                 showTrimDialog()
             }
         }
