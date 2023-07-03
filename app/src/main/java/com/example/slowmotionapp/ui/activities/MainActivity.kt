@@ -221,7 +221,7 @@ class MainActivity : AppCompatActivity() {
                     progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
                     progressDialog.isIndeterminate = true
                     progressDialog.setCancelable(false)
-                    progressDialog.setMessage("Please Wait")
+                    progressDialog.setMessage("Fetching Videos")
                     progressDialog.show()
                     progressInitialized = true
                     startActivity(Intent(this, SavedActivity::class.java))

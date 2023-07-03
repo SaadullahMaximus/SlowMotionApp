@@ -67,7 +67,7 @@ object Utils {
         this.listener = listener
     }
 
-    var mLastClickTime = 0L
+    private var mLastClickTime = 0L
     fun singleClick(listener: () -> Unit) {
         if (SystemClock.elapsedRealtime() - mLastClickTime < 1500) { // 1000 = 1second
             return
@@ -88,6 +88,7 @@ object Utils {
                         videosList.add(file)
                     }
                 }
+                videosList.reverse()
             }
         }
 
@@ -224,6 +225,7 @@ object Utils {
     fun getFileExtension(filePath: String): String {
         return filePath.substring(filePath.lastIndexOf("."))
     }
+
 
     fun getVideoDuration(context: Context, file: File): Long {
         val retriever = MediaMetadataRetriever()
@@ -491,13 +493,15 @@ object Utils {
         val btnOk = dialog.findViewById<TextView>(R.id.okBtn)
         val btnCancel = dialog.findViewById<TextView>(R.id.cancelBtn)
 
-
         btnOk.setOnClickListener {
-            val text = fileName.text.toString()
+            val text = fileName.text.toString() + ".mp4"
             if (text.isNotEmpty()) {
-                // The EditText has non-empty text
-                // Perform your desired actions here
-                File(videoPath).renameTo(File(File(videoPath).parent, "$text.mp4"))
+                val parentDirectory = File(videoPath).parentFile
+                val newFileName = getUniqueFileName(parentDirectory, text)
+
+                val renamedFile = File(parentDirectory, newFileName)
+                File(videoPath).renameTo(renamedFile)
+
                 val runnable = Runnable {
                     action.invoke()
                 }
@@ -515,6 +519,35 @@ object Utils {
         }
 
         dialog.show()
+    }
+
+    private fun getUniqueFileName(directory: File, fileName: String): String {
+        var uniqueFileName = fileName
+        var counter = 1
+        val extension = getFileNameExtension(fileName)
+
+        while (File(directory, uniqueFileName).exists()) {
+            uniqueFileName = "${getFileNameWithoutExtension(fileName)} ($counter).$extension"
+            counter++
+        }
+
+        return uniqueFileName
+    }
+
+    private fun getFileNameExtension(fileName: String): String {
+        val dotIndex = fileName.lastIndexOf(".")
+        if (dotIndex == -1 || dotIndex == fileName.length - 1) {
+            return ""
+        }
+        return fileName.substring(dotIndex + 1)
+    }
+
+    private fun getFileNameWithoutExtension(fileName: String): String {
+        val dotIndex = fileName.lastIndexOf(".")
+        if (dotIndex == -1) {
+            return fileName
+        }
+        return fileName.substring(0, dotIndex)
     }
 
     fun Context.editVideo(videoPath: String) {

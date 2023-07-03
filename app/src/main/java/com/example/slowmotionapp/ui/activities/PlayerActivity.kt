@@ -105,7 +105,10 @@ class PlayerActivity : AppCompatActivity() {
         binding.videoView.setOnCompletionListener {
             binding.seekBar.progress = 0
             binding.videoView.seekTo(0)
-            binding.playBtn.setImageResource(R.drawable.baseline_play_arrow)
+            binding.videoView.start()
+            showViews()
+            handler.removeCallbacks(hideViewsRunnable)
+            handler.postDelayed(hideViewsRunnable, 5000)
         }
 
         binding.forwardBtn.setOnClickListener {
