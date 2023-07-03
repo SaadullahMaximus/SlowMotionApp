@@ -454,6 +454,7 @@ class CropSpeedFragment : Fragment(), MyListener {
         }
 
         binding.saveBtn.setOnClickListener {
+            audioPlayer!!.release()
             if (enhanced) {
                 sharedViewModel.enhanced(true)
             } else {

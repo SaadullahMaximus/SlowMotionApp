@@ -14,6 +14,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import android.provider.Settings
+import android.view.Gravity
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -225,6 +226,10 @@ class MainActivity : AppCompatActivity() {
                     progressDialog.setMessage("Fetching Videos")
                     progressDialog.show()
                     progressInitialized = true
+
+                    // Set the gravity to CENTER
+                    progressDialog.window?.setGravity(Gravity.CENTER)
+
                     startActivity(Intent(this, SavedActivity::class.java))
                 }
                 Constants.VIDEO_GALLERY -> {
@@ -318,10 +323,11 @@ class MainActivity : AppCompatActivity() {
             }
 
             Constants.RECORD_VIDEO -> {
+
                 if (resultCode == Activity.RESULT_OK) {
                     if (cameraPermission) {
 
-                        val timeInMillis = getVideoDuration(this, masterVideoFile!!)
+                        val timeInMillis = getVideoDuration(this, videoFile!!)
                         val duration = convertDurationInSec(timeInMillis)
 
                         if (duration in (VIDEO_MIN_LIMIT + 1) until VIDEO_LIMIT) {

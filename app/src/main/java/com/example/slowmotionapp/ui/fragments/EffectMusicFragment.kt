@@ -45,7 +45,6 @@ import com.example.slowmotionapp.utils.Utils.createCroppedFile
 import com.example.slowmotionapp.utils.Utils.deleteFromGallery
 import com.example.slowmotionapp.utils.Utils.getAudioFilePathFromUri
 import com.example.slowmotionapp.utils.Utils.getVideoDuration
-import com.example.slowmotionapp.utils.Utils.refreshAudioGallery
 import com.example.slowmotionapp.utils.Utils.saveEditedVideo
 import com.example.slowmotionapp.viewmodel.SharedViewModel
 import com.google.android.material.tabs.TabLayout
@@ -186,12 +185,20 @@ class EffectMusicFragment : Fragment() {
                         permission
                     ) == PackageManager.PERMISSION_GRANTED
                 ) {
-                    //call the gallery intent
-                    refreshAudioGallery(requireContext())
                     val i = Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
                     i.type = "audio/*"
                     i.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("audio/*"))
-                    startActivityForResult(i, Constants.AUDIO_GALLERY)
+
+                    // Verify that there is an activity available to handle the intent
+                    if (i.resolveActivity(requireActivity().packageManager) != null) {
+                        startActivityForResult(i, Constants.AUDIO_GALLERY)
+                    } else {
+                        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+                        intent.addCategory(Intent.CATEGORY_OPENABLE)
+                        intent.type = "audio/*"
+                        startActivityForResult(intent, 456)
+                        Toast.makeText(requireContext(), "No application found to handle audio file picking.", Toast.LENGTH_SHORT).show()
+                    }
                 } else {
                     callPermissionSettings()
                 }
@@ -206,6 +213,8 @@ class EffectMusicFragment : Fragment() {
             // Handle the selected video here
             // Perform any required operations with the selected video
 
+            setupFragment(getAudioFilePathFromUri(requireContext(), data?.data!!))
+        } else if (requestCode == 456 && resultCode == Activity.RESULT_OK){
             setupFragment(getAudioFilePathFromUri(requireContext(), data?.data!!))
         }
     }
