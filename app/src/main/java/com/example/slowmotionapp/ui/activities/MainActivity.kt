@@ -3,7 +3,9 @@ package com.example.slowmotionapp.ui.activities
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
+import android.app.Activity
 import android.app.Dialog
+import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -43,6 +45,10 @@ class MainActivity : AppCompatActivity() {
     private var masterVideoFile: File? = null
     private var playbackPosition: Long = 0
     private var currentWindow: Int = 0
+
+    private var progressInitialized = false
+
+    private lateinit var progressDialog: ProgressDialog
 
     companion object {
 
@@ -210,6 +216,14 @@ class MainActivity : AppCompatActivity() {
         if (allPermissionsGranted) {
             when (requestCode) {
                 Constants.GALLERY_PERMISSION_CODE -> {
+                    progressDialog =
+                        ProgressDialog(this, R.style.CustomDialog)
+                    progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
+                    progressDialog.isIndeterminate = true
+                    progressDialog.setCancelable(false)
+                    progressDialog.setMessage("Please Wait")
+                    progressDialog.show()
+                    progressInitialized = true
                     startActivity(Intent(this, SavedActivity::class.java))
                 }
                 Constants.VIDEO_GALLERY -> {
@@ -303,27 +317,36 @@ class MainActivity : AppCompatActivity() {
             }
 
             Constants.RECORD_VIDEO -> {
-                if (cameraPermission) {
-                    if (justEffects) {
-                        val intent = Intent(this, EffectActivity::class.java)
-                        intent.putExtra("VideoUri", videoUri.toString())
-                        intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
-                        startActivity(intent)
-                    } else {
-                        if (trimOrCrop) {
-                            val intent = Intent(this, CropActivity::class.java)
+                if (resultCode == Activity.RESULT_OK) {
+                    if (cameraPermission) {
+                        if (justEffects) {
+                            val intent = Intent(this, EffectActivity::class.java)
                             intent.putExtra("VideoUri", videoUri.toString())
                             intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
                             startActivity(intent)
                         } else {
-                            val intent = Intent(this, TrimVideoActivity::class.java)
-                            intent.putExtra("VideoUri", videoUri.toString())
-                            intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
-                            startActivity(intent)
+                            if (trimOrCrop) {
+                                val intent = Intent(this, CropActivity::class.java)
+                                intent.putExtra("VideoUri", videoUri.toString())
+                                intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
+                                startActivity(intent)
+                            } else {
+                                val intent = Intent(this, TrimVideoActivity::class.java)
+                                intent.putExtra("VideoUri", videoUri.toString())
+                                intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
+                                startActivity(intent)
+                            }
+                        }
+                    } else {
+                        requestPermissions(Constants.PERMISSION_CAMERA, Constants.RECORD_VIDEO)
+                    }
+                } else if (resultCode == Activity.RESULT_CANCELED) {
+                    // Video recording was canceled, delete the recorded video file if it exists
+                    videoFile?.let { file ->
+                        if (file.exists()) {
+                            file.delete()
                         }
                     }
-                } else {
-                    requestPermissions(Constants.PERMISSION_CAMERA, Constants.RECORD_VIDEO)
                 }
             }
 
@@ -466,6 +489,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         openExitDialog()
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        if (progressInitialized) {
+            progressDialog.dismiss()
+            progressInitialized = false
+        }
     }
 
 }
