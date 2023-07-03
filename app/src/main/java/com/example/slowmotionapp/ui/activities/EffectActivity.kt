@@ -26,7 +26,9 @@ import com.example.slowmotionapp.effects.FilterType
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.utils.Utils
 import com.example.slowmotionapp.utils.Utils.createCacheTempFile
+import com.example.slowmotionapp.utils.Utils.getVideoDuration
 import com.example.slowmotionapp.utils.Utils.getVideoSize
+import com.example.slowmotionapp.utils.Utils.milliSecondsToTimer
 import com.example.slowmotionapp.utils.Utils.player
 import com.example.slowmotionapp.utils.Utils.saveEditedVideo
 import com.example.slowmotionapp.utils.Utils.setUpSimpleExoPlayer
@@ -101,9 +103,7 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
                     runnable = Runnable { updateSeekBar() }
                 }
                 if (playbackState == Player.STATE_ENDED) {
-                    binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
                     player!!.seekTo(0)
-                    player!!.pause()
                 }
             }
         })
@@ -136,6 +136,10 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
                 player?.seekTo((mStartPosition * 1000 + seekBar.progress).toLong())
             }
         })
+
+        binding.totalDurationTextView.text =
+            milliSecondsToTimer(getVideoDuration(this, mainCachedFile).toLong() * 1000)
+
     }
 
     override fun onBackPressed() {

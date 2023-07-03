@@ -16,7 +16,6 @@ import android.provider.MediaStore
 import android.provider.Settings
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.MutableLiveData
@@ -319,23 +318,46 @@ class MainActivity : AppCompatActivity() {
             Constants.RECORD_VIDEO -> {
                 if (resultCode == Activity.RESULT_OK) {
                     if (cameraPermission) {
-                        if (justEffects) {
-                            val intent = Intent(this, EffectActivity::class.java)
-                            intent.putExtra("VideoUri", videoUri.toString())
-                            intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
-                            startActivity(intent)
-                        } else {
-                            if (trimOrCrop) {
-                                val intent = Intent(this, CropActivity::class.java)
+
+                        val timeInMillis = getVideoDuration(this, masterVideoFile!!)
+                        val duration = convertDurationInSec(timeInMillis)
+
+                        if (duration in (VIDEO_MIN_LIMIT + 1) until VIDEO_LIMIT) {
+                            if (justEffects) {
+                                val intent = Intent(this, EffectActivity::class.java)
                                 intent.putExtra("VideoUri", videoUri.toString())
                                 intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
                                 startActivity(intent)
                             } else {
-                                val intent = Intent(this, TrimVideoActivity::class.java)
-                                intent.putExtra("VideoUri", videoUri.toString())
-                                intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
-                                startActivity(intent)
+                                if (trimOrCrop) {
+                                    val intent = Intent(this, CropActivity::class.java)
+                                    intent.putExtra("VideoUri", videoUri.toString())
+                                    intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
+                                    startActivity(intent)
+                                } else {
+                                    val intent = Intent(this, TrimVideoActivity::class.java)
+                                    intent.putExtra("VideoUri", videoUri.toString())
+                                    intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
+                                    startActivity(intent)
+                                }
                             }
+                        } else {
+                            val dialog = Dialog(this, R.style.FullScreenDialogStyle)
+                            dialog.setContentView(R.layout.duration_alert_dialog)
+
+                            val noBtn = dialog.findViewById<TextView>(R.id.noBtn)
+                            val yesBtn = dialog.findViewById<TextView>(R.id.yesBtn)
+
+                            yesBtn.setOnClickListener {
+                                isFromTrim = false
+                                checkPermissionGallery()
+                                dialog.dismiss()
+                            }
+
+                            noBtn.setOnClickListener {
+                                dialog.dismiss()
+                            }
+                            dialog.show()
                         }
                     } else {
                         requestPermissions(Constants.PERMISSION_CAMERA, Constants.RECORD_VIDEO)
@@ -409,9 +431,22 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 } else {
-                    Toast.makeText(
-                        this, "Video duration should be between 4-240 seconds", Toast.LENGTH_SHORT
-                    ).show()
+                    val dialog = Dialog(this, R.style.FullScreenDialogStyle)
+                    dialog.setContentView(R.layout.duration_alert_dialog)
+
+                    val noBtn = dialog.findViewById<TextView>(R.id.noBtn)
+                    val yesBtn = dialog.findViewById<TextView>(R.id.yesBtn)
+
+                    yesBtn.setOnClickListener {
+                        isFromTrim = false
+                        checkPermissionGallery()
+                        dialog.dismiss()
+                    }
+
+                    noBtn.setOnClickListener {
+                        dialog.dismiss()
+                    }
+                    dialog.show()
                 }
             }
         } catch (_: Exception) {
