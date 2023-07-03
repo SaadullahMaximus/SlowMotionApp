@@ -31,6 +31,7 @@ import com.example.slowmotionapp.utils.Utils.getFileExtension
 import com.example.slowmotionapp.utils.Utils.getMediaDuration
 import com.example.slowmotionapp.utils.Utils.getVideoDuration
 import com.example.slowmotionapp.utils.Utils.refreshGalleryAlone
+import com.example.slowmotionapp.utils.Utils.singleClick
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
@@ -128,41 +129,55 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.captureVideoBtn.setOnClickListener {
-            isFromTrim = false
-            startCamera()
+            singleClick {
+                isFromTrim = false
+                startCamera()
+            }
         }
 
         binding.selectVideoBtn.setOnClickListener {
-            isFromTrim = false
-            checkPermissionGallery()
+            singleClick {
+                isFromTrim = false
+                checkPermissionGallery()
+            }
         }
 
         binding.btnSaved.setOnClickListener {
-            requestPermissions(
-                Constants.PERMISSION_GALLERY, 100
-            )
+            singleClick {
+                requestPermissions(
+                    Constants.PERMISSION_GALLERY, 100
+                )
+            }
         }
 
         binding.btnTrim.setOnClickListener {
-            trimOrCrop = false
-            val myDialogFragment = MyDialogFragment()
-            myDialogFragment.show(supportFragmentManager, "MyDialogFragment")
+            singleClick {
+                trimOrCrop = false
+                val myDialogFragment = MyDialogFragment()
+                myDialogFragment.show(supportFragmentManager, "MyDialogFragment")
+            }
         }
 
         binding.btnCrop.setOnClickListener {
-            trimOrCrop = true
-            val myDialogFragment = MyDialogFragment()
-            myDialogFragment.show(supportFragmentManager, "MyDialogFragment")
+            singleClick {
+                trimOrCrop = true
+                val myDialogFragment = MyDialogFragment()
+                myDialogFragment.show(supportFragmentManager, "MyDialogFragment")
+            }
         }
 
         binding.btnEffects.setOnClickListener {
-            justEffects = true
-            val myDialogFragment = MyDialogFragment()
-            myDialogFragment.show(supportFragmentManager, "MyDialogFragment")
+            singleClick {
+                justEffects = true
+                val myDialogFragment = MyDialogFragment()
+                myDialogFragment.show(supportFragmentManager, "MyDialogFragment")
+            }
         }
 
         binding.settingBtn.setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
+            singleClick {
+                startActivity(Intent(this, SettingsActivity::class.java))
+            }
         }
 
     }

@@ -14,6 +14,7 @@ import android.net.Uri
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.provider.MediaStore
 import android.text.SpannableString
 import android.text.Spanned
@@ -64,6 +65,15 @@ object Utils {
 
     fun setListener(listener: MyListener) {
         this.listener = listener
+    }
+
+    var mLastClickTime = 0L
+    fun singleClick(listener: () -> Unit) {
+        if (SystemClock.elapsedRealtime() - mLastClickTime < 1500) { // 1000 = 1second
+            return
+        }
+        mLastClickTime = SystemClock.elapsedRealtime()
+        listener.invoke()
     }
 
     fun fetchVideosFromDirectory(dir: File): MutableList<File> {

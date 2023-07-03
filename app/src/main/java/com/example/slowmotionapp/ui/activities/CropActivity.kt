@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
@@ -20,10 +19,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.arthenica.mobileffmpeg.Config
 import com.arthenica.mobileffmpeg.FFmpeg
-import com.basusingh.beautifulprogressdialog.BeautifulProgressDialog
 import com.edmodo.cropper.cropwindow.edge.Edge
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
+import com.example.slowmotionapp.customviews.CustomWaitingDialog
 import com.example.slowmotionapp.databinding.ActivityCropBinding
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
@@ -400,19 +399,19 @@ class CropActivity : AppCompatActivity() {
     }
 
     private fun executeFFMPEG(strArr: Array<String>, str: String) {
-        val progressDialog =
-            BeautifulProgressDialog(this, BeautifulProgressDialog.withLottie, "Please wait")
-        progressDialog.setLottieLocation("loading_dialog.json")
-        //Loop the Lottie Animation
-        progressDialog.setLottieLoop(true)
-        progressDialog.setLayoutColor(Color.WHITE)
+        val progressDialog = CustomWaitingDialog(this)
+        progressDialog.setCloseButtonClickListener {
+            progressDialog.dismiss()
+            FFmpeg.cancel()
+        }
         progressDialog.show()
-        progressDialog.setCancelable(false)
+
 
         binding.imageViewFree.setImageResource(R.drawable.crop_unselect)
         binding.imageView11.setImageResource(R.drawable.crop_unselect)
         binding.imageViewPortrait.setImageResource(R.drawable.crop_unselect)
         binding.imageViewLandScape.setImageResource(R.drawable.crop_unselect)
+
         if (binding.videoView.isPlaying) {
             binding.videoView.pause()
             binding.videoView.seekTo(0)
