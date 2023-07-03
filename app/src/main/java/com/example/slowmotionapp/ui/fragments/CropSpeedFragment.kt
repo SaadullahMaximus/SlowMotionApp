@@ -150,11 +150,15 @@ class CropSpeedFragment : Fragment(), MyListener {
         sharedViewModel.videoPath.observe(viewLifecycleOwner) { path ->
             path?.let {
                 videoView.setVideoURI(Uri.parse(path))
+                binding.totalDurationTextView.text =
+                    milliSecondsToTimer(getVideoDuration(requireContext(), path).toLong() * 1000)
                 layoutMovieWrapper.removeAllViews()
                 player?.release()
                 setUpSimpleExoPlayer(requireContext())
                 setUoGlPlayerView()
             }
+
+            playerRestart()
         }
 
         sharedViewModel.booleanLiveData.observe(viewLifecycleOwner) { newValue ->
@@ -242,17 +246,7 @@ class CropSpeedFragment : Fragment(), MyListener {
             player!!.volume = it
         }
 
-        player?.addListener(object : Player.Listener {
-            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-                if (playbackState == Player.STATE_ENDED) {
-                    player!!.seekTo(0)
-                    Log.d("Hello", "onPlayerStateChanged: Hello")
-                    if (musicReady && audioPlayer!!.isPlaying) {
-                        audioPlayer!!.seekTo(0)
-                    }
-                }
-            }
-        })
+        playerRestart()
 
         seekBar2.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(p0: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -269,6 +263,20 @@ class CropSpeedFragment : Fragment(), MyListener {
         })
 
 
+    }
+
+    private fun playerRestart() {
+        player?.addListener(object : Player.Listener {
+            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+                if (playbackState == Player.STATE_ENDED) {
+                    player!!.seekTo(0)
+                    Log.d("Hello", "onPlayerStateChanged: Hello")
+                    if (musicReady && audioPlayer!!.isPlaying) {
+                        audioPlayer!!.seekTo(0)
+                    }
+                }
+            }
+        })
     }
 
     private fun setUoGlPlayerView() {
@@ -364,7 +372,7 @@ class CropSpeedFragment : Fragment(), MyListener {
         })
 
         binding.backBtn.setOnClickListener {
-            requireActivity().finish()
+            exitDialog()
         }
 
         childFragmentManager!!.beginTransaction()
@@ -393,17 +401,7 @@ class CropSpeedFragment : Fragment(), MyListener {
             setUpSimpleExoPlayer(requireContext())
             setUoGlPlayerView()
 
-            player?.addListener(object : Player.Listener {
-                override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-                    if (playbackState == Player.STATE_ENDED) {
-                        player!!.seekTo(0)
-                        Log.d("Hello", "onPlayerStateChanged: Hello2")
-                        if (musicReady && audioPlayer!!.isPlaying) {
-                            audioPlayer!!.seekTo(0)
-                        }
-                    }
-                }
-            })
+            playerRestart()
 
             binding.videoView.stopPlayback()
             binding.layoutMovieWrapper.visibility = View.VISIBLE
@@ -464,6 +462,24 @@ class CropSpeedFragment : Fragment(), MyListener {
         }
 
         return binding.root
+    }
+
+    private fun exitDialog() {
+        val dialog = Dialog(requireContext(), R.style.FullScreenDialogStyle)
+        dialog.setContentView(R.layout.exit_dialog)
+
+        val noBtn = dialog.findViewById<TextView>(R.id.noBtn)
+        val yesBtn = dialog.findViewById<TextView>(R.id.yesBtn)
+
+        yesBtn.setOnClickListener {
+            requireActivity().finish()
+            dialog.dismiss()
+        }
+
+        noBtn.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.show()
     }
 
     private fun updateSeekBar2() {

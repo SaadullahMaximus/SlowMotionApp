@@ -96,8 +96,6 @@ class TrimVideoActivity : AppCompatActivity() {
             }
         }
 
-//        binding.trimVideoView.setOnCompletionListener { onVideoCompleted() }
-
         binding.timeLineBar.addOnRangeSeekBarListener(object : OnRangeSeekBarChangeListener {
             override fun onCreate(
                 customRangeSeekBarNew: CustomRangeSeekBar,
@@ -133,7 +131,6 @@ class TrimVideoActivity : AppCompatActivity() {
                 onStopSeekThumbs()
             }
         })
-
 
         binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {}
@@ -188,7 +185,6 @@ class TrimVideoActivity : AppCompatActivity() {
         }
 
         try {
-            //output file is generated and send to video processing
             outputFile = createTrimmedFile()
 
             val durationSeconds = (mEndPosition - mStartPosition)
@@ -430,5 +426,4 @@ class TrimVideoActivity : AppCompatActivity() {
             finish()
         }
     }
-
 }

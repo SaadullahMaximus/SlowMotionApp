@@ -1,7 +1,8 @@
 package com.example.slowmotionapp.ui.activities
 
+import android.app.Dialog
 import android.os.Bundle
-import android.util.Log
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.slowmotionapp.R
@@ -30,6 +31,28 @@ class EditorActivity : AppCompatActivity() {
         videoUri = intent.getStringExtra("VideoUri")
         mainCachedFile = videoUri!!
         type = intent.getIntExtra(Constants.TYPE, 0)
+    }
+
+    override fun onBackPressed() {
+        exitDialog()
+    }
+
+    private fun exitDialog() {
+        val dialog = Dialog(this, R.style.FullScreenDialogStyle)
+        dialog.setContentView(R.layout.exit_dialog)
+
+        val noBtn = dialog.findViewById<TextView>(R.id.noBtn)
+        val yesBtn = dialog.findViewById<TextView>(R.id.yesBtn)
+
+        yesBtn.setOnClickListener {
+            finish()
+            dialog.dismiss()
+        }
+
+        noBtn.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.show()
     }
 
 }
