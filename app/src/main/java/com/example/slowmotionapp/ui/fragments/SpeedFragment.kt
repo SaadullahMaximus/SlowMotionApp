@@ -17,6 +17,7 @@ import com.basusingh.beautifulprogressdialog.BeautifulProgressDialog
 import com.example.slowmotionapp.customviews.KnobView
 import com.example.slowmotionapp.databinding.FragmentSpeedBinding
 import com.example.slowmotionapp.extras.VideoPlayerState
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.knobFinalValue
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.knobPosition
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.utils.Utils.commandsGenerator
@@ -32,8 +33,6 @@ class SpeedFragment : Fragment() {
 
     private var _binding: FragmentSpeedBinding? = null
     private val binding get() = _binding!!
-
-    private var knobFinalValue = 7
 
     private var videoPlayerState: VideoPlayerState = VideoPlayerState()
 
@@ -80,8 +79,6 @@ class SpeedFragment : Fragment() {
 
     private fun handleKnobStopMoving(knobValue: Int) {
         // Handle the event when the user stops moving the knob
-
-        knobPosition = knobValue * 100F
         videoSpeedChange(knobValue)
     }
 

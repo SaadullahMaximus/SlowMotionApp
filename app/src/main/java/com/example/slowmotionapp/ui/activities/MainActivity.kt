@@ -86,6 +86,8 @@ class MainActivity : AppCompatActivity() {
         var wannaGoBack = false
 
         var wannaGoBackCheckViewModel: MutableLiveData<Boolean> = MutableLiveData(false)
+
+        var knobFinalValue = 7
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
