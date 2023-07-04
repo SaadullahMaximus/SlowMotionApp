@@ -56,12 +56,25 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_17sdp"
         android:layout_marginTop="@dimen/_20sdp"
-        android:layout_marginEnd="@dimen/_40sdp"
+        android:layout_marginEnd="@dimen/_17sdp"
+        android:ellipsize="end"
         android:fontFamily="@font/fredokaregular"
+        android:maxLines="1"
         android:text="Video Player"
         android:textColor="@color/white"
         android:textSize="@dimen/_14sdp"
+        app:layout_constraintEnd_toStartOf="@id/shareBtn"
         app:layout_constraintStart_toEndOf="@id/backBtn"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <ImageView
+        android:id="@+id/shareBtn"
+        android:layout_width="@dimen/_20sdp"
+        android:layout_height="@dimen/_20sdp"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginEnd="@dimen/_17sdp"
+        android:src="@drawable/share_ic"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

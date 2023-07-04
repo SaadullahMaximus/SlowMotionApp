@@ -40,7 +40,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/fredokaregular"
-                android:text="Warning!"
+                android:text="Alert!"
                 android:textColor="@color/white"
                 android:textSize="@dimen/_14sdp" />
 
@@ -50,7 +50,7 @@
                 android:layout_marginTop="@dimen/_8sdp"
                 android:layout_marginBottom="@dimen/_8sdp"
                 android:fontFamily="@font/fredokaregular"
-                android:text="Video duration should be between 4-240 seconds. Want to select Video Again?"
+                android:text="Video duration should be 3-240 seconds. Select a different video to continue?"
                 android:textColor="#919191"
                 android:textSize="@dimen/_11sdp" />
 

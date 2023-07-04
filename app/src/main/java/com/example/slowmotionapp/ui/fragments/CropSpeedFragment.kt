@@ -453,7 +453,9 @@ class CropSpeedFragment : Fragment(), MyListener {
         }
 
         binding.saveBtn.setOnClickListener {
-            audioPlayer!!.release()
+            if (audioPlayer != null){
+                audioPlayer!!.release()
+            }
             if (enhanced) {
                 sharedViewModel.enhanced(true)
             } else {
@@ -473,6 +475,7 @@ class CropSpeedFragment : Fragment(), MyListener {
 
         yesBtn.setOnClickListener {
             requireActivity().finish()
+            sharedViewModel.stopAllMusic(true)
             dialog.dismiss()
         }
 
@@ -852,6 +855,7 @@ class CropSpeedFragment : Fragment(), MyListener {
             wannaGoBack = true
 
             sharedViewModel.enhanced(true)
+            sharedViewModel.stopAllMusic(true)
 
             enhanced = false
 

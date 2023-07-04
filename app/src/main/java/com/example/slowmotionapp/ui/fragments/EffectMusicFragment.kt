@@ -46,6 +46,7 @@ import com.example.slowmotionapp.utils.Utils.deleteFromGallery
 import com.example.slowmotionapp.utils.Utils.getAudioFilePathFromUri
 import com.example.slowmotionapp.utils.Utils.getVideoDuration
 import com.example.slowmotionapp.utils.Utils.saveEditedVideo
+import com.example.slowmotionapp.utils.Utils.singleClick
 import com.example.slowmotionapp.viewmodel.SharedViewModel
 import com.google.android.material.tabs.TabLayout
 import java.io.File
@@ -156,7 +157,10 @@ class EffectMusicFragment : Fragment() {
         })
 
         binding.myMusicConstraint.setOnClickListener {
-            openAudioFiles(Constants.PERMISSION_AUDIO)
+            sharedViewModel.stopAllMusic(true)
+            singleClick {
+                openAudioFiles(Constants.PERMISSION_AUDIO)
+            }
         }
 
         binding.crossButton.setOnClickListener {
@@ -197,7 +201,11 @@ class EffectMusicFragment : Fragment() {
                         intent.addCategory(Intent.CATEGORY_OPENABLE)
                         intent.type = "audio/*"
                         startActivityForResult(intent, 456)
-                        Toast.makeText(requireContext(), "No application found to handle audio file picking.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            requireContext(),
+                            "No application found to handle audio file picking.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 } else {
                     callPermissionSettings()
@@ -214,7 +222,7 @@ class EffectMusicFragment : Fragment() {
             // Perform any required operations with the selected video
 
             setupFragment(getAudioFilePathFromUri(requireContext(), data?.data!!))
-        } else if (requestCode == 456 && resultCode == Activity.RESULT_OK){
+        } else if (requestCode == 456 && resultCode == Activity.RESULT_OK) {
             setupFragment(getAudioFilePathFromUri(requireContext(), data?.data!!))
         }
     }

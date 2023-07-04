@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.databinding.ActivitySettingsBinding
 import com.example.slowmotionapp.utils.Utils.openURL
+import com.example.slowmotionapp.utils.Utils.singleClick
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -32,35 +33,51 @@ class SettingsActivity : AppCompatActivity() {
         appUpdateManager = AppUpdateManagerFactory.create(this)
 
         binding.quit.setOnClickListener {
-            showCustomBottomSheet()
+            singleClick {
+                showCustomBottomSheet()
+            }
         }
 
         binding.policy.setOnClickListener {
-            openURL(this)
+            singleClick {
+                openURL(this)
+            }
         }
 
         binding.checkForUpdates.setOnClickListener {
-            checkForUpdates()
+            singleClick {
+                checkForUpdates()
+            }
         }
 
         binding.rateApp.setOnClickListener {
-            showCustomRatingBottomSheet()
+            singleClick {
+                showCustomRatingBottomSheet()
+            }
         }
 
         binding.moreApps.setOnClickListener {
-            openPlayStoreAllApps()
+            singleClick {
+                openPlayStoreAllApps()
+            }
         }
 
         binding.share.setOnClickListener {
-            shareApp()
+            singleClick {
+                shareApp()
+            }
         }
 
         binding.contactUs.setOnClickListener {
-            contactUs()
+            singleClick {
+                contactUs()
+            }
         }
 
         binding.backBtn.setOnClickListener {
-            finish()
+            singleClick {
+                finish()
+            }
         }
     }
 
@@ -87,7 +104,7 @@ class SettingsActivity : AppCompatActivity() {
         shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Check out this app!")
         shareIntent.putExtra(
             Intent.EXTRA_TEXT,
-            "I recommend $appName. Download it from the Play Store: https://play.google.com/store/apps/details?id=$packageName"
+            "Create  slow-motion videos effortlessly with our amazing app. Download it from the Play Store: https://play.google.com/store/apps/details?id=$packageName"
         )
 
         val chooserIntent = Intent.createChooser(shareIntent, "Share $appName")

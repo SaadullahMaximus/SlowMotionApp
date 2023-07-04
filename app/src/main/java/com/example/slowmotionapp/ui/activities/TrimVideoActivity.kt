@@ -34,6 +34,7 @@ import com.example.slowmotionapp.utils.Utils.createCacheCopy
 import com.example.slowmotionapp.utils.Utils.createTrimmedFile
 import com.example.slowmotionapp.utils.Utils.deleteFromGallery
 import com.example.slowmotionapp.utils.Utils.milliSecondsToTimer
+import com.example.slowmotionapp.utils.Utils.singleClick
 import java.io.File
 import java.text.DecimalFormat
 import java.util.*
@@ -146,17 +147,21 @@ class TrimVideoActivity : AppCompatActivity() {
         })
 
         binding.btnDone.setOnClickListener {
-            val diff = mEndPosition - mStartPosition
-            if (diff < 3) {
-                Toast.makeText(
-                    this, getString(R.string.video_length_validation),
-                    Toast.LENGTH_LONG
-                ).show()
-            } else {
-                binding.trimVideoView.pause()
-                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
-                showTrimDialog()
+
+            singleClick {
+                val diff = mEndPosition - mStartPosition
+                if (diff < 3) {
+                    Toast.makeText(
+                        this, getString(R.string.video_length_validation),
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    binding.trimVideoView.pause()
+                    binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
+                    showTrimDialog()
+                }
             }
+
         }
 
         binding.playPauseButton.setOnClickListener {

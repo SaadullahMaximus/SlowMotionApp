@@ -64,7 +64,7 @@ class Mp3StoreAdapter(
                 holder.selected.setImageResource(R.drawable.music_unselect)
             }
 
-            onApplyBtnClick(mp3Store.link)
+            onApplyBtnClick(mp3Stores[position].link)
         }
 
         holder.itemView.setOnClickListener {
@@ -84,7 +84,7 @@ class Mp3StoreAdapter(
                 progressDialog?.setCancelable(false)
                 progressDialog?.show()
 
-                onItemClick(mp3Store.link, position)
+                onItemClick(mp3Stores[position].link, position)
 
                 clickHandler.postDelayed({
                     isClickable = true
@@ -108,6 +108,8 @@ class Mp3StoreAdapter(
     }
 
     fun setCurrentMediaPlayer(mediaPlayer: MediaPlayer?) {
+        currentMediaPlayer?.release()
+
         currentMediaPlayer = mediaPlayer
     }
 

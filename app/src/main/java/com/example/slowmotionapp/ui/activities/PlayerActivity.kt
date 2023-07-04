@@ -11,6 +11,8 @@ import com.example.slowmotionapp.R
 import com.example.slowmotionapp.databinding.ActivityPlayerBinding
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
 import com.example.slowmotionapp.utils.Utils.milliSecondsToTimer
+import com.example.slowmotionapp.utils.Utils.shareVideo
+import com.example.slowmotionapp.utils.Utils.singleClick
 import java.io.File
 
 class PlayerActivity : AppCompatActivity() {
@@ -130,6 +132,14 @@ class PlayerActivity : AppCompatActivity() {
                 binding.videoView.seekTo(newPosition)
                 binding.seekBar.progress = newPosition
                 binding.currentTime.text = milliSecondsToTimer(newPosition.toLong())
+            }
+        }
+
+        binding.shareBtn.setOnClickListener {
+            binding.playBtn.setImageResource(R.drawable.baseline_play_arrow)
+            binding.videoView.pause()
+            singleClick {
+                shareVideo(playVideo)
             }
         }
 

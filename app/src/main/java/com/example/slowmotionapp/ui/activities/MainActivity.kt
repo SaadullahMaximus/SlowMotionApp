@@ -20,6 +20,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModelProvider
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.constants.Constants.Companion.VIDEO_LIMIT
@@ -34,8 +35,8 @@ import com.example.slowmotionapp.utils.Utils.getMediaDuration
 import com.example.slowmotionapp.utils.Utils.getVideoDuration
 import com.example.slowmotionapp.utils.Utils.refreshGalleryAlone
 import com.example.slowmotionapp.utils.Utils.singleClick
+import com.example.slowmotionapp.viewmodel.SharedViewModel
 import java.io.File
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -48,6 +49,9 @@ class MainActivity : AppCompatActivity() {
     private var currentWindow: Int = 0
 
     private var progressInitialized = false
+
+    private lateinit var sharedViewModel: SharedViewModel
+
 
     companion object {
 
@@ -94,6 +98,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        sharedViewModel = ViewModelProvider(this)[SharedViewModel::class.java]
 
         binding.overlayView.visibility = View.GONE
 
@@ -543,6 +549,7 @@ class MainActivity : AppCompatActivity() {
         val btnYes = dialog.findViewById<TextView>(R.id.btnYes)
 
         btnYes.setOnClickListener {
+            sharedViewModel.stopAllMusic(true)
             finishAffinity()
             dialog.dismiss()
         }

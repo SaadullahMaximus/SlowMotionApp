@@ -29,9 +29,9 @@ class PreSplashActivity : AppCompatActivity() {
         binding = ActivityPreSplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        makeTextLink(binding.TV, "Privacy Policy", true, Color.YELLOW) { openURL(this) }
+        makeTextLink(binding.TV, "Privacy Policy", true, resources.getColor(R.color.baseColor)) { openURL(this) }
 
-        makeTextLink(binding.TV, "Terms", true, Color.YELLOW) { openURL(this) }
+        makeTextLink(binding.TV, "Terms", true, resources.getColor(R.color.baseColor)) { openURL(this) }
 
         handler.postDelayed({
             binding.animationView.visibility = View.INVISIBLE

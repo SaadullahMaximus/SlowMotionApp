@@ -44,6 +44,8 @@ class CropActivity : AppCompatActivity() {
 
     private val mHandler = Handler(Looper.getMainLooper())
 
+    private var cropSelected = false
+
     private var mStartPosition = 0
     private var mDuration = 0
     private var mEndPosition = 0
@@ -162,6 +164,8 @@ class CropActivity : AppCompatActivity() {
             binding.imageView11.setImageResource(R.drawable.crop_unselect)
             binding.imageViewPortrait.setImageResource(R.drawable.crop_unselect)
             binding.imageViewLandScape.setImageResource(R.drawable.crop_unselect)
+
+            cropSelected = true
         }
         binding.btn11.setOnClickListener {
             cropSelect(2)
@@ -171,6 +175,8 @@ class CropActivity : AppCompatActivity() {
             binding.imageView11.setImageResource(R.drawable.crop_select)
             binding.imageViewPortrait.setImageResource(R.drawable.crop_unselect)
             binding.imageViewLandScape.setImageResource(R.drawable.crop_unselect)
+
+            cropSelected = true
         }
         binding.btnPortrait.setOnClickListener {
             cropSelect(3)
@@ -180,6 +186,8 @@ class CropActivity : AppCompatActivity() {
             binding.imageView11.setImageResource(R.drawable.crop_unselect)
             binding.imageViewPortrait.setImageResource(R.drawable.crop_select)
             binding.imageViewLandScape.setImageResource(R.drawable.crop_unselect)
+
+            cropSelected = true
         }
         binding.btnLandScape.setOnClickListener {
             cropSelect(4)
@@ -189,6 +197,8 @@ class CropActivity : AppCompatActivity() {
             binding.imageView11.setImageResource(R.drawable.crop_unselect)
             binding.imageViewPortrait.setImageResource(R.drawable.crop_unselect)
             binding.imageViewLandScape.setImageResource(R.drawable.crop_select)
+
+            cropSelected = true
         }
 
         binding.btnCancel.setOnClickListener {
@@ -197,10 +207,18 @@ class CropActivity : AppCompatActivity() {
             binding.imageViewPortrait.setImageResource(R.drawable.crop_unselect)
             binding.imageViewLandScape.setImageResource(R.drawable.crop_unselect)
             binding.cropView.visibility = View.GONE
+
+            cropSelected = false
         }
         binding.btnOk.setOnClickListener {
-            getDimension()
-            startCrop()
+            if (cropSelected) {
+                cropSelected = false
+                getDimension()
+                startCrop()
+            } else {
+                Toast.makeText(this, "Please select Crop aspect ratio.", Toast.LENGTH_SHORT).show()
+            }
+
         }
 
     }

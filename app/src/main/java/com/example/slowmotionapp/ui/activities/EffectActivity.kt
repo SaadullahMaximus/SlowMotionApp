@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.RelativeLayout
 import android.widget.SeekBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -32,6 +33,7 @@ import com.example.slowmotionapp.utils.Utils.milliSecondsToTimer
 import com.example.slowmotionapp.utils.Utils.player
 import com.example.slowmotionapp.utils.Utils.saveEditedVideo
 import com.example.slowmotionapp.utils.Utils.setUpSimpleExoPlayer
+import com.example.slowmotionapp.utils.Utils.singleClick
 import com.google.android.exoplayer2.Player
 import java.io.File
 
@@ -123,7 +125,9 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
 
 
         binding.saveBtn.setOnClickListener {
-            saveVideoWithFilter()
+            singleClick {
+                saveVideoWithFilter()
+            }
         }
 
         binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -187,8 +191,10 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
 
                     override fun onCompleted() {
                         mainCachedFile = outputFile
-                        progressDialog.dismiss()
-                        saveEditedVideo(this@EffectActivity)
+                        runOnUiThread {
+                            progressDialog.dismiss()
+                            saveEditedVideo(this@EffectActivity)
+                        }
                     }
 
                     override fun onCanceled() {
@@ -201,6 +207,7 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
                 }).start()
         } else {
             progressDialog.dismiss()
+            Toast.makeText(this, "Please select Effect.", Toast.LENGTH_SHORT).show()
         }
     }
 

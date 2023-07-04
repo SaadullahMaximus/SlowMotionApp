@@ -3,6 +3,7 @@ package com.example.slowmotionapp.ui.fragments
 import android.app.ProgressDialog
 import android.media.MediaPlayer
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,13 +33,24 @@ class MusicFragment : Fragment() {
     private lateinit var workManager: WorkManager
     private var progressDialog: ProgressDialog? = null
 
-    private val mediaPlayer = MediaPlayer()
+    private var mediaPlayer = MediaPlayer()
+
+    private lateinit var mp: MediaPlayer
 
     private lateinit var sharedViewModel: SharedViewModel
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
+
+        sharedViewModel.stopAllMusic.observe(viewLifecycleOwner) { newValue ->
+            if (newValue) {
+                mediaPlayer.stop()
+                mediaPlayer.reset()
+                mp.stop()
+                mp.reset()
+            }
+        }
     }
 
     override fun onCreateView(
@@ -52,20 +64,25 @@ class MusicFragment : Fragment() {
         workManager = WorkManager.getInstance(requireContext())
 
         mp3StoreAdapter = Mp3StoreAdapter(emptyList(), { link, position ->
-            mediaPlayer.setDataSource(link)
-            mediaPlayer.prepareAsync()
 
-            mp3StoreAdapter.notifyItemChanged(position)
+            mp = MediaPlayer()
 
-            mediaPlayer.setOnPreparedListener {
-                mediaPlayer.start()
+            mp.setDataSource(link)
+            mp.prepareAsync()
+
+            mp.setOnPreparedListener {
+                it.start()
+                Log.d("PREPARESSAAD", "onCreateView: PREPARES")
                 mp3StoreAdapter.notifyItemChanged(position)
                 mp3StoreAdapter.dialogDismiss()
             }
-            mediaPlayer.setOnCompletionListener {
-                mediaPlayer.seekTo(0)
-                mediaPlayer.start()
+
+            mp.setOnCompletionListener {
+                mp.seekTo(0)
+                mp.start()
             }
+
+            mediaPlayer = mp
 
             // Stop any other media player that might be playing
             val previousMediaPlayer = mp3StoreAdapter.getCurrentMediaPlayer()
@@ -74,8 +91,10 @@ class MusicFragment : Fragment() {
             }
 
             mp3StoreAdapter.setCurrentMediaPlayer(mediaPlayer)
+
         }, {
             mediaPlayer.stop()
+            mediaPlayer.reset()
             startDownloadWork(it)
         })
 
@@ -156,4 +175,5 @@ class MusicFragment : Fragment() {
             )
         }
     }
+
 }

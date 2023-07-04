@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.slowmotionapp.R
@@ -14,6 +15,8 @@ class CropFragment : Fragment() {
 
     private var _binding: FragmentCropBinding? = null
     private val binding get() = _binding!!
+
+    private var cropSelected = false
 
     private lateinit var sharedViewModel: SharedViewModel
 
@@ -37,6 +40,8 @@ class CropFragment : Fragment() {
             binding.imageView11.setImageResource(R.drawable.crop_unselect)
             binding.imageViewPortrait.setImageResource(R.drawable.crop_unselect)
             binding.imageViewLandScape.setImageResource(R.drawable.crop_unselect)
+
+            cropSelected = true
         }
         binding.btn11.setOnClickListener {
             sharedViewModel.pauseVideo(true)
@@ -45,6 +50,8 @@ class CropFragment : Fragment() {
             binding.imageView11.setImageResource(R.drawable.crop_select)
             binding.imageViewPortrait.setImageResource(R.drawable.crop_unselect)
             binding.imageViewLandScape.setImageResource(R.drawable.crop_unselect)
+
+            cropSelected = true
         }
         binding.btnPortrait.setOnClickListener {
             sharedViewModel.pauseVideo(true)
@@ -53,6 +60,8 @@ class CropFragment : Fragment() {
             binding.imageView11.setImageResource(R.drawable.crop_unselect)
             binding.imageViewPortrait.setImageResource(R.drawable.crop_select)
             binding.imageViewLandScape.setImageResource(R.drawable.crop_unselect)
+
+            cropSelected = true
         }
         binding.btnLandScape.setOnClickListener {
             sharedViewModel.pauseVideo(true)
@@ -61,13 +70,24 @@ class CropFragment : Fragment() {
             binding.imageView11.setImageResource(R.drawable.crop_unselect)
             binding.imageViewPortrait.setImageResource(R.drawable.crop_unselect)
             binding.imageViewLandScape.setImageResource(R.drawable.crop_select)
+
+            cropSelected = true
         }
 
         binding.btnCancel.setOnClickListener {
+            cropSelected = false
             sharedViewModel.switchFragmentB(true)
         }
         binding.btnOk.setOnClickListener {
-            sharedViewModel.startCrop(true)
+            if (cropSelected) {
+                sharedViewModel.startCrop(true)
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    "Please select Crop aspect ratio.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
 
 

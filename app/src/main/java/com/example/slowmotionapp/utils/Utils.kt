@@ -478,7 +478,12 @@ object Utils {
         // Optionally, you can set a subject for the shared video
         shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Shared Video")
 
-        // Start the activity for sharing
+        // Set the video description
+        shareIntent.putExtra(
+            Intent.EXTRA_TEXT,
+            "Create  slow-motion videos effortlessly with our amazing app. Download it from the Play Store: https://play.google.com/store/apps/details?id=$packageName"
+
+        )
 
         // Start the activity for sharing
         startActivity(Intent.createChooser(shareIntent, "Share Video"))
@@ -497,7 +502,7 @@ object Utils {
             val text = fileName.text.toString() + ".mp4"
             if (text.isNotEmpty()) {
                 val parentDirectory = File(videoPath).parentFile
-                val newFileName = getUniqueFileName(parentDirectory, text)
+                val newFileName = getUniqueFileName(parentDirectory!!, text)
 
                 val renamedFile = File(parentDirectory, newFileName)
                 File(videoPath).renameTo(renamedFile)
