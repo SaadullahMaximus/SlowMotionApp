@@ -270,7 +270,6 @@ class CropSpeedFragment : Fragment(), MyListener {
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 if (playbackState == Player.STATE_ENDED) {
                     player!!.seekTo(0)
-                    Log.d("Hello", "onPlayerStateChanged: Hello")
                     if (musicReady && audioPlayer!!.isPlaying) {
                         audioPlayer!!.seekTo(0)
                     }

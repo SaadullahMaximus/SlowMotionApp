@@ -406,7 +406,6 @@ class CropActivity : AppCompatActivity() {
         }
         progressDialog.show()
 
-
         binding.imageViewFree.setImageResource(R.drawable.crop_unselect)
         binding.imageView11.setImageResource(R.drawable.crop_unselect)
         binding.imageViewPortrait.setImageResource(R.drawable.crop_unselect)
@@ -435,9 +434,6 @@ class CropActivity : AppCompatActivity() {
                     try {
                         File(str).delete()
                         deleteFromGallery(str, this)
-                        Toast.makeText(
-                            this, "Unable to Crop", Toast.LENGTH_LONG
-                        ).show()
                     } catch (th: Throwable) {
                         th.printStackTrace()
                     }

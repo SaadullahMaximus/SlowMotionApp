@@ -69,7 +69,7 @@ object Utils {
 
     private var mLastClickTime = 0L
     fun singleClick(listener: () -> Unit) {
-        if (SystemClock.elapsedRealtime() - mLastClickTime < 1500) { // 1000 = 1second
+        if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) { // 1000 = 1second
             return
         }
         mLastClickTime = SystemClock.elapsedRealtime()
