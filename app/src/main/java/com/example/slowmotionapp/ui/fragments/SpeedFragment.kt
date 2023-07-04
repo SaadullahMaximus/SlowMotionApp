@@ -340,4 +340,5 @@ class SpeedFragment : Fragment() {
     private fun updateVideoUri(path: String) {
         sharedViewModel.setVideoUri(path)
     }
+
 }

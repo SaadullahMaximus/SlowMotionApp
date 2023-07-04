@@ -23,37 +23,41 @@
         android:id="@+id/btnOk"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:layout_marginEnd="@dimen/_20sdp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
         android:fontFamily="@font/fredokaregular"
+        android:padding="@dimen/_3sdp"
         android:text="OK"
         android:textAllCaps="true"
         android:textColor="@color/baseColor"
         android:textSize="@dimen/_13sdp"
-        android:layout_marginTop="@dimen/_10sdp"
-        android:layout_marginEnd="@dimen/_20sdp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/slowTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_15sdp"
+        android:layout_marginTop="@dimen/_42sdp"
         android:fontFamily="@font/fredokaregular"
         android:rotation="-90"
         android:text="Slow"
-        android:layout_marginStart="@dimen/_15sdp"
         android:textColor="@color/baseColor"
         android:textSize="@dimen/_14sdp"
-        app:layout_constraintTop_toBottomOf="@id/pointerTV"
-        android:layout_marginTop="@dimen/_42sdp"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/pointerTV" />
 
     <com.example.slowmotionapp.customviews.KnobView
         android:id="@+id/knobView"
         android:layout_width="0dp"
         android:layout_height="@dimen/_60sdp"
         android:layout_marginStart="@dimen/_48sdp"
-        android:layout_marginEnd="@dimen/_48sdp"
         android:layout_marginTop="@dimen/_6sdp"
+        android:layout_marginEnd="@dimen/_48sdp"
         android:layout_marginBottom="@dimen/_10sdp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -63,14 +67,14 @@
         android:id="@+id/fastTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_42sdp"
+        android:layout_marginEnd="@dimen/_15sdp"
         android:fontFamily="@font/fredokaregular"
         android:rotation="-90"
         android:text="Fast"
         android:textColor="@color/baseColor"
         android:textSize="@dimen/_14sdp"
-        android:layout_marginEnd="@dimen/_15sdp"
-        app:layout_constraintTop_toBottomOf="@id/pointerTV"
-        android:layout_marginTop="@dimen/_42sdp"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/pointerTV" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

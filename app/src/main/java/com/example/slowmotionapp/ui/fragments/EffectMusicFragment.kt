@@ -61,6 +61,12 @@ class EffectMusicFragment : Fragment() {
 
     private lateinit var filterTypes: List<FilterType>
 
+    private var ifMuted = false
+
+    private var progressBeforeMute = 50
+
+    private var seekBarMax = 0
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -122,15 +128,38 @@ class EffectMusicFragment : Fragment() {
         binding.seekBarSpeaker.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 // Calculate the volume based on the SeekBar progress
-                val volume = progress.toFloat() / seekBar.max
+                seekBarMax = seekBar.max
+                val volume = progress.toFloat() / seekBarMax
+                progressBeforeMute = progress
 
                 sharedViewModel.videoVolumeLevelCheck(volume)
+                if (progress == 0) {
+                    ifMuted = true
+                    binding.speakerButton.setImageResource(R.drawable.mute_icon)
+                } else {
+                    binding.speakerButton.setImageResource(R.drawable.speaker_ic)
+                }
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {}
         })
+
+        binding.speakerButton.setOnClickListener {
+            if (ifMuted) {
+                ifMuted = false
+                binding.seekBarSpeaker.progress = progressBeforeMute
+                binding.speakerButton.setImageResource(R.drawable.speaker_ic)
+                val volume = progressBeforeMute.toFloat() / seekBarMax
+                sharedViewModel.videoVolumeLevelCheck(volume)
+            } else {
+                ifMuted = true
+                binding.seekBarSpeaker.progress = 0
+                binding.speakerButton.setImageResource(R.drawable.mute_icon)
+                sharedViewModel.videoVolumeLevelCheck(0F)
+            }
+        }
 
         binding.seekBarMusic.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
