@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.app.Activity
 import android.app.Dialog
-import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -14,9 +13,10 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import android.provider.Settings
-import android.view.Gravity
 import android.view.View
+import android.view.WindowManager
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.MutableLiveData
@@ -36,6 +36,7 @@ import com.example.slowmotionapp.utils.Utils.refreshGalleryAlone
 import com.example.slowmotionapp.utils.Utils.singleClick
 import java.io.File
 
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
@@ -47,8 +48,6 @@ class MainActivity : AppCompatActivity() {
     private var currentWindow: Int = 0
 
     private var progressInitialized = false
-
-    private lateinit var progressDialog: ProgressDialog
 
     companion object {
 
@@ -95,6 +94,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.overlayView.visibility = View.GONE
 
         createCacheTempFile(this)
 
@@ -218,17 +219,10 @@ class MainActivity : AppCompatActivity() {
         if (allPermissionsGranted) {
             when (requestCode) {
                 Constants.GALLERY_PERMISSION_CODE -> {
-                    progressDialog =
-                        ProgressDialog(this, R.style.CustomDialog)
-                    progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
-                    progressDialog.isIndeterminate = true
-                    progressDialog.setCancelable(false)
-                    progressDialog.setMessage("Fetching Videos")
-                    progressDialog.show()
-                    progressInitialized = true
 
-                    // Set the gravity to CENTER
-                    progressDialog.window?.setGravity(Gravity.CENTER)
+                    binding.progressBar.visibility = View.VISIBLE
+                    showOverlay(true)
+                    progressInitialized = true
 
                     startActivity(Intent(this, SavedActivity::class.java))
                 }
@@ -240,7 +234,12 @@ class MainActivity : AppCompatActivity() {
 
                     i.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("video/*"))
                     permissionAllowed = true
-                    startActivityForResult(i, Constants.VIDEO_GALLERY)
+                    // Set the result code and data
+                    setResult(Activity.RESULT_OK, i)
+
+                    previewVideoGallery.launch(i)
+//
+//                    startActivityForResult(i, Constants.VIDEO_GALLERY)
                 }
                 Constants.RECORD_VIDEO -> {
                     val cameraIntent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
@@ -252,7 +251,13 @@ class MainActivity : AppCompatActivity() {
                     cameraIntent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1)
                     cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoUri)
                     cameraPermission = true
-                    startActivityForResult(cameraIntent, Constants.RECORD_VIDEO)
+
+                    // Set the result code and data
+                    setResult(Activity.RESULT_OK, cameraIntent)
+
+                    previewRecordVideo.launch(cameraIntent)
+
+//                    startActivityForResult(cameraIntent, Constants.RECORD_VIDEO)
                 }
             }
         } else {
@@ -272,7 +277,22 @@ class MainActivity : AppCompatActivity() {
             intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
             val uri = Uri.fromParts("package", this.applicationContext.packageName, null)
             intent.data = uri
-            startActivityForResult(intent, requestCode)
+
+            when (requestCode) {
+
+                Constants.VIDEO_GALLERY -> {
+                    previewVideoGallery.launch(intent)
+                }
+
+                Constants.RECORD_VIDEO -> {
+                    previewRecordVideo.launch(intent)
+                }
+
+                Constants.GALLERY_PERMISSION_CODE -> {
+                    previewGalleryPermission.launch(intent)
+                }
+            }
+
             dialog.dismiss()
         }
 
@@ -304,88 +324,91 @@ class MainActivity : AppCompatActivity() {
         openCameraDialog()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+    private val previewVideoGallery =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
 
-        when (requestCode) {
-
-            Constants.VIDEO_GALLERY -> {
+            if (it.resultCode == Activity.RESULT_OK) {
                 if (permissionAllowed) {
-                    data?.let {
-                        setFilePath(it)
+                    it.data?.let { data ->
+                        setFilePath(data)
                     }
                 } else {
                     requestPermissions(
                         Constants.PERMISSION_GALLERY, Constants.VIDEO_GALLERY
                     )
                 }
-
             }
 
-            Constants.RECORD_VIDEO -> {
+        }
 
-                if (resultCode == Activity.RESULT_OK) {
-                    if (cameraPermission) {
+    private val previewRecordVideo =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
 
-                        val timeInMillis = getVideoDuration(this, videoFile!!)
-                        val duration = convertDurationInSec(timeInMillis)
+            if (it.resultCode == Activity.RESULT_OK) {
+                if (cameraPermission) {
 
-                        if (duration in (VIDEO_MIN_LIMIT + 1) until VIDEO_LIMIT) {
-                            if (justEffects) {
-                                val intent = Intent(this, EffectActivity::class.java)
+                    val timeInMillis = getVideoDuration(this, videoFile!!)
+                    val duration = convertDurationInSec(timeInMillis)
+
+                    if (duration in (VIDEO_MIN_LIMIT + 1) until VIDEO_LIMIT) {
+                        if (justEffects) {
+                            val intent = Intent(this, EffectActivity::class.java)
+                            intent.putExtra("VideoUri", videoUri.toString())
+                            intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
+                            startActivity(intent)
+                        } else {
+                            if (trimOrCrop) {
+                                val intent = Intent(this, CropActivity::class.java)
                                 intent.putExtra("VideoUri", videoUri.toString())
                                 intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
                                 startActivity(intent)
                             } else {
-                                if (trimOrCrop) {
-                                    val intent = Intent(this, CropActivity::class.java)
-                                    intent.putExtra("VideoUri", videoUri.toString())
-                                    intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
-                                    startActivity(intent)
-                                } else {
-                                    val intent = Intent(this, TrimVideoActivity::class.java)
-                                    intent.putExtra("VideoUri", videoUri.toString())
-                                    intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
-                                    startActivity(intent)
-                                }
+                                val intent = Intent(this, TrimVideoActivity::class.java)
+                                intent.putExtra("VideoUri", videoUri.toString())
+                                intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
+                                startActivity(intent)
                             }
-                        } else {
-                            val dialog = Dialog(this, R.style.FullScreenDialogStyle)
-                            dialog.setContentView(R.layout.duration_alert_dialog)
-
-                            val noBtn = dialog.findViewById<TextView>(R.id.noBtn)
-                            val yesBtn = dialog.findViewById<TextView>(R.id.yesBtn)
-
-                            yesBtn.setOnClickListener {
-                                isFromTrim = false
-                                checkPermissionGallery()
-                                dialog.dismiss()
-                            }
-
-                            noBtn.setOnClickListener {
-                                dialog.dismiss()
-                            }
-                            dialog.show()
                         }
                     } else {
-                        requestPermissions(Constants.PERMISSION_CAMERA, Constants.RECORD_VIDEO)
-                    }
-                } else if (resultCode == Activity.RESULT_CANCELED) {
-                    // Video recording was canceled, delete the recorded video file if it exists
-                    videoFile?.let { file ->
-                        if (file.exists()) {
-                            file.delete()
+                        val dialog = Dialog(this, R.style.FullScreenDialogStyle)
+                        dialog.setContentView(R.layout.duration_alert_dialog)
+
+                        val noBtn = dialog.findViewById<TextView>(R.id.noBtn)
+                        val yesBtn = dialog.findViewById<TextView>(R.id.yesBtn)
+
+                        yesBtn.setOnClickListener {
+                            isFromTrim = false
+                            checkPermissionGallery()
+                            dialog.dismiss()
                         }
+
+                        noBtn.setOnClickListener {
+                            dialog.dismiss()
+                        }
+                        dialog.show()
+                    }
+                } else {
+                    requestPermissions(Constants.PERMISSION_CAMERA, Constants.RECORD_VIDEO)
+                }
+            } else if (it.resultCode == Activity.RESULT_CANCELED) {
+                // Video recording was canceled, delete the recorded video file if it exists
+                videoFile?.let { file ->
+                    if (file.exists()) {
+                        file.delete()
                     }
                 }
             }
 
-            Constants.GALLERY_PERMISSION_CODE -> {
-                startActivity(Intent(this, SavedActivity::class.java))
-            }
         }
 
-    }
+    private val previewGalleryPermission =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+
+            if (it.resultCode == Activity.RESULT_OK) {
+                startActivity(Intent(this, SavedActivity::class.java))
+            }
+
+        }
 
     private fun setFilePath(data: Intent) {
 
@@ -537,9 +560,24 @@ class MainActivity : AppCompatActivity() {
     override fun onRestart() {
         super.onRestart()
         if (progressInitialized) {
-            progressDialog.dismiss()
+            binding.progressBar.visibility = View.GONE
+            showOverlay(false)
             progressInitialized = false
         }
     }
+
+    private fun showOverlay(show: Boolean) {
+        if (show) {
+            binding.overlayView.visibility = View.VISIBLE
+            window.setFlags(
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+            )
+        } else {
+            binding.overlayView.visibility = View.GONE
+            window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+        }
+    }
+
 
 }
