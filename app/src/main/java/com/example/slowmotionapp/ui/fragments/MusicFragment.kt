@@ -3,7 +3,6 @@ package com.example.slowmotionapp.ui.fragments
 import android.app.ProgressDialog
 import android.media.MediaPlayer
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,9 +32,7 @@ class MusicFragment : Fragment() {
     private lateinit var workManager: WorkManager
     private var progressDialog: ProgressDialog? = null
 
-    private var mediaPlayer = MediaPlayer()
-
-    private lateinit var mp: MediaPlayer
+    private var mp: MediaPlayer? = null
 
     private lateinit var sharedViewModel: SharedViewModel
 
@@ -45,10 +42,12 @@ class MusicFragment : Fragment() {
 
         sharedViewModel.stopAllMusic.observe(viewLifecycleOwner) { newValue ->
             if (newValue) {
-                mediaPlayer.stop()
-                mediaPlayer.reset()
-                mp.stop()
-                mp.reset()
+                mp?.stop()
+                mp?.reset()
+                mp?.let {
+                    it.stop()
+                    it.reset()
+                }
             }
         }
     }
@@ -67,34 +66,30 @@ class MusicFragment : Fragment() {
 
             mp = MediaPlayer()
 
-            mp.setDataSource(link)
-            mp.prepareAsync()
+            mp?.setDataSource(link)
+            mp?.prepareAsync()
 
-            mp.setOnPreparedListener {
+            mp?.setOnPreparedListener {
                 it.start()
-                Log.d("PREPARESSAAD", "onCreateView: PREPARES")
                 mp3StoreAdapter.notifyItemChanged(position)
                 mp3StoreAdapter.dialogDismiss()
             }
 
-            mp.setOnCompletionListener {
-                mp.seekTo(0)
-                mp.start()
+            mp?.setOnCompletionListener {
+                mp?.seekTo(0)
+                mp?.start()
             }
-
-            mediaPlayer = mp
-
             // Stop any other media player that might be playing
             val previousMediaPlayer = mp3StoreAdapter.getCurrentMediaPlayer()
             if (previousMediaPlayer != null && previousMediaPlayer.isPlaying) {
                 previousMediaPlayer.stop()
             }
 
-            mp3StoreAdapter.setCurrentMediaPlayer(mediaPlayer)
+            mp3StoreAdapter.setCurrentMediaPlayer(mp)
 
         }, {
-            mediaPlayer.stop()
-            mediaPlayer.reset()
+            mp?.stop()
+            mp?.reset()
             startDownloadWork(it)
         })
 

@@ -50,13 +50,10 @@ class TrimVideoActivity : AppCompatActivity() {
     private var mStartPosition = 0
     private var mDuration = 0
     private var mEndPosition = 0
-    private var mTimeVideo = 0
-    private val mMaxDuration = 120
-    private var mDurationWithoutEdit = 0
 
     private lateinit var file: File
 
-    private lateinit var outputFile: File
+    private lateinit var outputFile: String
 
     private val mHandler = Handler(Looper.getMainLooper())
 
@@ -119,7 +116,7 @@ class TrimVideoActivity : AppCompatActivity() {
                 value: Float
             ) {
                 mHandler.removeCallbacks(mUpdateTimeTask)
-                binding.seekBar.progress = 0
+                binding.seekBar.progress = mStartPosition
                 binding.trimVideoView.seekTo(mStartPosition * 1000)
                 updateProgressBar()
             }
@@ -129,18 +126,19 @@ class TrimVideoActivity : AppCompatActivity() {
                 index: Int,
                 value: Float
             ) {
-                onStopSeekThumbs()
             }
         })
 
         binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {}
+
             override fun onStartTrackingTouch(seekBar: SeekBar) {
-                binding.seekBar.progress = 0
+                binding.seekBar.progress = mStartPosition
                 binding.trimVideoView.seekTo(mStartPosition * 1000)
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
+                binding.seekBar.progress = mStartPosition
                 binding.trimVideoView.seekTo(mStartPosition * 1000 + seekBar.progress)
 
             }
@@ -190,9 +188,11 @@ class TrimVideoActivity : AppCompatActivity() {
         }
 
         try {
-            outputFile = createTrimmedFile()
+            outputFile = createTrimmedFile().absolutePath
 
             val durationSeconds = (mEndPosition - mStartPosition)
+
+            Log.d("TIMESTAMP", "startTrimming: $mStartPosition, $mEndPosition, $durationSeconds")
 
             trimVideo(
                 this,
@@ -208,9 +208,9 @@ class TrimVideoActivity : AppCompatActivity() {
                     "copy",
                     "-c:a",
                     "copy",
-                    outputFile.toString()
+                    outputFile
                 ),
-                outputFile.toString()
+                outputFile
             )
 
 
@@ -259,31 +259,33 @@ class TrimVideoActivity : AppCompatActivity() {
     }
 
     private fun updateProgressBar() {
-        mHandler.postDelayed(mUpdateTimeTask, 100)
-    }
-
-    private fun onStopSeekThumbs() {
-
+        mHandler.postDelayed(mUpdateTimeTask, 10)
     }
 
     private fun onSeekThumbs(index: Int, value: Float) {
         when (index) {
             BarThumb.LEFT -> {
-                mStartPosition = (mDuration * value / 100L).toInt()
-                binding.trimVideoView.seekTo(mStartPosition * 1000)
+                Log.d("BarThumb", "onSeekThumbs: Left $value")
+                mStartPosition = (mDuration * (value / 100)).toInt()
                 binding.startTime.text = milliSecondsToTimer(((mStartPosition * 1000).toLong()))
             }
             BarThumb.RIGHT -> {
-                mEndPosition = (mDuration * value / 100L).toInt()
+                Log.d("BarThumb", "onSeekThumbs: Right $value")
+
+                mEndPosition = (mDuration * (value / 100)).toInt()
                 binding.endTime.text = milliSecondsToTimer(((mEndPosition * 1000).toLong()))
             }
         }
         binding.totalDurationTextView.text =
             milliSecondsToTimer((mEndPosition - mStartPosition) * 1000L)
-        mTimeVideo = mEndPosition - mStartPosition
-        binding.seekBar.progress = mStartPosition
-        binding.seekBar.max = mTimeVideo * 1000
-        binding.trimVideoView.seekTo(mStartPosition * 1000)
+
+        Log.d("mStartPosition", "onSeekThumbs: mStartPosition $mStartPosition")
+
+        binding.trimVideoView.seekTo((mStartPosition * 1000))
+
+        binding.seekBar.max = (mEndPosition - mStartPosition) * 1000
+        binding.seekBar.progress = mStartPosition * 1000
+
 
         var mStart: String = mStartPosition.toString() + ""
         if (mStartPosition < 10) mStart = "0$mStartPosition"
@@ -315,24 +317,16 @@ class TrimVideoActivity : AppCompatActivity() {
         updateProgressBar()
     }
 
-
     private fun setSeekBarPosition() {
-        if (mDuration >= mMaxDuration) {
-            mStartPosition = 0
-            mEndPosition = mMaxDuration
-            binding.timeLineBar.setThumbValue(0, (mStartPosition * 100 / mDuration).toFloat())
-            binding.timeLineBar.setThumbValue(1, (mEndPosition * 100 / mDuration).toFloat())
-            mDurationWithoutEdit = mDuration
-        } else {
-            mStartPosition = 0
-            mEndPosition = mDuration
-            mDurationWithoutEdit = mDuration
-        }
+        mStartPosition = 0
+        mEndPosition = mDuration
+        binding.timeLineBar.setThumbValue(0, 0f)
+        binding.timeLineBar.setThumbValue(1, (mEndPosition * 100 / mDuration).toFloat())
+
         timeLineSet(mDuration)
-        mTimeVideo = mDuration
+
         binding.timeLineBar.initMaxWidth()
-        binding.seekBar.max = mDurationWithoutEdit * 1000
-        binding.trimVideoView.seekTo(mStartPosition * 1000)
+        binding.seekBar.max = mDuration * 1000
 
         var mStart = mStartPosition.toString() + ""
         if (mStartPosition < 10) mStart = "0$mStartPosition"
@@ -342,7 +336,6 @@ class TrimVideoActivity : AppCompatActivity() {
         if (mEndPosition < 10) mEnd = "0$mEndPosition"
         mEnd.toInt() / 60
         mEnd.toInt() % 60
-
     }
 
     private fun timeLineSet(mDuration: Int) {

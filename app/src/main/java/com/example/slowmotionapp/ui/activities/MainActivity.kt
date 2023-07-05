@@ -244,8 +244,6 @@ class MainActivity : AppCompatActivity() {
                     setResult(Activity.RESULT_OK, i)
 
                     previewVideoGallery.launch(i)
-//
-//                    startActivityForResult(i, Constants.VIDEO_GALLERY)
                 }
                 Constants.RECORD_VIDEO -> {
                     val cameraIntent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
@@ -263,7 +261,6 @@ class MainActivity : AppCompatActivity() {
 
                     previewRecordVideo.launch(cameraIntent)
 
-//                    startActivityForResult(cameraIntent, Constants.RECORD_VIDEO)
                 }
             }
         } else {
