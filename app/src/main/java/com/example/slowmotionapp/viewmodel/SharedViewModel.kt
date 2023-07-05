@@ -28,9 +28,11 @@ class SharedViewModel : ViewModel() {
 
     val downloadedMusic: MutableLiveData<String> = MutableLiveData()
 
-    val wannaGoBackCheck: MutableLiveData<Boolean> = MutableLiveData()
-
     val stopAllMusic: MutableLiveData<Boolean> = MutableLiveData()
+
+    val musicSelectPauseEveryThing: MutableLiveData<Boolean> = MutableLiveData()
+
+    val crossClick: MutableLiveData<Boolean> = MutableLiveData()
 
     fun setVideoUri(path: String) {
         _videoPath.value = path
@@ -76,12 +78,16 @@ class SharedViewModel : ViewModel() {
         downloadedMusic.value = newValue
     }
 
-    fun wannaGoBackCheckFunction(newValue: Boolean) {
-        wannaGoBackCheck.value = newValue
-    }
-
     fun stopAllMusic(newValue: Boolean) {
         stopAllMusic.value = newValue
+    }
+
+    fun musicSelectPauseEveryThing(newValue: Boolean) {
+        musicSelectPauseEveryThing.value = newValue
+    }
+
+    fun crossClick(newValue: Boolean) {
+        crossClick.value = newValue
     }
 
 }

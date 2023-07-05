@@ -13,11 +13,13 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.models.Mp3Store
+import com.example.slowmotionapp.ui.fragments.MusicFragment.Companion.appliedMusicPosition
 
 class Mp3StoreAdapter(
     private var mp3Stores: List<Mp3Store>,
     private val onItemClick: (String, Int) -> Unit,
-    private val onApplyBtnClick: (String) -> Unit
+    private val onApplyBtnClick: (String, Int) -> Unit,
+    private val onStopBtnClick: () -> Unit
 ) :
     RecyclerView.Adapter<Mp3StoreAdapter.ViewHolder>() {
 
@@ -33,6 +35,7 @@ class Mp3StoreAdapter(
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvMp3StoreName: TextView = itemView.findViewById(R.id.musicTitle)
         val btnApply: Button = itemView.findViewById(R.id.btnApply)
+        val btnStop: Button = itemView.findViewById(R.id.btnPaused)
         val selected: ImageView = itemView.findViewById(R.id.selected)
     }
 
@@ -48,8 +51,10 @@ class Mp3StoreAdapter(
 
         if (position == selectedPosition) {
             holder.btnApply.visibility = View.VISIBLE
+            holder.btnStop.visibility = View.VISIBLE
         } else {
             holder.btnApply.visibility = View.GONE
+            holder.btnStop.visibility = View.GONE
         }
 
         holder.btnApply.setOnClickListener {
@@ -57,6 +62,7 @@ class Mp3StoreAdapter(
             selectedPosition = -1
 
             holder.btnApply.visibility = View.GONE
+            holder.btnStop.visibility = View.GONE
 
             if (position == finalPosition) {
                 holder.selected.setImageResource(R.drawable.music_select)
@@ -64,7 +70,21 @@ class Mp3StoreAdapter(
                 holder.selected.setImageResource(R.drawable.music_unselect)
             }
 
-            onApplyBtnClick(mp3Stores[position].link)
+            onApplyBtnClick(mp3Stores[position].link, position)
+        }
+
+        holder.btnStop.setOnClickListener {
+            selectedPosition = -1
+
+            holder.btnApply.visibility = View.GONE
+            holder.btnStop.visibility = View.GONE
+
+            if (position == appliedMusicPosition) {
+                holder.selected.setImageResource(R.drawable.music_select)
+            } else {
+                holder.selected.setImageResource(R.drawable.music_unselect)
+            }
+            onStopBtnClick()
         }
 
         holder.itemView.setOnClickListener {

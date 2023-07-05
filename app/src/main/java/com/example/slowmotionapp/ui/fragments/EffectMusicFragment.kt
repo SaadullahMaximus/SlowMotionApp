@@ -79,6 +79,7 @@ class EffectMusicFragment : Fragment() {
         sharedViewModel.downloadedMusic.observe(viewLifecycleOwner) { newValue ->
             setupFragment(newValue)
         }
+
     }
 
     override fun onCreateView(
@@ -133,6 +134,7 @@ class EffectMusicFragment : Fragment() {
                 progressBeforeMute = progress
 
                 sharedViewModel.videoVolumeLevelCheck(volume)
+
                 if (progress == 0) {
                     ifMuted = true
                     binding.speakerButton.setImageResource(R.drawable.mute_icon)
@@ -198,6 +200,7 @@ class EffectMusicFragment : Fragment() {
             binding.musicButton.visibility = View.GONE
             binding.seekBarMusic.visibility = View.GONE
             binding.crossButton.visibility = View.GONE
+            sharedViewModel.crossClick(true)
             MusicApplied = false
         }
 
@@ -411,7 +414,7 @@ class EffectMusicFragment : Fragment() {
 
                         if (wannaGoBack) {
                             wannaGoBack = false
-                            sharedViewModel.wannaGoBackCheckFunction(true)
+                            wannaGoBackCheckViewModel.postValue(true)
                         } else {
                             saveEditedVideo(requireContext())
                         }

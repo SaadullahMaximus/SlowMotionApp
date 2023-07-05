@@ -36,6 +36,10 @@ class MusicFragment : Fragment() {
 
     private lateinit var sharedViewModel: SharedViewModel
 
+    companion object {
+        var appliedMusicPosition = -1
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
@@ -48,6 +52,11 @@ class MusicFragment : Fragment() {
                     it.stop()
                     it.reset()
                 }
+            }
+        }
+        sharedViewModel.crossClick.observe(viewLifecycleOwner) {
+            if (it) {
+                binding.recyclerView.adapter = mp3StoreAdapter
             }
         }
     }
@@ -63,6 +72,10 @@ class MusicFragment : Fragment() {
         workManager = WorkManager.getInstance(requireContext())
 
         mp3StoreAdapter = Mp3StoreAdapter(emptyList(), { link, position ->
+
+            sharedViewModel.musicSelectPauseEveryThing(true)
+
+            binding.recyclerView.layoutManager?.scrollToPosition(position)
 
             mp = MediaPlayer()
 
@@ -87,13 +100,19 @@ class MusicFragment : Fragment() {
 
             mp3StoreAdapter.setCurrentMediaPlayer(mp)
 
+        }, { link, position ->
+            mp?.stop()
+            mp?.reset()
+            appliedMusicPosition = position
+            binding.recyclerView.adapter = mp3StoreAdapter
+            startDownloadWork(link)
         }, {
             mp?.stop()
             mp?.reset()
-            startDownloadWork(it)
         })
 
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
         binding.recyclerView.adapter = mp3StoreAdapter
 
 
@@ -148,7 +167,6 @@ class MusicFragment : Fragment() {
                         val downloadPath = outputData.getString(DownloadWorker.KEY_DOWNLOAD_PATH)
                         // Do something with the downloaded file path
                         sharedViewModel.downloadMusicPath(downloadPath!!)
-
                         progressDialog?.dismiss() // Dismiss the progress dialog
                     }
                     WorkInfo.State.FAILED, WorkInfo.State.CANCELLED -> {

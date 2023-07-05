@@ -98,8 +98,6 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
                     // You can start playing the media here
                     binding.seekBar.max = player!!.duration.toInt()
 
-                    player!!.playWhenReady = true
-
                     // Initialize handler and runnable
                     handler = Handler(Looper.getMainLooper())
                     runnable = Runnable { updateSeekBar() }

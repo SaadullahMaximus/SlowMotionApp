@@ -81,6 +81,7 @@ class CropFragment : Fragment() {
         binding.btnOk.setOnClickListener {
             if (cropSelected) {
                 sharedViewModel.startCrop(true)
+                sharedViewModel.cropSelected(-1)
             } else {
                 Toast.makeText(
                     requireContext(),

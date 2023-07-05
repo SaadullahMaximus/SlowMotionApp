@@ -10,8 +10,9 @@
     <ImageView
         android:id="@+id/backBtn"
         android:layout_width="@dimen/_20sdp"
-        android:layout_height="@dimen/_20sdp"
-        android:layout_margin="@dimen/_20sdp"
+        android:layout_height="@dimen/_24sdp"
+        android:layout_margin="@dimen/_24sdp"
+        android:padding="@dimen/_6sdp"
         android:src="@drawable/baseline_arrow_back"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -21,7 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_20sdp"
-        android:layout_marginTop="@dimen/_17sdp"
+        android:layout_marginTop="@dimen/_21sdp"
         android:fontFamily="@font/fredokaregular"
         android:text="Setting"
         android:textColor="@color/white"
@@ -44,17 +45,16 @@
             android:id="@+id/pro"
             android:layout_width="@dimen/_230sdp"
             android:layout_height="@dimen/_90sdp"
-            android:layout_marginBottom="@dimen/_3sdp"
+            android:layout_marginBottom="@dimen/_5sdp"
             android:src="@drawable/pro" />
 
         <androidx.cardview.widget.CardView
             android:id="@+id/checkForUpdates"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/_6sdp"
             android:layout_marginStart="@dimen/_13sdp"
-            android:layout_marginTop="@dimen/_4sdp"
             android:layout_marginEnd="@dimen/_13sdp"
-            android:layout_marginBottom="@dimen/_4sdp"
             android:clickable="true"
             android:focusable="true"
             app:cardCornerRadius="@dimen/_10sdp">
@@ -66,8 +66,8 @@
 
                 <ImageView
                     android:id="@+id/checkUpdateImageView"
-                    android:layout_width="@dimen/_20sdp"
-                    android:layout_height="@dimen/_20sdp"
+                    android:layout_width="@dimen/_17sdp"
+                    android:layout_height="@dimen/_17sdp"
                     android:layout_marginStart="@dimen/_19sdp"
                     android:layout_marginTop="@dimen/_10sdp"
                     android:layout_marginBottom="@dimen/_10sdp"
@@ -79,7 +79,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_14sdp"
+                    android:layout_marginStart="@dimen/_18sdp"
                     android:fontFamily="@font/fredokaregular"
                     android:text="Check for update"
                     android:textColor="#AFAFAF"
@@ -108,10 +108,9 @@
             android:id="@+id/rateApp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/_6sdp"
             android:layout_marginStart="@dimen/_13sdp"
-            android:layout_marginTop="@dimen/_4sdp"
             android:layout_marginEnd="@dimen/_13sdp"
-            android:layout_marginBottom="@dimen/_4sdp"
             android:clickable="true"
             android:focusable="true"
             app:cardCornerRadius="@dimen/_10sdp">
@@ -123,8 +122,8 @@
 
                 <ImageView
                     android:id="@+id/rateAppImageView"
-                    android:layout_width="@dimen/_20sdp"
-                    android:layout_height="@dimen/_20sdp"
+                    android:layout_width="@dimen/_17sdp"
+                    android:layout_height="@dimen/_17sdp"
                     android:layout_marginStart="@dimen/_19sdp"
                     android:layout_marginTop="@dimen/_10sdp"
                     android:layout_marginBottom="@dimen/_10sdp"
@@ -136,7 +135,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_14sdp"
+                    android:layout_marginStart="@dimen/_18sdp"
                     android:fontFamily="@font/fredokaregular"
                     android:text="Rate App"
                     android:textColor="#AFAFAF"
@@ -165,10 +164,9 @@
             android:id="@+id/policy"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/_6sdp"
             android:layout_marginStart="@dimen/_13sdp"
-            android:layout_marginTop="@dimen/_4sdp"
             android:layout_marginEnd="@dimen/_13sdp"
-            android:layout_marginBottom="@dimen/_4sdp"
             android:clickable="true"
             android:focusable="true"
             app:cardCornerRadius="@dimen/_10sdp">
@@ -180,8 +178,8 @@
 
                 <ImageView
                     android:id="@+id/policyImageView"
-                    android:layout_width="@dimen/_20sdp"
-                    android:layout_height="@dimen/_20sdp"
+                    android:layout_width="@dimen/_17sdp"
+                    android:layout_height="@dimen/_17sdp"
                     android:layout_marginStart="@dimen/_19sdp"
                     android:layout_marginTop="@dimen/_10sdp"
                     android:layout_marginBottom="@dimen/_10sdp"
@@ -193,7 +191,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_14sdp"
+                    android:layout_marginStart="@dimen/_18sdp"
                     android:fontFamily="@font/fredokaregular"
                     android:text="Policy"
                     android:textColor="#AFAFAF"
@@ -222,10 +220,9 @@
             android:id="@+id/moreApps"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/_6sdp"
             android:layout_marginStart="@dimen/_13sdp"
-            android:layout_marginTop="@dimen/_4sdp"
             android:layout_marginEnd="@dimen/_13sdp"
-            android:layout_marginBottom="@dimen/_4sdp"
             android:clickable="true"
             android:focusable="true"
             app:cardCornerRadius="@dimen/_10sdp">
@@ -237,8 +234,8 @@
 
                 <ImageView
                     android:id="@+id/moreAppsImageView"
-                    android:layout_width="@dimen/_20sdp"
-                    android:layout_height="@dimen/_20sdp"
+                    android:layout_width="@dimen/_17sdp"
+                    android:layout_height="@dimen/_17sdp"
                     android:layout_marginStart="@dimen/_19sdp"
                     android:layout_marginTop="@dimen/_10sdp"
                     android:layout_marginBottom="@dimen/_10sdp"
@@ -250,7 +247,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_14sdp"
+                    android:layout_marginStart="@dimen/_18sdp"
                     android:fontFamily="@font/fredokaregular"
                     android:text="More free apps (AD)"
                     android:textColor="#AFAFAF"
@@ -279,10 +276,9 @@
             android:id="@+id/share"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/_6sdp"
             android:layout_marginStart="@dimen/_13sdp"
-            android:layout_marginTop="@dimen/_4sdp"
             android:layout_marginEnd="@dimen/_13sdp"
-            android:layout_marginBottom="@dimen/_4sdp"
             android:clickable="true"
             android:focusable="true"
             app:cardCornerRadius="@dimen/_10sdp">
@@ -294,8 +290,8 @@
 
                 <ImageView
                     android:id="@+id/shareImageView"
-                    android:layout_width="@dimen/_20sdp"
-                    android:layout_height="@dimen/_20sdp"
+                    android:layout_width="@dimen/_17sdp"
+                    android:layout_height="@dimen/_17sdp"
                     android:layout_marginStart="@dimen/_19sdp"
                     android:layout_marginTop="@dimen/_10sdp"
                     android:layout_marginBottom="@dimen/_10sdp"
@@ -307,7 +303,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_14sdp"
+                    android:layout_marginStart="@dimen/_18sdp"
                     android:fontFamily="@font/fredokaregular"
                     android:text="Share app"
                     android:textColor="#AFAFAF"
@@ -336,10 +332,9 @@
             android:id="@+id/contactUs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/_6sdp"
             android:layout_marginStart="@dimen/_13sdp"
-            android:layout_marginTop="@dimen/_4sdp"
             android:layout_marginEnd="@dimen/_13sdp"
-            android:layout_marginBottom="@dimen/_4sdp"
             android:clickable="true"
             android:focusable="true"
             app:cardCornerRadius="@dimen/_10sdp">
@@ -351,8 +346,8 @@
 
                 <ImageView
                     android:id="@+id/contactUsImageView"
-                    android:layout_width="@dimen/_20sdp"
-                    android:layout_height="@dimen/_20sdp"
+                    android:layout_width="@dimen/_17sdp"
+                    android:layout_height="@dimen/_17sdp"
                     android:layout_marginStart="@dimen/_19sdp"
                     android:layout_marginTop="@dimen/_10sdp"
                     android:layout_marginBottom="@dimen/_10sdp"
@@ -364,7 +359,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_14sdp"
+                    android:layout_marginStart="@dimen/_18sdp"
                     android:fontFamily="@font/fredokaregular"
                     android:text="Contact Us"
                     android:textColor="#AFAFAF"
@@ -393,10 +388,9 @@
             android:id="@+id/quit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/_6sdp"
             android:layout_marginStart="@dimen/_13sdp"
-            android:layout_marginTop="@dimen/_4sdp"
             android:layout_marginEnd="@dimen/_13sdp"
-            android:layout_marginBottom="@dimen/_4sdp"
             android:clickable="true"
             android:focusable="true"
             app:cardCornerRadius="@dimen/_10sdp">
@@ -408,8 +402,8 @@
 
                 <ImageView
                     android:id="@+id/quitImageView"
-                    android:layout_width="@dimen/_20sdp"
-                    android:layout_height="@dimen/_20sdp"
+                    android:layout_width="@dimen/_17sdp"
+                    android:layout_height="@dimen/_17sdp"
                     android:layout_marginStart="@dimen/_19sdp"
                     android:layout_marginTop="@dimen/_10sdp"
                     android:layout_marginBottom="@dimen/_10sdp"
@@ -421,7 +415,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_14sdp"
+                    android:layout_marginStart="@dimen/_18sdp"
                     android:fontFamily="@font/fredokaregular"
                     android:text="Exit"
                     android:textColor="#AFAFAF"

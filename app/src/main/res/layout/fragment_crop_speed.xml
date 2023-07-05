@@ -20,6 +20,7 @@
         android:layout_width="@dimen/_25sdp"
         android:layout_height="@dimen/_25sdp"
         android:layout_marginTop="@dimen/_20sdp"
+        android:padding="@dimen/_2sdp"
         android:src="@drawable/ic_undo"
         app:layout_constraintEnd_toStartOf="@+id/rotateRight"
         app:layout_constraintStart_toEndOf="@+id/backBtn"
@@ -30,6 +31,7 @@
         android:layout_width="@dimen/_25sdp"
         android:layout_height="@dimen/_25sdp"
         android:layout_marginTop="@dimen/_20sdp"
+        android:padding="@dimen/_2sdp"
         android:src="@drawable/ic_redo"
         app:layout_constraintEnd_toStartOf="@+id/linearLayoutBtnContainer"
         app:layout_constraintStart_toEndOf="@+id/rotateLeft"
@@ -39,7 +41,7 @@
         android:id="@+id/saveBtn"
         style="@style/CustomButtonStyle"
         android:layout_width="@dimen/_50sdp"
-        android:layout_height="@dimen/_27sdp"
+        android:layout_height="@dimen/_25sdp"
         android:layout_marginTop="@dimen/_20sdp"
         android:layout_marginEnd="@dimen/_10sdp"
         android:background="@drawable/background_rounded_corners"
@@ -49,15 +51,17 @@
         android:paddingEnd="@dimen/_4sdp"
         android:paddingBottom="@dimen/_3sdp"
         android:text="Save"
+        android:textAllCaps="false"
         android:textColor="@color/black"
         android:textSize="@dimen/_9sdp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:id="@+id/linearLayoutBtnContainer"
         android:layout_width="@dimen/_80sdp"
-        android:layout_height="@dimen/_27sdp"
+        android:layout_height="@dimen/_25sdp"
         android:layout_marginTop="@dimen/_20sdp"
         android:layout_marginEnd="@dimen/_10sdp"
         android:orientation="vertical"
@@ -73,8 +77,10 @@
             android:background="@drawable/background_rounded_corners"
             android:fontFamily="@font/fredokamedium"
             android:text="Enhance"
+            android:textAllCaps="false"
             android:textColor="@color/black"
-            android:textSize="@dimen/_9sdp" />
+            android:textSize="@dimen/_9sdp"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/backTextBtn"
@@ -84,8 +90,10 @@
             android:background="@drawable/background_rounded_corners"
             android:fontFamily="@font/fredokamedium"
             android:text="Back"
+            android:textAllCaps="false"
             android:textColor="@color/black"
             android:textSize="@dimen/_9sdp"
+            android:textStyle="bold"
             android:visibility="gone" />
 
     </LinearLayout>

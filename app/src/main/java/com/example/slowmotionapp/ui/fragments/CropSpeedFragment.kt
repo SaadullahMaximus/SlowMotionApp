@@ -246,6 +246,29 @@ class CropSpeedFragment : Fragment(), MyListener {
             player!!.volume = it
         }
 
+        sharedViewModel.musicSelectPauseEveryThing.observe(viewLifecycleOwner) {
+            if (it) {
+                player?.seekTo(0)
+                player?.pause()
+                audioPlayer?.let {
+                    audioPlayer?.seekTo(0)
+                    audioPlayer?.pause()
+                }
+
+                binding.playPauseButton2.setImageResource(R.drawable.baseline_play_arrow)
+            }
+        }
+
+        sharedViewModel.crossClick.observe(viewLifecycleOwner) {
+            if (it) {
+                audioPlayer?.stop()
+                audioPlayer?.reset()
+                player?.seekTo(0)
+                player?.pause()
+                binding.playPauseButton2.setImageResource(R.drawable.baseline_play_arrow)
+            }
+        }
+
         playerRestart()
 
         seekBar2.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -441,6 +464,7 @@ class CropSpeedFragment : Fragment(), MyListener {
         }
 
         binding.backTextBtn.setOnClickListener {
+            sharedViewModel.musicSelectPauseEveryThing(true)
             showFullScreenDialog()
         }
 
@@ -453,7 +477,7 @@ class CropSpeedFragment : Fragment(), MyListener {
         }
 
         binding.saveBtn.setOnClickListener {
-            if (audioPlayer != null){
+            if (audioPlayer != null) {
                 audioPlayer!!.release()
             }
             if (enhanced) {
@@ -551,7 +575,6 @@ class CropSpeedFragment : Fragment(), MyListener {
             when (returnCode) {
                 Config.RETURN_CODE_SUCCESS -> {
                     progressDialog.dismiss()
-                    Toast.makeText(requireContext(), "Success", Toast.LENGTH_SHORT).show()
                     mainCachedFile = str
                     sharedViewModel.setVideoUri(str)
                     when (valueCheck) {
@@ -851,14 +874,12 @@ class CropSpeedFragment : Fragment(), MyListener {
 
         btnYes.setOnClickListener {
             backSave = true
-
             wannaGoBack = true
 
             sharedViewModel.enhanced(true)
             sharedViewModel.stopAllMusic(true)
 
             enhanced = false
-
             player!!.release()
 
             dialog.dismiss()
@@ -866,7 +887,6 @@ class CropSpeedFragment : Fragment(), MyListener {
 
         btnNo.setOnClickListener {
             backSave = false
-
             wannaGoBack = true
 
             fragmentSwap()

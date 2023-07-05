@@ -57,6 +57,7 @@ class VideoAdapter(val context: Context, private val videos: MutableList<File>) 
         }
 
         threeDots.setOnClickListener {
+            playVideo = videoFile.path
             videoItemClickListener?.onButtonClicked(videoFile.path, position)
         }
 
