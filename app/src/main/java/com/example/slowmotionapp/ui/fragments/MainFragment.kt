@@ -40,6 +40,9 @@ class MainFragment : Fragment() {
 
     private val volumeChangedAction = "android.media.VOLUME_CHANGED_ACTION"
 
+    private var ifMuted = false
+    private var progressBeforeMute = 50
+    private var seekBarMax = 0
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -71,13 +74,41 @@ class MainFragment : Fragment() {
         // Update the SeekBar initially
         updateSeekBar()
 
+        binding.speakerButton.setOnClickListener {
+            if (ifMuted) {
+                ifMuted = false
+                binding.seekBarSpeaker.progress = progressBeforeMute
+                binding.speakerButton.setImageResource(R.drawable.speaker_ic)
+                val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+                val volume = (maxVolume * progressBeforeMute) / 100
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0)
+            } else {
+                ifMuted = true
+                progressBeforeMute = binding.seekBarSpeaker.progress
+                binding.seekBarSpeaker.progress = 0
+                binding.speakerButton.setImageResource(R.drawable.mute_icon)
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0)
+            }
+        }
+
         // Set up a SeekBar change listener
         binding.seekBarSpeaker.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
+                    seekBarMax = seekBar.max
+
                     val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
                     val volume = (maxVolume * progress) / 100
                     audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0)
+
+                    if (progress == 0) {
+                        ifMuted = true
+                        binding.speakerButton.setImageResource(R.drawable.mute_icon)
+                    } else {
+                        ifMuted = false
+                        binding.speakerButton.setImageResource(R.drawable.speaker_ic)
+                    }
+
                 }
             }
 
@@ -86,6 +117,7 @@ class MainFragment : Fragment() {
             override fun onStopTrackingTouch(seekBar: SeekBar) {}
         })
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -176,6 +208,13 @@ class MainFragment : Fragment() {
         val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
         val progress = (currentVolume * 100) / maxVolume
         binding.seekBarSpeaker.progress = progress
+        if (progress == 0) {
+            ifMuted = true
+            binding.speakerButton.setImageResource(R.drawable.mute_icon)
+        } else {
+            ifMuted = false
+            binding.speakerButton.setImageResource(R.drawable.speaker_ic)
+        }
     }
 
 

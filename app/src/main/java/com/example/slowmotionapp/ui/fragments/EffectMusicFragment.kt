@@ -137,6 +137,7 @@ class EffectMusicFragment : Fragment() {
                     ifMuted = true
                     binding.speakerButton.setImageResource(R.drawable.mute_icon)
                 } else {
+                    ifMuted = false
                     binding.speakerButton.setImageResource(R.drawable.speaker_ic)
                 }
             }
