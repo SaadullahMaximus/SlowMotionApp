@@ -251,7 +251,7 @@ class MainActivity : AppCompatActivity() {
                     videoUri = FileProvider.getUriForFile(
                         this, Constants.provider, videoFile!!
                     )
-                    cameraIntent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 240) //4 minutes
+                    cameraIntent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 240)
                     cameraIntent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1)
                     cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoUri)
                     cameraPermission = true

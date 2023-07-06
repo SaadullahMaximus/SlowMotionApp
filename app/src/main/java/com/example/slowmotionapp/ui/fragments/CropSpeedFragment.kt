@@ -150,6 +150,7 @@ class CropSpeedFragment : Fragment(), MyListener {
         sharedViewModel.videoPath.observe(viewLifecycleOwner) { path ->
             path?.let {
                 videoView.setVideoURI(Uri.parse(path))
+                playPauseButton2.setImageResource(R.drawable.baseline_play_arrow)
                 binding.totalDurationTextView.text =
                     milliSecondsToTimer(getVideoDuration(requireContext(), path).toLong() * 1000)
                 layoutMovieWrapper.removeAllViews()

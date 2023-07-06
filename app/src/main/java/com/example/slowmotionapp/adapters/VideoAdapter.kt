@@ -70,8 +70,7 @@ class VideoAdapter(val context: Context, private val videos: MutableList<File>) 
     class VideoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
     fun deleteItem(
-        position: Int,
-        action: (() -> Unit)? = null
+        position: Int, action: (() -> Unit)? = null
     ) {
         videos.removeAt(position)
 

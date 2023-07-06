@@ -67,6 +67,7 @@ class SpeedFragment : Fragment() {
 
         binding.btnOk.setOnClickListener {
             if (knobFinalValue != 7) {
+                animateKnob(700F)
                 val tempPath = createCacheTempFile(requireContext())
                 videoMotionCommand(tempPath, knobFinalValue)
             }
@@ -288,7 +289,6 @@ class SpeedFragment : Fragment() {
             when (returnCode) {
                 Config.RETURN_CODE_SUCCESS -> {
                     progressDialog.dismiss()
-                    Toast.makeText(requireContext(), "Success", Toast.LENGTH_SHORT).show()
                     mainCachedFile = str
                     updateVideoUri(str)
                 }

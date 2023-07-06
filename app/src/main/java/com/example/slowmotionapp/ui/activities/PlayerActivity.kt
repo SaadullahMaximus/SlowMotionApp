@@ -93,7 +93,6 @@ class PlayerActivity : AppCompatActivity() {
             }
         }
 
-
         binding.playBtn.setOnClickListener {
             if (binding.videoView.isPlaying) {
                 binding.playBtn.setImageResource(R.drawable.baseline_play_arrow)

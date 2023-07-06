@@ -14,7 +14,6 @@ import com.example.slowmotionapp.adapters.VideoAdapter
 import com.example.slowmotionapp.databinding.FragmentSavedCropBinding
 import com.example.slowmotionapp.ui.activities.SavedActivity
 import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.croppedFiles
-import com.example.slowmotionapp.utils.Utils
 import com.example.slowmotionapp.utils.Utils.croppedDir
 import com.example.slowmotionapp.utils.Utils.deleteVideoFile
 import com.example.slowmotionapp.utils.Utils.editVideo
