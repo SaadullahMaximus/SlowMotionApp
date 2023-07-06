@@ -68,6 +68,7 @@ class SpeedFragment : Fragment() {
         binding.btnOk.setOnClickListener {
             if (knobFinalValue != 7) {
                 animateKnob(700F)
+                handleKnobStopMoving(7)
                 val tempPath = createCacheTempFile(requireContext())
                 videoMotionCommand(tempPath, knobFinalValue)
             }

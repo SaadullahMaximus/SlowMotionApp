@@ -141,7 +141,7 @@ class SettingsActivity : AppCompatActivity() {
 
 
     private fun showCustomBottomSheet() {
-        val dialog = BottomSheetDialog(this)
+        val dialog = BottomSheetDialog(this, R.style.FullScreenDialogStyle)
         val view = layoutInflater.inflate(R.layout.custom_bottom_sheet, null)
         dialog.setContentView(view)
 
@@ -160,7 +160,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun showCustomRatingBottomSheet() {
-        val dialog = BottomSheetDialog(this)
+        val dialog = BottomSheetDialog(this, R.style.FullScreenDialogStyle)
         val view = layoutInflater.inflate(R.layout.rate_us_bottom_sheet, null)
         dialog.setContentView(view)
 
