@@ -19,10 +19,10 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import com.arthenica.mobileffmpeg.Config
 import com.arthenica.mobileffmpeg.FFmpeg
-import com.basusingh.beautifulprogressdialog.BeautifulProgressDialog
 import com.edmodo.cropper.CropImageView
 import com.edmodo.cropper.cropwindow.edge.Edge
 import com.example.slowmotionapp.R
+import com.example.slowmotionapp.customviews.CustomWaitingDialog
 import com.example.slowmotionapp.databinding.FragmentCropSpeedBinding
 import com.example.slowmotionapp.effects.EPlayerView
 import com.example.slowmotionapp.interfaces.MyListener
@@ -558,15 +558,13 @@ class CropSpeedFragment : Fragment(), MyListener {
     private fun executeFFMPEG(strArr: Array<String>, str: String, valueCheck: Int) {
         sharedViewModel.pauseVideo(true)
 
-        val progressDialog = BeautifulProgressDialog(
-            requireActivity(), BeautifulProgressDialog.withLottie, "Please wait"
-        )
-        progressDialog.setLottieLocation("loading_dialog.json")
-
-        progressDialog.setLayoutColor(Color.WHITE)
-        progressDialog.setLottieLoop(true)
+        val progressDialog = CustomWaitingDialog(requireContext())
+        progressDialog.setCloseButtonClickListener {
+            progressDialog.dismiss()
+            FFmpeg.cancel()
+        }
         progressDialog.show()
-        progressDialog.setCancelable(false)
+
         val ffmpegCommand: String = commandsGenerator(strArr)
         FFmpeg.executeAsync(
             ffmpegCommand
@@ -589,9 +587,6 @@ class CropSpeedFragment : Fragment(), MyListener {
                     try {
                         File(str).delete()
                         deleteFromGallery(str, requireContext())
-                        Toast.makeText(
-                            requireContext(), "Error Creating Video", Toast.LENGTH_LONG
-                        ).show()
                     } catch (th: Throwable) {
                         th.printStackTrace()
                     }
@@ -919,7 +914,7 @@ class CropSpeedFragment : Fragment(), MyListener {
         player!!.release()
 
         audioPlayer?.stop()
-        audioPlayer?.release()
+        audioPlayer?.reset()
 
         binding.seekBar2.visibility = View.GONE
         binding.playPauseButton2.visibility = View.GONE

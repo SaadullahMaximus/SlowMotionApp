@@ -1,7 +1,6 @@
 package com.example.slowmotionapp.ui.activities
 
 import android.app.Dialog
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -14,12 +13,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.basusingh.beautifulprogressdialog.BeautifulProgressDialog
+import com.arthenica.mobileffmpeg.FFmpeg
 import com.daasuu.mp4compose.FillMode
 import com.daasuu.mp4compose.Rotation
 import com.daasuu.mp4compose.composer.Mp4Composer
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
+import com.example.slowmotionapp.customviews.CustomWaitingDialog
 import com.example.slowmotionapp.databinding.ActivityEffectBinding
 import com.example.slowmotionapp.effects.EPlayerView
 import com.example.slowmotionapp.effects.FilterAdapter
@@ -167,14 +167,13 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
     }
 
     private fun saveVideoWithFilter() {
-        val progressDialog =
-            BeautifulProgressDialog(this, BeautifulProgressDialog.withLottie, "Please wait")
-        progressDialog.setLottieLocation("loading_dialog.json")
-        //Loop the Lottie Animation
-        progressDialog.setLayoutColor(Color.WHITE)
-        progressDialog.setLottieLoop(true)
+        val progressDialog = CustomWaitingDialog(this)
+        progressDialog.setCloseButtonClickListener {
+            progressDialog.dismiss()
+            FFmpeg.cancel()
+        }
+
         progressDialog.show()
-        progressDialog.setCancelable(false)
 
         if (effectPosition != 0) {
             val outputFile = createCacheTempFile(this)

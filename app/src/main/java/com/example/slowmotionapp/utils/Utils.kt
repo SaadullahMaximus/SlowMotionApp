@@ -15,16 +15,19 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.TextPaint
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
+import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.documentfile.provider.DocumentFile
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.interfaces.MyListener
@@ -402,14 +405,54 @@ object Utils {
 
     fun getAudioFilePathFromUri(context: Context, uri: Uri): String? {
         var filePath: String? = null
-        val projection = arrayOf(MediaStore.Audio.Media.DATA)
-        val cursor = context.contentResolver.query(uri, projection, null, null, null)
-        cursor?.use {
-            if (it.moveToFirst()) {
-                val columnIndex = it.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
-                filePath = it.getString(columnIndex)
+
+        if (DocumentsContract.isDocumentUri(context, uri)) {
+            val documentId = DocumentsContract.getDocumentId(uri)
+            val authority = uri.authority
+
+            val split = documentId.split(":")
+            val documentType = split[0]
+            val documentIdNumber = split[1]
+
+            if ("com.android.providers.media.documents" == authority) {
+                val contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+
+                val selection = MediaStore.Audio.Media._ID + "=?"
+                val selectionArgs = arrayOf(documentIdNumber)
+
+                val projection = arrayOf(MediaStore.Audio.Media.DATA)
+
+                context.contentResolver.query(contentUri, projection, selection, selectionArgs, null)?.use { cursor ->
+                    if (cursor.moveToFirst()) {
+                        val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
+                        filePath = cursor.getString(columnIndex)
+                    }
+                }
+            } else if ("com.android.providers.downloads.documents" == authority && "raw" != documentType) {
+                val contentUri = Uri.parse("content://downloads/public_downloads")
+
+                val contentUriWithId = ContentUris.withAppendedId(contentUri, documentIdNumber.toLong())
+
+                val projection = arrayOf(MediaStore.Audio.Media.DATA)
+
+                context.contentResolver.query(contentUriWithId, projection, null, null, null)?.use { cursor ->
+                    if (cursor.moveToFirst()) {
+                        val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
+                        filePath = cursor.getString(columnIndex)
+                    }
+                }
+            } else if ("com.android.externalstorage.documents" == authority) {
+                val split = documentId.split(":")
+                if (split.size >= 2) {
+                    val storageType = split[0]
+                    val storagePath = split[1]
+                    if ("primary" == storageType) {
+                        filePath = "${Environment.getExternalStorageDirectory()}/$storagePath"
+                    }
+                }
             }
         }
+
         return filePath
     }
 

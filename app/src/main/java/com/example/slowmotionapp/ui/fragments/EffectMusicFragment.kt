@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
@@ -222,24 +221,10 @@ class EffectMusicFragment : Fragment() {
                         permission
                     ) == PackageManager.PERMISSION_GRANTED
                 ) {
-                    val i = Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
-                    i.type = "audio/*"
-                    i.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("audio/*"))
-
-                    // Verify that there is an activity available to handle the intent
-                    if (i.resolveActivity(requireActivity().packageManager) != null) {
-                        startActivityForResult(i, Constants.AUDIO_GALLERY)
-                    } else {
-                        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-                        intent.addCategory(Intent.CATEGORY_OPENABLE)
-                        intent.type = "audio/*"
-                        startActivityForResult(intent, 456)
-                        Toast.makeText(
-                            requireContext(),
-                            "No application found to handle audio file picking.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
+                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+                    intent.addCategory(Intent.CATEGORY_OPENABLE)
+                    intent.type = "audio/*"
+                    startActivityForResult(intent, Constants.AUDIO_GALLERY)
                 } else {
                     callPermissionSettings()
                 }
@@ -251,10 +236,9 @@ class EffectMusicFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == Constants.AUDIO_GALLERY && resultCode == Activity.RESULT_OK) {
-            // Handle the selected video here
-            // Perform any required operations with the selected video
 
-            setupFragment(getAudioFilePathFromUri(requireContext(), data?.data!!))
+            setupFragment(getAudioFilePathFromUri(requireContext(), data!!.data!!))
+
         } else if (requestCode == 456 && resultCode == Activity.RESULT_OK) {
             setupFragment(getAudioFilePathFromUri(requireContext(), data?.data!!))
         }
