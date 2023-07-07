@@ -15,19 +15,17 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
-import android.provider.DocumentsContract
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.TextPaint
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
-import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import androidx.documentfile.provider.DocumentFile
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.interfaces.MyListener
@@ -403,57 +401,34 @@ object Utils {
         return finalTimerString
     }
 
-    fun getAudioFilePathFromUri(context: Context, uri: Uri): String? {
+    fun getAudioFilePath(context: Context, uri: Uri): String? {
         var filePath: String? = null
 
-        if (DocumentsContract.isDocumentUri(context, uri)) {
-            val documentId = DocumentsContract.getDocumentId(uri)
-            val authority = uri.authority
+        val contentResolver: ContentResolver = context.contentResolver
+        val projection = arrayOf(MediaStore.MediaColumns.DISPLAY_NAME)
 
-            val split = documentId.split(":")
-            val documentType = split[0]
-            val documentIdNumber = split[1]
+        contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val displayNameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                val fileName = cursor.getString(displayNameIndex)
+                val cacheDir = context.cacheDir
 
-            if ("com.android.providers.media.documents" == authority) {
-                val contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-
-                val selection = MediaStore.Audio.Media._ID + "=?"
-                val selectionArgs = arrayOf(documentIdNumber)
-
-                val projection = arrayOf(MediaStore.Audio.Media.DATA)
-
-                context.contentResolver.query(contentUri, projection, selection, selectionArgs, null)?.use { cursor ->
-                    if (cursor.moveToFirst()) {
-                        val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
-                        filePath = cursor.getString(columnIndex)
-                    }
-                }
-            } else if ("com.android.providers.downloads.documents" == authority && "raw" != documentType) {
-                val contentUri = Uri.parse("content://downloads/public_downloads")
-
-                val contentUriWithId = ContentUris.withAppendedId(contentUri, documentIdNumber.toLong())
-
-                val projection = arrayOf(MediaStore.Audio.Media.DATA)
-
-                context.contentResolver.query(contentUriWithId, projection, null, null, null)?.use { cursor ->
-                    if (cursor.moveToFirst()) {
-                        val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
-                        filePath = cursor.getString(columnIndex)
-                    }
-                }
-            } else if ("com.android.externalstorage.documents" == authority) {
-                val split = documentId.split(":")
-                if (split.size >= 2) {
-                    val storageType = split[0]
-                    val storagePath = split[1]
-                    if ("primary" == storageType) {
-                        filePath = "${Environment.getExternalStorageDirectory()}/$storagePath"
-                    }
+                val file = File(cacheDir, fileName)
+                val inputStream = contentResolver.openInputStream(uri)
+                if (inputStream != null) {
+                    file.copyInputStreamToFile(inputStream)
+                    filePath = file.path
                 }
             }
         }
 
         return filePath
+    }
+
+    private fun File.copyInputStreamToFile(inputStream: java.io.InputStream) {
+        this.outputStream().use { fileOut ->
+            inputStream.copyTo(fileOut)
+        }
     }
 
     fun deleteVideoFile(filePath: String) {
@@ -608,6 +583,44 @@ object Utils {
             getMediaDuration(this, uri)
         )
         startActivity(intent)
+    }
+
+    fun formatCSeconds(timeInSeconds: Long): String? {
+        val hours = timeInSeconds / 3600
+        val secondsLeft = timeInSeconds - hours * 3600
+        val minutes = secondsLeft / 60
+        val seconds = secondsLeft - minutes * 60
+        var formattedTime = ""
+        if (hours < 10) formattedTime += "0"
+        formattedTime += "$hours:"
+        if (minutes < 10) formattedTime += "0"
+        formattedTime += "$minutes:"
+        if (seconds < 10) formattedTime += "0"
+        formattedTime += seconds
+        return formattedTime
+    }
+
+    fun getVideoResolution(videoPath: String): Pair<Int, Int>? {
+        val retriever = MediaMetadataRetriever()
+
+        try {
+            retriever.setDataSource(videoPath)
+            val width =
+                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toInt()
+            val height =
+                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toInt()
+            return if (width != null && height != null) {
+                Pair(width, height)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            retriever.release()
+        }
+
+        return null
     }
 
 }

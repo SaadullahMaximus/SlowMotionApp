@@ -233,13 +233,15 @@ class CropSpeedFragment : Fragment(), MyListener {
         }
 
         sharedViewModel.audioVolumeLevel.observe(viewLifecycleOwner) {
-            audioPlayer!!.setVolume(it, it)
+            audioPlayer?.setVolume(it, it)
         }
 
         wannaGoBackCheckViewModel.observe(viewLifecycleOwner) {
             if (it) {
-                wannaGoBackCheckViewModel.postValue(false)
+                Log.d("HELLOJIMMY", "showFullScreenDialog: Go Back Simmon")
+
                 fragmentSwap()
+                wannaGoBackCheckViewModel.postValue(false)
             }
         }
 
@@ -270,6 +272,12 @@ class CropSpeedFragment : Fragment(), MyListener {
             }
         }
 
+        sharedViewModel.stopAllMusic.observe(viewLifecycleOwner) { newValue ->
+            if (newValue) {
+                audioPlayer?.reset()
+            }
+        }
+
         playerRestart()
 
         seekBar2.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -295,7 +303,7 @@ class CropSpeedFragment : Fragment(), MyListener {
                 if (playbackState == Player.STATE_ENDED) {
                     player!!.seekTo(0)
                     if (musicReady && audioPlayer!!.isPlaying) {
-                        audioPlayer!!.seekTo(0)
+                        audioPlayer?.seekTo(0)
                     }
                 }
             }
@@ -441,14 +449,14 @@ class CropSpeedFragment : Fragment(), MyListener {
                 binding.playPauseButton2.setImageResource(R.drawable.baseline_play_arrow)
                 player!!.pause()
                 if (musicReady && audioPlayer!!.isPlaying) {
-                    audioPlayer!!.pause()
+                    audioPlayer?.pause()
                 }
                 stopTrackingSeekBar()
             } else {
                 binding.playPauseButton2.setImageResource(R.drawable.baseline_pause)
                 player!!.play()
                 if (musicReady) {
-                    audioPlayer!!.start()
+                    audioPlayer?.start()
                 }
                 startTrackingSeekBar()
             }
@@ -482,6 +490,7 @@ class CropSpeedFragment : Fragment(), MyListener {
                 audioPlayer!!.release()
             }
             if (enhanced) {
+                Log.d("BAWA", "onCreateView: BAWA")
                 sharedViewModel.enhanced(true)
             } else {
                 saveEditedVideo(requireContext())
@@ -869,6 +878,7 @@ class CropSpeedFragment : Fragment(), MyListener {
         val btnNo = dialog.findViewById<TextView>(R.id.noBtn)
 
         btnYes.setOnClickListener {
+            Log.d("HELLOJIMMY", "showFullScreenDialog: Yes Click")
             backSave = true
             wannaGoBack = true
 
@@ -896,6 +906,8 @@ class CropSpeedFragment : Fragment(), MyListener {
     }
 
     private fun fragmentSwap() {
+        Log.d("HELLOJIMMY", "showFullScreenDialog: Finally Going Back")
+
         enhanced = false
         binding.enhanceBtn.visibility = View.VISIBLE
         binding.backTextBtn.visibility = View.GONE

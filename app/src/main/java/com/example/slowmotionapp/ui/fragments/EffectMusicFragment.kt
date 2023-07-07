@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -28,9 +29,11 @@ import com.daasuu.mp4compose.composer.Mp4Composer
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.adapters.ViewPagerAdapter
 import com.example.slowmotionapp.constants.Constants
+import com.example.slowmotionapp.customviews.CustomWaitingDialog
 import com.example.slowmotionapp.databinding.FragmentEffectMusicBinding
 import com.example.slowmotionapp.effects.FilterType
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.MusicApplied
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.backSave
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.filterPosition
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.myMusic
@@ -42,7 +45,7 @@ import com.example.slowmotionapp.utils.Utils.commandsGenerator
 import com.example.slowmotionapp.utils.Utils.createCacheTempFile
 import com.example.slowmotionapp.utils.Utils.createCroppedFile
 import com.example.slowmotionapp.utils.Utils.deleteFromGallery
-import com.example.slowmotionapp.utils.Utils.getAudioFilePathFromUri
+import com.example.slowmotionapp.utils.Utils.getAudioFilePath
 import com.example.slowmotionapp.utils.Utils.getVideoDuration
 import com.example.slowmotionapp.utils.Utils.saveEditedVideo
 import com.example.slowmotionapp.utils.Utils.singleClick
@@ -72,6 +75,8 @@ class EffectMusicFragment : Fragment() {
         sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
         sharedViewModel.enhanced.observe(viewLifecycleOwner) { newValue ->
             if (newValue) {
+                Log.d("HELLOJIMMY", "showFullScreenDialog: Video Going to Enhanced")
+
                 saveVideoWithFilter()
             }
         }
@@ -237,10 +242,12 @@ class EffectMusicFragment : Fragment() {
 
         if (requestCode == Constants.AUDIO_GALLERY && resultCode == Activity.RESULT_OK) {
 
-            setupFragment(getAudioFilePathFromUri(requireContext(), data!!.data!!))
+            Log.d("DATADATA", "onActivityResult: ${data?.data}")
+
+            setupFragment(getAudioFilePath(requireContext(), data!!.data!!))
 
         } else if (requestCode == 456 && resultCode == Activity.RESULT_OK) {
-            setupFragment(getAudioFilePathFromUri(requireContext(), data?.data!!))
+            setupFragment(getAudioFilePath(requireContext(), data?.data!!))
         }
     }
 
@@ -280,6 +287,136 @@ class EffectMusicFragment : Fragment() {
 
     private fun saveVideoWithFilter() {
 
+
+        Log.d("HELLOJIMMY", "showFullScreenDialog: saveVideoWithFilter()")
+
+        if (filterPosition != 0) {
+
+            val targetWidth = 720
+            val targetHeight = 1280
+
+            val retriever = MediaMetadataRetriever()
+            retriever.setDataSource(mainCachedFile)
+
+            val originalWidth =
+                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toInt()
+                    ?: 0
+            val originalHeight =
+                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toInt()
+                    ?: 0
+
+            Log.d("VideoRes", "saveVideoWithFilter: $originalWidth $originalHeight")
+
+            if (originalWidth > targetWidth || originalHeight > targetHeight) {
+                Log.d("VideoRes", "saveVideoWithFilter: IF")
+                val outputFilePath = createCacheTempFile(requireContext())
+
+                val aspectRatio = "" + targetWidth + "x" + "" + targetHeight
+
+                val ffmpegCommand =
+                    arrayOf(
+                        "-ss",
+                        "0",
+                        "-y",
+                        "-i",
+                        mainCachedFile,
+                        "-t",
+                        getVideoDuration(requireContext(), mainCachedFile).toString(),
+                        "-s",
+                        aspectRatio,
+                        "-r",
+                        "25",
+                        "-vcodec",
+                        "mpeg4",
+                        "-b:v",
+                        "150k",
+                        "-b:a",
+                        "48000",
+                        "-ac",
+                        "2",
+                        "-ar",
+                        "22050",
+                        outputFilePath
+                    )
+                executeFFMPEGCommand(ffmpegCommand, outputFilePath)
+            } else {
+                Log.d("VideoRes", "saveVideoWithFilter: ELSE")
+                applyFilter()
+            }
+        } else {
+            if (MusicApplied) {
+                audioVideoMixer()
+            } else {
+                if (wannaGoBack) {
+                    wannaGoBackCheckViewModel.postValue(true)
+                    backSave = false
+
+                    requireActivity().runOnUiThread {
+                        sharedViewModel.enhanced(false)
+                    }
+                    wannaGoBack = false
+                } else {
+                    saveEditedVideo(requireContext())
+                }
+            }
+        }
+    }
+
+    private fun executeFFMPEGCommand(command: Array<String>, outputFilePath: String) {
+        val progressDialog = CustomWaitingDialog(requireContext())
+        progressDialog.setCloseButtonClickListener {
+            progressDialog.dismiss()
+            FFmpeg.cancel()
+        }
+        progressDialog.show()
+
+        val ffmpegCommand: String = commandsGenerator(command)
+
+        FFmpeg.executeAsync(
+            ffmpegCommand
+        ) { _, returnCode ->
+            Config.printLastCommandOutput(Log.INFO)
+            when (returnCode) {
+                Config.RETURN_CODE_SUCCESS -> {
+                    progressDialog.dismiss()
+                    mainCachedFile = outputFilePath
+                    applyFilter()
+                }
+                Config.RETURN_CODE_CANCEL -> {
+                    progressDialog.dismiss()
+                    try {
+                        File(outputFilePath).delete()
+                        deleteFromGallery(outputFilePath, requireContext())
+                    } catch (th: Throwable) {
+                        th.printStackTrace()
+                    }
+                    Log.i(
+                        Config.TAG,
+                        "Async command execution cancelled by user."
+                    )
+                }
+                else -> {
+                    progressDialog.dismiss()
+                    try {
+                        File(outputFilePath).delete()
+                        deleteFromGallery(outputFilePath, requireContext())
+                        Toast.makeText(requireContext(), "Error Creating Video", Toast.LENGTH_SHORT)
+                            .show()
+                    } catch (th: Throwable) {
+                        th.printStackTrace()
+                    }
+                    Log.i(
+                        Config.TAG,
+                        String.format("Async command execution failed with rc=%d.", returnCode)
+                    )
+                }
+            }
+        }
+    }
+
+
+    private fun applyFilter() {
+
         val progressDialog =
             ProgressDialog(requireContext(), R.style.CustomDialog)
         progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
@@ -288,54 +425,63 @@ class EffectMusicFragment : Fragment() {
         progressDialog.setMessage("Please Wait")
         progressDialog.show()
 
-        if (filterPosition != 0) {
-            val outputFile = createCroppedFile().toString()
-            val filter = FilterType.createGlFilter(
-                FilterType.createFilterList()[filterPosition],
-                requireContext()
-            )
-            Mp4Composer(mainCachedFile, outputFile)
-                .rotation(Rotation.NORMAL)
-                .fillMode(FillMode.PRESERVE_ASPECT_FIT)
-                .filter(filter)
-                .listener(object : Mp4Composer.Listener {
-                    override fun onProgress(progress: Double) {
-                    }
+        Log.d("HELLOJIMMY", "showFullScreenDialog: filterPosition != 0")
 
-                    override fun onCompleted() {
-                        mainCachedFile = outputFile
-                        progressDialog.dismiss()
+        val outputFile = createCroppedFile().toString()
+        val filter = FilterType.createGlFilter(
+            FilterType.createFilterList()[filterPosition],
+            requireContext()
+        )
+        Mp4Composer(mainCachedFile, outputFile)
+            .rotation(Rotation.NORMAL)
+            .fillMode(FillMode.PRESERVE_ASPECT_FIT)
+            .filter(filter)
+            .listener(object : Mp4Composer.Listener {
+                override fun onProgress(progress: Double) {
+                    Log.d("HELLOJIMMY", "showFullScreenDialog: Filter Progress $progress")
+                }
 
-                        if (MusicApplied) {
-                            audioVideoMixer()
-                        } else {
-                            if (wannaGoBack) {
-                                wannaGoBackCheckViewModel.postValue(true)
-                                wannaGoBack = false
-                            } else {
-                                saveEditedVideo(requireContext())
+                override fun onCompleted() {
+                    mainCachedFile = outputFile
+                    progressDialog.dismiss()
+
+                    Log.d("HELLOJIMMY", "showFullScreenDialog: Filter Applied")
+
+
+                    if (MusicApplied) {
+                        Log.d("HELLOJIMMY", "showFullScreenDialog: want to Add Music")
+
+                        audioVideoMixer()
+                    } else {
+                        if (wannaGoBack) {
+
+                            Log.d("HELLOJIMMY", "showFullScreenDialog: Wanna Go Back")
+
+
+                            wannaGoBackCheckViewModel.postValue(true)
+
+                            requireActivity().runOnUiThread {
+                                sharedViewModel.enhanced(false)
                             }
+                            wannaGoBack = false
+                        } else {
+                            saveEditedVideo(requireContext())
                         }
                     }
+                }
 
-                    override fun onCanceled() {
-                        progressDialog.dismiss()
-                    }
+                override fun onCanceled() {
+                    Log.d("HELLOJIMMY", "showFullScreenDialog: Filter Cancel")
+                    progressDialog.dismiss()
+                }
 
-                    override fun onFailed(exception: Exception) {
-                        progressDialog.dismiss()
-                        Log.e(Constants.APP_NAME, "onFailed() Filter", exception)
-                    }
-                })
-                .start()
-        } else {
-            progressDialog.dismiss()
-            if (MusicApplied) {
-                audioVideoMixer()
-            } else {
-                saveEditedVideo(requireContext())
-            }
-        }
+                override fun onFailed(exception: Exception) {
+                    progressDialog.dismiss()
+                    Log.e(Constants.APP_NAME, "onFailed() Filter", exception)
+                    Log.d("HELLOJIMMY", "showFullScreenDialog: Filter Failed")
+                }
+            })
+            .start()
     }
 
     private fun audioVideoMixer() {
@@ -384,6 +530,10 @@ class EffectMusicFragment : Fragment() {
             progressDialog.setCancelable(false)
             progressDialog.setMessage("Please Wait")
             progressDialog.show()
+
+            Log.d("HELLOJIMMY", "showFullScreenDialog: Audio Video Mixer")
+
+
             val ffmpegCommand: String = commandsGenerator(strArr)
             FFmpeg.executeAsync(
                 ffmpegCommand
@@ -396,7 +546,10 @@ class EffectMusicFragment : Fragment() {
                         playVideo = str
                         mainCachedFile = str
 
+                        Log.d("HELLOJIMMY", "showFullScreenDialog: Audio Video Mixer Completed")
+
                         if (wannaGoBack) {
+                            Log.d("HELLOJIMMY", "showFullScreenDialog: Wanna Go Back After Mixing")
                             wannaGoBack = false
                             wannaGoBackCheckViewModel.postValue(true)
                         } else {

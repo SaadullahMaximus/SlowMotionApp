@@ -1,7 +1,6 @@
 package com.example.slowmotionapp.ui.fragments
 
 import android.animation.ValueAnimator
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,7 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.arthenica.mobileffmpeg.Config
 import com.arthenica.mobileffmpeg.FFmpeg
-import com.basusingh.beautifulprogressdialog.BeautifulProgressDialog
+import com.example.slowmotionapp.customviews.CustomWaitingDialog
 import com.example.slowmotionapp.customviews.KnobView
 import com.example.slowmotionapp.databinding.FragmentSpeedBinding
 import com.example.slowmotionapp.extras.VideoPlayerState
@@ -68,9 +67,16 @@ class SpeedFragment : Fragment() {
         binding.btnOk.setOnClickListener {
             if (knobFinalValue != 7) {
                 animateKnob(700F)
-                handleKnobStopMoving(7)
                 val tempPath = createCacheTempFile(requireContext())
                 videoMotionCommand(tempPath, knobFinalValue)
+
+                handleKnobStopMoving(7)
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    "Please select any option for Editing",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 
@@ -268,25 +274,18 @@ class SpeedFragment : Fragment() {
 
     private fun executeFFMPEG(strArr: Array<String>, str: String) {
         sharedViewModel.pauseVideo(true)
-        val progressDialog =
-            BeautifulProgressDialog(
-                requireActivity(),
-                BeautifulProgressDialog.withLottie,
-                "Please wait"
-            )
-        progressDialog.setLottieLocation("loading_dialog.json")
-        //Loop the Lottie Animation
-        progressDialog.setLayoutColor(Color.WHITE)
-        progressDialog.setLottieLoop(true)
+        val progressDialog = CustomWaitingDialog(requireContext())
+        progressDialog.setCloseButtonClickListener {
+            progressDialog.dismiss()
+            FFmpeg.cancel()
+        }
         progressDialog.show()
-        progressDialog.setCancelable(false)
         val ffmpegCommand: String = commandsGenerator(strArr)
         FFmpeg.executeAsync(
             ffmpegCommand
         ) { _, returnCode ->
 
             Config.printLastCommandOutput(Log.INFO)
-            progressDialog.dismiss()
             when (returnCode) {
                 Config.RETURN_CODE_SUCCESS -> {
                     progressDialog.dismiss()

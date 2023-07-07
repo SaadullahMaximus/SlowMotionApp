@@ -1,11 +1,17 @@
 package com.example.slowmotionapp.ui.fragments
 
 import android.app.ProgressDialog
+import android.content.Context
 import android.media.MediaPlayer
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -40,8 +46,36 @@ class MusicFragment : Fragment() {
         var appliedMusicPosition = -1
     }
 
+    private fun isNetworkAvailable(): Boolean {
+        val connectivityManager =
+            requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        val networkCapabilities =
+            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+
+        return networkCapabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            ?: false
+    }
+
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) {
+            super.onAvailable(network)
+            // Internet connection is available
+            Toast.makeText(requireContext(), "Internet connected", Toast.LENGTH_SHORT).show()
+            viewModel.fetchMp3Stores()
+        }
+
+        override fun onLost(network: Network) {
+            super.onLost(network)
+            // Internet connection is lost
+            Toast.makeText(requireContext(), "Internet connection lost", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
 
         sharedViewModel.stopAllMusic.observe(viewLifecycleOwner) { newValue ->
@@ -59,7 +93,22 @@ class MusicFragment : Fragment() {
                 binding.recyclerView.adapter = mp3StoreAdapter
             }
         }
+
+        // Check network connectivity and display toast if internet is not available
+        if (!isNetworkAvailable()) {
+            Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT).show()
+        }
+
+        val connectivityManager =
+            requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+
+
+        connectivityManager.registerDefaultNetworkCallback(networkCallback)
+
+
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -128,7 +177,10 @@ class MusicFragment : Fragment() {
         viewModel.mp3Stores.observe(requireActivity()) {
             // Display the mp3 store names in your UI
             // You can use a RecyclerView with a custom adapter for this
+            Log.d("OBSERVER", "onCreateView: $it")
+            Log.d("OBSERVER", "onCreateView: ${it.size}")
             mp3StoreAdapter.setData(it)
+            binding.recyclerView.visibility = View.VISIBLE
         }
 
         viewModel.error.observe(requireActivity()) {
@@ -188,5 +240,13 @@ class MusicFragment : Fragment() {
             )
         }
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        val connectivityManager =
+            requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        connectivityManager.unregisterNetworkCallback(networkCallback)
+    }
+
 
 }

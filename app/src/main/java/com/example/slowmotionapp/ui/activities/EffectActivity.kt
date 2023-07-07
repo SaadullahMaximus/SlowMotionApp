@@ -1,10 +1,12 @@
 package com.example.slowmotionapp.ui.activities
 
 import android.app.Dialog
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.RelativeLayout
 import android.widget.SeekBar
@@ -13,6 +15,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.arthenica.mobileffmpeg.Config
 import com.arthenica.mobileffmpeg.FFmpeg
 import com.daasuu.mp4compose.FillMode
 import com.daasuu.mp4compose.Rotation
@@ -53,6 +56,8 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
     private var mStartPosition = 0
 
     private lateinit var file: File
+
+    private var mp4Composer: Mp4Composer? = null
 
     companion object {
         var exoPLayerView: EPlayerView? = null
@@ -167,44 +172,155 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
     }
 
     private fun saveVideoWithFilter() {
+
+        if (effectPosition != 0) {
+
+            val targetWidth = 720
+            val targetHeight = 1280
+
+            val retriever = MediaMetadataRetriever()
+            retriever.setDataSource(mainCachedFile)
+
+            val originalWidth =
+                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toInt()
+                    ?: 0
+            val originalHeight =
+                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toInt()
+                    ?: 0
+
+            Log.d("VideoRes", "saveVideoWithFilter: $originalWidth $originalHeight")
+
+            if (originalWidth > targetWidth || originalHeight > targetHeight) {
+                Log.d("VideoRes", "saveVideoWithFilter: IF")
+                val outputFilePath = createCacheTempFile(this)
+
+                val aspectRatio = "" + targetWidth + "x" + "" + targetHeight
+
+                val ffmpegCommand =
+                    arrayOf(
+                        "-ss",
+                        "0",
+                        "-y",
+                        "-i",
+                        mainCachedFile,
+                        "-t",
+                        getVideoDuration(this, mainCachedFile).toString(),
+                        "-s",
+                        aspectRatio,
+                        "-r",
+                        "25",
+                        "-vcodec",
+                        "mpeg4",
+                        "-b:v",
+                        "150k",
+                        "-b:a",
+                        "48000",
+                        "-ac",
+                        "2",
+                        "-ar",
+                        "22050",
+                        outputFilePath
+                    )
+                executeFFMPEGCommand(ffmpegCommand, outputFilePath)
+            } else {
+                Log.d("VideoRes", "saveVideoWithFilter: ELSE")
+                applyFilter()
+            }
+        } else {
+            Toast.makeText(this, "Please select Effect.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun applyFilter() {
+
+        val progressDialog = CustomWaitingDialog(this)
+        progressDialog.setCloseButtonClickListener {
+            progressDialog.dismiss()
+            mp4Composer?.cancel()
+        }
+        progressDialog.show()
+
+        Log.d("VideoRes", "saveVideoWithFilter: Apply Filter")
+
+        val outputFile = createCacheTempFile(this)
+        val filter = FilterType.createGlFilter(
+            FilterType.createFilterList()[effectPosition], this
+        )
+        mp4Composer = Mp4Composer(mainCachedFile, outputFile).rotation(Rotation.NORMAL)
+            .fillMode(FillMode.PRESERVE_ASPECT_FIT).filter(filter)
+            .listener(object : Mp4Composer.Listener {
+                override fun onProgress(progress: Double) {
+                }
+
+                override fun onCompleted() {
+                    mainCachedFile = outputFile
+                    runOnUiThread {
+                        progressDialog.dismiss()
+                        saveEditedVideo(this@EffectActivity)
+                        effectPosition = 0
+                    }
+                }
+
+                override fun onCanceled() {
+                    progressDialog.dismiss()
+                }
+
+                override fun onFailed(exception: Exception) {
+                    Log.d("exception", "onFailed: $exception")
+                    progressDialog.dismiss()
+                }
+            }).start()
+    }
+
+    private fun executeFFMPEGCommand(command: Array<String>, outputFilePath: String) {
         val progressDialog = CustomWaitingDialog(this)
         progressDialog.setCloseButtonClickListener {
             progressDialog.dismiss()
             FFmpeg.cancel()
         }
-
         progressDialog.show()
 
-        if (effectPosition != 0) {
-            val outputFile = createCacheTempFile(this)
-            val filter = FilterType.createGlFilter(
-                FilterType.createFilterList()[effectPosition], this
-            )
-            Mp4Composer(mainCachedFile, outputFile).rotation(Rotation.NORMAL)
-                .fillMode(FillMode.PRESERVE_ASPECT_FIT).filter(filter)
-                .listener(object : Mp4Composer.Listener {
-                    override fun onProgress(progress: Double) {
-                    }
+        val ffmpegCommand: String = Utils.commandsGenerator(command)
 
-                    override fun onCompleted() {
-                        mainCachedFile = outputFile
-                        runOnUiThread {
-                            progressDialog.dismiss()
-                            saveEditedVideo(this@EffectActivity)
-                        }
+        FFmpeg.executeAsync(
+            ffmpegCommand
+        ) { _, returnCode ->
+            Config.printLastCommandOutput(Log.INFO)
+            when (returnCode) {
+                Config.RETURN_CODE_SUCCESS -> {
+                    progressDialog.dismiss()
+                    mainCachedFile = outputFilePath
+                    applyFilter()
+                }
+                Config.RETURN_CODE_CANCEL -> {
+                    progressDialog.dismiss()
+                    try {
+                        File(outputFilePath).delete()
+                        Utils.deleteFromGallery(outputFilePath, this)
+                    } catch (th: Throwable) {
+                        th.printStackTrace()
                     }
-
-                    override fun onCanceled() {
-                        progressDialog.dismiss()
+                    Log.i(
+                        Config.TAG,
+                        "Async command execution cancelled by user."
+                    )
+                }
+                else -> {
+                    progressDialog.dismiss()
+                    try {
+                        File(outputFilePath).delete()
+                        Utils.deleteFromGallery(outputFilePath, this)
+                        Toast.makeText(this, "Error Creating Video", Toast.LENGTH_SHORT)
+                            .show()
+                    } catch (th: Throwable) {
+                        th.printStackTrace()
                     }
-
-                    override fun onFailed(exception: Exception) {
-                        progressDialog.dismiss()
-                    }
-                }).start()
-        } else {
-            progressDialog.dismiss()
-            Toast.makeText(this, "Please select Effect.", Toast.LENGTH_SHORT).show()
+                    Log.i(
+                        Config.TAG,
+                        String.format("Async command execution failed with rc=%d.", returnCode)
+                    )
+                }
+            }
         }
     }
 

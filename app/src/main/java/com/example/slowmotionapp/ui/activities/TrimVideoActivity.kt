@@ -23,6 +23,7 @@ import com.arthenica.mobileffmpeg.FFmpeg
 import com.basusingh.beautifulprogressdialog.BeautifulProgressDialog
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
+import com.example.slowmotionapp.customviews.CustomWaitingDialog
 import com.example.slowmotionapp.databinding.ActivityTrimVideoBinding
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.isFromTrim
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
@@ -33,6 +34,7 @@ import com.example.slowmotionapp.utils.Utils.convertContentUriToFilePath
 import com.example.slowmotionapp.utils.Utils.createCacheCopy
 import com.example.slowmotionapp.utils.Utils.createTrimmedFile
 import com.example.slowmotionapp.utils.Utils.deleteFromGallery
+import com.example.slowmotionapp.utils.Utils.formatCSeconds
 import com.example.slowmotionapp.utils.Utils.milliSecondsToTimer
 import com.example.slowmotionapp.utils.Utils.singleClick
 import java.io.File
@@ -198,16 +200,24 @@ class TrimVideoActivity : AppCompatActivity() {
                 this,
                 arrayOf(
                     "-ss",
-                    mStartPosition.toString(),
+                    formatCSeconds(mStartPosition.toLong())!!,
                     "-y",
                     "-i",
                     file.toString(),
                     "-t",
-                    durationSeconds.toString(),
-                    "-c:v",
-                    "copy",
-                    "-c:a",
-                    "copy",
+                    formatCSeconds(durationSeconds.toLong())!!,
+                    "-vcodec",
+                    "mpeg4",
+                    "-b:v",
+                    "2097152",
+                    "-b:a",
+                    "48000",
+                    "-ac",
+                    "2",
+                    "-ar",
+                    "22050",
+                    "-strict",
+                    "-2",
                     outputFile
                 ),
                 outputFile
@@ -354,21 +364,18 @@ class TrimVideoActivity : AppCompatActivity() {
     }
 
     private fun trimVideo(context: Context, strArr: Array<String>, str: String) {
-        val progressDialog =
-            BeautifulProgressDialog(this, BeautifulProgressDialog.withLottie, "Please wait")
-        progressDialog.setLottieLocation("loading_dialog.json")
-        //Loop the Lottie Animation
-        progressDialog.setLayoutColor(Color.WHITE)
-        progressDialog.setLottieLoop(true)
+        val progressDialog = CustomWaitingDialog(this)
+        progressDialog.setCloseButtonClickListener {
+            progressDialog.dismiss()
+            FFmpeg.cancel()
+        }
         progressDialog.show()
-        progressDialog.setCancelable(false)
 
         val ffmpegCommand: String = commandsGenerator(strArr)
         FFmpeg.executeAsync(
             ffmpegCommand
         ) { _, returnCode ->
             Config.printLastCommandOutput(Log.INFO)
-            progressDialog.dismiss()
             when (returnCode) {
                 Config.RETURN_CODE_SUCCESS -> {
                     progressDialog.dismiss()
@@ -383,8 +390,6 @@ class TrimVideoActivity : AppCompatActivity() {
                     try {
                         File(str).delete()
                         deleteFromGallery(str, context)
-                        Toast.makeText(context, "Error Creating Video", Toast.LENGTH_SHORT)
-                            .show()
                     } catch (th: Throwable) {
                         th.printStackTrace()
                     }
