@@ -239,9 +239,7 @@ class CropSpeedFragment : Fragment(), MyListener {
         wannaGoBackCheckViewModel.observe(viewLifecycleOwner) {
             if (it) {
                 Log.d("HELLOJIMMY", "showFullScreenDialog: Go Back Simmon")
-
                 fragmentSwap()
-                wannaGoBackCheckViewModel.postValue(false)
             }
         }
 
@@ -881,11 +879,11 @@ class CropSpeedFragment : Fragment(), MyListener {
             Log.d("HELLOJIMMY", "showFullScreenDialog: Yes Click")
             backSave = true
             wannaGoBack = true
+            enhanced = false
 
             sharedViewModel.enhanced(true)
             sharedViewModel.stopAllMusic(true)
 
-            enhanced = false
             player!!.release()
 
             dialog.dismiss()
@@ -932,6 +930,8 @@ class CropSpeedFragment : Fragment(), MyListener {
         binding.playPauseButton2.visibility = View.GONE
 
         binding.videoView.setVideoURI(Uri.parse(mainCachedFile))
+
+        wannaGoBackCheckViewModel.postValue(false)
 
         childFragmentManager!!.beginTransaction()
             .replace(R.id.fragment_container_main, currentChildFragment as MainFragment).commit()

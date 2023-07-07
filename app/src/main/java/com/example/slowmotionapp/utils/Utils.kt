@@ -134,7 +134,6 @@ object Utils {
         )
         val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
 
-
         // Create the "Edited" directory if it doesn't exist
         if (!editedDir.exists()) {
             editedDir.mkdirs()
@@ -164,10 +163,10 @@ object Utils {
             // Delete the original file from the cache directory
             videoFile.delete()
             if (backSave) {
+                backSave = false
                 mainCachedFile = destinationFile.toString()
                 // Call the listener function
                 listener?.onUtilityFunctionCalled()
-                backSave = false
             } else {
                 playVideo = destinationFile.toString()
                 context.startActivity(Intent(context, PlayerActivity::class.java))

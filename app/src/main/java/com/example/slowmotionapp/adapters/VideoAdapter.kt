@@ -47,6 +47,16 @@ class VideoAdapter(val context: Context, private val videos: MutableList<File>) 
 
         retriever.release()
 
+//        try {
+//            retriever.setDataSource(context, Uri.parse(videoFile.path))
+//            // Proceed with extracting metadata or further processing
+//        } catch (e: Exception) {
+//            Log.e("MetadataRetriever", "Failed to set data source for video file: ${videoFile.path}", e)
+//            // Handle the error gracefully
+//        } finally {
+//            retriever.release()
+//        }
+
         thumbnailImageView.setImageBitmap(thumbnail)
         videoDuration.text = milliSecondsToTimer(time!!) + " min"
         titleTextView.text = videoFile.nameWithoutExtension

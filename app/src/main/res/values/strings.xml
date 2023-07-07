@@ -7,11 +7,7 @@
     <string name="done">Done</string>
     <string name="trim_video">Trim Video</string>
 
-    <string name="video_length_validation">Video should be of minimum 3 seconds</string>
     <string name="save">Save</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
     <string name="error_select_smaller_video">Select the video smaller than 4 minutes</string>
     <string name="not_supported_video">Video format is not supported. Would you like to convert avi to mp4 format?</string>
 

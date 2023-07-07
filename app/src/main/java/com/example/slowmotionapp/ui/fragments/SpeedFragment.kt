@@ -66,7 +66,6 @@ class SpeedFragment : Fragment() {
 
         binding.btnOk.setOnClickListener {
             if (knobFinalValue != 7) {
-                animateKnob(700F)
                 val tempPath = createCacheTempFile(requireContext())
                 videoMotionCommand(tempPath, knobFinalValue)
 
@@ -74,7 +73,7 @@ class SpeedFragment : Fragment() {
             } else {
                 Toast.makeText(
                     requireContext(),
-                    "Please select any option for Editing",
+                    "Please move slider first",
                     Toast.LENGTH_SHORT
                 ).show()
             }
@@ -141,12 +140,6 @@ class SpeedFragment : Fragment() {
         val strArr: Array<String>
         var str = ""
 
-        val valueOf: String = java.lang.String.valueOf(this.videoPlayerState.getStart() / 1000)
-        java.lang.String.valueOf(this.videoPlayerState.getStop() / 1000)
-
-
-        val filename: String = mainCachedFile
-
         var f2 = 0.0f
         when (value) {
             1 -> {
@@ -189,8 +182,6 @@ class SpeedFragment : Fragment() {
                 f2 = 0.333f
             }
         }
-
-        val valueOf2: String = java.lang.String.valueOf(this.videoPlayerState.getDuration() * f2)
 
         when (value) {
             1 -> {
@@ -236,16 +227,21 @@ class SpeedFragment : Fragment() {
         }
 
         try {
+
+            Log.d("HelloWorld", "videoMotionCommand: $value, $f2, $str")
+
             val sb = StringBuilder()
+
             sb.append("setpts=")
             sb.append(f2)
             sb.append("*PTS")
+
             strArr = arrayOf(
                 "-y",
                 "-ss",
-                valueOf,
+                "0",
                 "-i",
-                filename,
+                mainCachedFile,
                 "-filter:v",
                 sb.toString(),
                 "-filter:a",
@@ -257,7 +253,7 @@ class SpeedFragment : Fragment() {
                 "-strict",
                 "experimental",
                 "-t",
-                valueOf2,
+                (getVideoDuration(requireContext(), mainCachedFile) * f2).toString(),
                 path
             )
             executeFFMPEG(strArr, path)
@@ -291,6 +287,7 @@ class SpeedFragment : Fragment() {
                     progressDialog.dismiss()
                     mainCachedFile = str
                     updateVideoUri(str)
+                    animateKnob(700F)
                 }
                 Config.RETURN_CODE_CANCEL -> {
                     try {

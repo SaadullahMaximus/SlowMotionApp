@@ -64,8 +64,8 @@
                 <Button
                     android:id="@+id/btnCancel"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/_13sdp"
+                    android:layout_height="@dimen/_40sdp"
+                    android:layout_margin="@dimen/_10sdp"
                     android:layout_weight="1"
                     android:backgroundTint="#747474"
                     android:fontFamily="@font/fredokamedium"
@@ -81,8 +81,8 @@
                 <Button
                     android:id="@+id/btnProceed"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/_13sdp"
+                    android:layout_height="@dimen/_40sdp"
+                    android:layout_margin="@dimen/_10sdp"
                     android:layout_weight="1"
                     android:backgroundTint="#FDC005"
                     android:fontFamily="@font/fredokamedium"

@@ -12,6 +12,7 @@ import com.example.slowmotionapp.R
 import com.example.slowmotionapp.ui.activities.MainActivity
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.isFromTrim
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.justEffects
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.trimOrCrop
 
 class MyDialogFragment : DialogFragment() {
 
@@ -40,6 +41,7 @@ class MyDialogFragment : DialogFragment() {
 
         overlayLayout.setOnClickListener {
             justEffects = false
+            trimOrCrop = false
             // Dismiss the fragment when the overlay layout is clicked
             dismiss()
         }

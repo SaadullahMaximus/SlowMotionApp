@@ -73,11 +73,12 @@ class EffectMusicFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
+
         sharedViewModel.enhanced.observe(viewLifecycleOwner) { newValue ->
             if (newValue) {
                 Log.d("HELLOJIMMY", "showFullScreenDialog: Video Going to Enhanced")
-
                 saveVideoWithFilter()
+                sharedViewModel.enhanced(false)
             }
         }
         sharedViewModel.downloadedMusic.observe(viewLifecycleOwner) { newValue ->
@@ -445,6 +446,8 @@ class EffectMusicFragment : Fragment() {
                     mainCachedFile = outputFile
                     progressDialog.dismiss()
 
+                    filterPosition = 0
+
                     Log.d("HELLOJIMMY", "showFullScreenDialog: Filter Applied")
 
 
@@ -553,6 +556,7 @@ class EffectMusicFragment : Fragment() {
                             wannaGoBack = false
                             wannaGoBackCheckViewModel.postValue(true)
                         } else {
+                            backSave = false
                             saveEditedVideo(requireContext())
                         }
 

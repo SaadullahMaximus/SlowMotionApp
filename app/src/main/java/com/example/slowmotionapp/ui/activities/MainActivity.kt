@@ -15,6 +15,7 @@ import android.provider.MediaStore
 import android.provider.Settings
 import android.view.View
 import android.view.WindowManager
+import android.widget.Button
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -36,6 +37,7 @@ import com.example.slowmotionapp.utils.Utils.getVideoDuration
 import com.example.slowmotionapp.utils.Utils.refreshGalleryAlone
 import com.example.slowmotionapp.utils.Utils.singleClick
 import com.example.slowmotionapp.viewmodel.SharedViewModel
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
@@ -539,14 +541,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openExitDialog() {
-        val dialog = Dialog(this, R.style.FullScreenDialogStyle)
-        dialog.setContentView(R.layout.main_exit_dialog)
+        val dialog = BottomSheetDialog(this, R.style.FullScreenDialogStyle)
+        val view = layoutInflater.inflate(R.layout.custom_bottom_sheet, null)
+        dialog.setContentView(view)
 
-        val btnNo = dialog.findViewById<TextView>(R.id.btnNo)
-        val btnYes = dialog.findViewById<TextView>(R.id.btnYes)
+        val btnYes = view.findViewById<Button>(R.id.btnYes)
+        val btnNo = view.findViewById<Button>(R.id.btnNo)
 
         btnYes.setOnClickListener {
-            sharedViewModel.stopAllMusic(true)
             finishAffinity()
             dialog.dismiss()
         }

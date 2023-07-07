@@ -3,7 +3,6 @@ package com.example.slowmotionapp.ui.activities
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
@@ -20,7 +19,6 @@ import com.ahmedbadereldin.videotrimmer.customVideoViews.CustomRangeSeekBar
 import com.ahmedbadereldin.videotrimmer.customVideoViews.OnRangeSeekBarChangeListener
 import com.arthenica.mobileffmpeg.Config
 import com.arthenica.mobileffmpeg.FFmpeg
-import com.basusingh.beautifulprogressdialog.BeautifulProgressDialog
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.customviews.CustomWaitingDialog
@@ -41,7 +39,6 @@ import java.io.File
 import java.text.DecimalFormat
 import java.util.*
 
-
 class TrimVideoActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityTrimVideoBinding
@@ -54,7 +51,6 @@ class TrimVideoActivity : AppCompatActivity() {
     private var mEndPosition = 0
 
     private lateinit var file: File
-
     private lateinit var outputFile: String
 
     private val mHandler = Handler(Looper.getMainLooper())
@@ -71,18 +67,26 @@ class TrimVideoActivity : AppCompatActivity() {
         }
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTrimVideoBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Fetch the videoUri from the intent
         videoUri = intent.getStringExtra("VideoUri")
         type = intent.getIntExtra(Constants.TYPE, 0)
 
         binding.backBtn.setOnClickListener {
             exitDialog()
+        }
+
+        binding.btnDone.setOnClickListener {
+
+            singleClick {
+                binding.trimVideoView.pause()
+                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
+                showTrimDialog()
+            }
+
         }
 
         binding.timeLineView.post {
@@ -135,34 +139,18 @@ class TrimVideoActivity : AppCompatActivity() {
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {}
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {
-                binding.seekBar.progress = mStartPosition
-                binding.trimVideoView.seekTo(mStartPosition * 1000)
+
+//                binding.seekBar.progress = mStartPosition
+//                binding.trimVideoView.seekTo(mStartPosition * 1000)
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
-                binding.seekBar.progress = mStartPosition
-                binding.trimVideoView.seekTo(mStartPosition * 1000 + seekBar.progress)
+                binding.trimVideoView.seekTo(binding.seekBar.progress + mStartPosition)
+//                binding.seekBar.progress = mStartPosition
+//                binding.trimVideoView.seekTo(mStartPosition * 1000 + seekBar.progress)
 
             }
         })
-
-        binding.btnDone.setOnClickListener {
-
-            singleClick {
-                val diff = mEndPosition - mStartPosition
-                if (diff < 3) {
-                    Toast.makeText(
-                        this, getString(R.string.video_length_validation),
-                        Toast.LENGTH_LONG
-                    ).show()
-                } else {
-                    binding.trimVideoView.pause()
-                    binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
-                    showTrimDialog()
-                }
-            }
-
-        }
 
         binding.playPauseButton.setOnClickListener {
             if (binding.trimVideoView.isPlaying) {

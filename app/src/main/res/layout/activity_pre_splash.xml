@@ -86,6 +86,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:visibility="invisible"
+        android:gravity="center"
         app:layout_constraintBottom_toTopOf="@id/letsGo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -101,7 +102,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/fredokaregular"
-            android:text="I Accept Privacy Policy and Terms"
+            android:text="I Accept Privacy Policy and Terms."
             android:textColor="@color/white"
             android:textSize="@dimen/_11sdp" />
 
