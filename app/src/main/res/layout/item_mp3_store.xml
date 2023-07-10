@@ -100,7 +100,7 @@
                 android:paddingTop="@dimen/_4sdp"
                 android:paddingEnd="@dimen/_13sdp"
                 android:paddingBottom="@dimen/_4sdp"
-                android:text="Apply"
+                android:text="Add"
                 android:textColor="@color/black"
                 android:textSize="@dimen/_12sdp" />
 

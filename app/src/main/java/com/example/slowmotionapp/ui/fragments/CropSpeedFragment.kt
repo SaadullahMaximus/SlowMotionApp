@@ -1,6 +1,7 @@
 package com.example.slowmotionapp.ui.fragments
 
 import android.app.Dialog
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.media.MediaMetadataRetriever
@@ -22,10 +23,12 @@ import com.arthenica.mobileffmpeg.FFmpeg
 import com.edmodo.cropper.CropImageView
 import com.edmodo.cropper.cropwindow.edge.Edge
 import com.example.slowmotionapp.R
+import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.customviews.CustomWaitingDialog
 import com.example.slowmotionapp.databinding.FragmentCropSpeedBinding
 import com.example.slowmotionapp.effects.EPlayerView
 import com.example.slowmotionapp.interfaces.MyListener
+import com.example.slowmotionapp.ui.activities.EditorActivity
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.backSave
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.musicReady
@@ -278,19 +281,29 @@ class CropSpeedFragment : Fragment(), MyListener {
 
         playerRestart()
 
-        seekBar2.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(p0: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    val newPosition = progress * 1000L
-                    player!!.seekTo(newPosition)
-                }
-            }
+//        seekBar2.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+//            override fun onProgressChanged(p0: SeekBar?, progress: Int, fromUser: Boolean) {
+//                if (fromUser) {
+//                    val newPosition = progress * 1000L
+//                    player!!.seekTo(newPosition)
+//                }
+//            }
+//
+//            override fun onStartTrackingTouch(seekbar: SeekBar?) {}
+//
+//            override fun onStopTrackingTouch(p0: SeekBar?) {}
+//
+//        })
 
-            override fun onStartTrackingTouch(seekbar: SeekBar?) {}
-
-            override fun onStopTrackingTouch(p0: SeekBar?) {}
-
-        })
+//        playPauseButton2.setOnClickListener {
+//            if (player?.isPlaying == true) {
+//                player?.pause()
+//                playPauseButton2.setImageResource(R.drawable.baseline_play_arrow)
+//            } else {
+//                player?.play()
+//                playPauseButton2.setImageResource(R.drawable.baseline_pause)
+//            }
+//        }
 
 
     }
@@ -300,7 +313,7 @@ class CropSpeedFragment : Fragment(), MyListener {
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 if (playbackState == Player.STATE_ENDED) {
                     player!!.seekTo(0)
-                    if (musicReady && audioPlayer!!.isPlaying) {
+                    if (musicReady && audioPlayer?.isPlaying == true) {
                         audioPlayer?.seekTo(0)
                     }
                 }
@@ -893,10 +906,18 @@ class CropSpeedFragment : Fragment(), MyListener {
             backSave = false
             wannaGoBack = true
 
-            fragmentSwap()
+//            val intent = Intent(requireContext(), EditorActivity::class.java)
+//            intent.putExtra("VideoUri", mainCachedFile)
+//            intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
+//            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+//            requireContext().startActivity(intent)
+//            requireActivity().finish()
+
+            wannaGoBackCheckViewModel.postValue(true)
+
             player!!.release()
 
-
+            sharedViewModel.switchFragmentB(true)
             dialog.dismiss()
         }
 
@@ -910,14 +931,14 @@ class CropSpeedFragment : Fragment(), MyListener {
         binding.enhanceBtn.visibility = View.VISIBLE
         binding.backTextBtn.visibility = View.GONE
 
-        binding.seekBar.visibility = View.VISIBLE
-        binding.playPauseButton.visibility = View.VISIBLE
+        binding.seekBar2.visibility = View.VISIBLE
+        binding.playPauseButton2.visibility = View.VISIBLE
 
         binding.rotateLeft.visibility = View.VISIBLE
         binding.rotateRight.visibility = View.VISIBLE
 
-        binding.videoView.visibility = View.VISIBLE
-        binding.layoutMovieWrapper.visibility = View.GONE
+        binding.videoView.visibility = View.GONE
+        binding.layoutMovieWrapper.visibility = View.VISIBLE
 
         ePlayerView!!.onPause()
         binding.layoutMovieWrapper.removeView(ePlayerView)
@@ -926,10 +947,26 @@ class CropSpeedFragment : Fragment(), MyListener {
         audioPlayer?.stop()
         audioPlayer?.reset()
 
-        binding.seekBar2.visibility = View.GONE
-        binding.playPauseButton2.visibility = View.GONE
+        binding.seekBar.visibility = View.GONE
+        binding.playPauseButton.visibility = View.GONE
 
-        binding.videoView.setVideoURI(Uri.parse(mainCachedFile))
+        val layoutParams = binding.frameLayout.layoutParams
+        layoutParams.width = screenWidth
+        layoutParams.height = screenWidth
+        binding.frameLayout.layoutParams = layoutParams
+
+        layoutMovieWrapper.removeAllViews()
+        player?.release()
+
+        setUpSimpleExoPlayer(requireContext())
+        setUoGlPlayerView()
+
+        playerRestart()
+
+        Log.d("HELLOJIMMY", "showFullScreenDialog: playerReset")
+
+
+//        binding.videoView.setVideoURI(Uri.parse(mainCachedFile))
 
         wannaGoBackCheckViewModel.postValue(false)
 

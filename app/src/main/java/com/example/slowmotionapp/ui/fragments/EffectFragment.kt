@@ -33,7 +33,7 @@ class EffectFragment : Fragment(), FilterAdapter.OnItemClickListener {
         // Initialize RecyclerView
         binding.recyclerView.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        adapter = FilterAdapter(filterTypes, this, lifecycleScope)
+        adapter = FilterAdapter(filterTypes, this, lifecycleScope, requireContext())
         binding.recyclerView.adapter = adapter
 
         return binding.root

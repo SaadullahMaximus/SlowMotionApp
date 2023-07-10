@@ -7,7 +7,10 @@ import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.media.MediaExtractor
+import android.media.MediaFormat
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
@@ -40,6 +43,7 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.google.android.exoplayer2.util.Log
 import com.google.android.exoplayer2.util.Util
 import java.io.File
 import java.io.FileInputStream
@@ -599,27 +603,43 @@ object Utils {
         return formattedTime
     }
 
-    fun getVideoResolution(videoPath: String): Pair<Int, Int>? {
-        val retriever = MediaMetadataRetriever()
-
+    fun logVideoBitrate(videoFilePath: String) {
         try {
-            retriever.setDataSource(videoPath)
-            val width =
-                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toInt()
-            val height =
-                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toInt()
-            return if (width != null && height != null) {
-                Pair(width, height)
-            } else {
-                null
+            val extractor = MediaExtractor()
+            extractor.setDataSource(videoFilePath)
+
+            val videoTrackIndex = selectVideoTrack(extractor)
+            if (videoTrackIndex >= 0) {
+                extractor.selectTrack(videoTrackIndex)
+
+                val format = extractor.getTrackFormat(videoTrackIndex)
+                val bitrate = format.getInteger(MediaFormat.KEY_BIT_RATE)
+
+                Log.d("VideoRes", "Video Bitrate: $bitrate")
             }
         } catch (e: Exception) {
+            Log.d("VideoRes", "Video Bitrate: Error")
             e.printStackTrace()
-        } finally {
-            retriever.release()
         }
+    }
 
-        return null
+    private fun selectVideoTrack(extractor: MediaExtractor): Int {
+        val trackCount = extractor.trackCount
+        for (i in 0 until trackCount) {
+            val format = extractor.getTrackFormat(i)
+            val mime = format.getString(MediaFormat.KEY_MIME)
+            if (mime?.startsWith("video/") == true) {
+                return i
+            }
+        }
+        return -1
+    }
+
+    fun Context.getVideoThumbnail(videoFilePath: String): Bitmap? {
+        val retriever = MediaMetadataRetriever()
+        retriever.setDataSource(this, Uri.parse(videoFilePath))
+
+        return retriever.getFrameAtTime(0, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
     }
 
 }

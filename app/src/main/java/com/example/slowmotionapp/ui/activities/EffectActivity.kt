@@ -93,7 +93,7 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
         // Initialize RecyclerView
         binding.recyclerView.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        adapter = FilterAdapter(filterTypes, this, lifecycleScope)
+        adapter = FilterAdapter(filterTypes, this, lifecycleScope, this)
         binding.recyclerView.adapter = adapter
 
         player!!.addListener(object : Player.Listener {

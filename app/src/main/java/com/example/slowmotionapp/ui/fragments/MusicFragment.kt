@@ -61,14 +61,12 @@ class MusicFragment : Fragment() {
         override fun onAvailable(network: Network) {
             super.onAvailable(network)
             // Internet connection is available
-            Toast.makeText(requireContext(), "Internet connected", Toast.LENGTH_SHORT).show()
             viewModel.fetchMp3Stores()
         }
 
         override fun onLost(network: Network) {
             super.onLost(network)
             // Internet connection is lost
-            Toast.makeText(requireContext(), "Internet connection lost", Toast.LENGTH_SHORT).show()
         }
     }
 

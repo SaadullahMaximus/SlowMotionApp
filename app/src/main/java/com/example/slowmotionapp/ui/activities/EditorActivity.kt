@@ -2,6 +2,7 @@ package com.example.slowmotionapp.ui.activities
 
 import android.app.Dialog
 import android.os.Bundle
+import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -26,7 +27,12 @@ class EditorActivity : AppCompatActivity() {
         binding = ActivityEditorBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        Log.d("HELLOJIMMY", "Editor OnCreate")
+
+
         sharedViewModel = ViewModelProvider(this)[SharedViewModel::class.java]
+
+        supportFragmentManager.beginTransaction().remove(CropSpeedFragment()).commit()
 
         supportFragmentManager.beginTransaction()
             .add(R.id.fragment_container, CropSpeedFragment() as Fragment)

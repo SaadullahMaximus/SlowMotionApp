@@ -47,6 +47,7 @@ import com.example.slowmotionapp.utils.Utils.createCroppedFile
 import com.example.slowmotionapp.utils.Utils.deleteFromGallery
 import com.example.slowmotionapp.utils.Utils.getAudioFilePath
 import com.example.slowmotionapp.utils.Utils.getVideoDuration
+import com.example.slowmotionapp.utils.Utils.logVideoBitrate
 import com.example.slowmotionapp.utils.Utils.saveEditedVideo
 import com.example.slowmotionapp.utils.Utils.singleClick
 import com.example.slowmotionapp.viewmodel.SharedViewModel
@@ -293,11 +294,11 @@ class EffectMusicFragment : Fragment() {
 
         if (filterPosition != 0) {
 
-            val targetWidth = 720
-            val targetHeight = 1280
+            var targetWidth = 0 //720
+            var targetHeight = 0 //1280
 
             val retriever = MediaMetadataRetriever()
-            retriever.setDataSource(mainCachedFile)
+            retriever.setDataSource(requireContext(), Uri.parse(mainCachedFile))
 
             val originalWidth =
                 retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toInt()
@@ -305,6 +306,19 @@ class EffectMusicFragment : Fragment() {
             val originalHeight =
                 retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toInt()
                     ?: 0
+
+            if (originalWidth < originalHeight) {
+                targetWidth = 720
+                targetHeight = 1280
+            } else if (originalWidth > originalHeight) {
+                targetWidth = 1280
+                targetHeight = 720
+            } else {
+                targetWidth = 1280
+                targetHeight = 1280
+            }
+
+            logVideoBitrate(mainCachedFile)
 
             Log.d("VideoRes", "saveVideoWithFilter: $originalWidth $originalHeight")
 
@@ -341,6 +355,7 @@ class EffectMusicFragment : Fragment() {
                     )
                 executeFFMPEGCommand(ffmpegCommand, outputFilePath)
             } else {
+                logVideoBitrate(mainCachedFile)
                 Log.d("VideoRes", "saveVideoWithFilter: ELSE")
                 applyFilter()
             }
@@ -417,6 +432,8 @@ class EffectMusicFragment : Fragment() {
 
 
     private fun applyFilter() {
+
+        logVideoBitrate(mainCachedFile)
 
         val progressDialog =
             ProgressDialog(requireContext(), R.style.CustomDialog)

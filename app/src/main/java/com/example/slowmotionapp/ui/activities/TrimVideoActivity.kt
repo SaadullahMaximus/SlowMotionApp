@@ -294,14 +294,20 @@ class TrimVideoActivity : AppCompatActivity() {
         val yesBtn = dialog.findViewById<TextView>(R.id.yesBtn)
 
         yesBtn.setOnClickListener {
-            trimFilePath = videoUri!!
+
+            trimFilePath = if (type == Constants.RECORD_VIDEO) {
+                File(convertContentUriToFilePath(videoUri!!)).toString()
+            } else {
+                File(videoUri!!).toString()
+            }
+
             mainCachedFile =
                 createCacheCopy(this, trimFilePath)
                     .toString()
-            playVideo = videoUri!!
+            playVideo = trimFilePath
 
             val intent = Intent(this, EditorActivity::class.java)
-            intent.putExtra("VideoUri", videoUri)
+            intent.putExtra("VideoUri", trimFilePath)
             intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
             startActivity(intent)
             dialog.dismiss()
@@ -485,8 +491,13 @@ class TrimVideoActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        mediaPlayer?.release()
         mediaPlayer = null
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mediaPlayer?.pause()
+        binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
     }
 
 }

@@ -15,6 +15,7 @@ import com.example.slowmotionapp.R
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
 import com.example.slowmotionapp.ui.activities.PlayerActivity
 import com.example.slowmotionapp.utils.Utils.milliSecondsToTimer
+import com.google.android.exoplayer2.util.Log
 import java.io.File
 
 class VideoAdapter(val context: Context, private val videos: MutableList<File>) :
@@ -40,25 +41,29 @@ class VideoAdapter(val context: Context, private val videos: MutableList<File>) 
         val threeDots: ImageView = holder.itemView.findViewById(R.id.threeDots)
 
         val retriever = MediaMetadataRetriever()
-        retriever.setDataSource(context, Uri.parse(videoFile.path))
+//        retriever.setDataSource(context, Uri.parse(videoFile.path))
+//
+//        val thumbnail = retriever.frameAtTime
+//        val time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong()
 
-        val thumbnail = retriever.frameAtTime
-        val time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong()
+//        retriever.release()
 
-        retriever.release()
+        try {
+            retriever.setDataSource(context, Uri.parse(videoFile.path))
+            // Proceed with extracting metadata or further processing
+            val thumbnail = retriever.frameAtTime
+            val time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong()
+            thumbnailImageView.setImageBitmap(thumbnail)
+            videoDuration.text = milliSecondsToTimer(time!!) + " min"
+        } catch (e: Exception) {
+            Log.e("MetadataRetriever", "Failed to set data source for video file: ${videoFile.path}", e)
+            // Handle the error gracefully
+        } finally {
+            retriever.release()
+        }
 
-//        try {
-//            retriever.setDataSource(context, Uri.parse(videoFile.path))
-//            // Proceed with extracting metadata or further processing
-//        } catch (e: Exception) {
-//            Log.e("MetadataRetriever", "Failed to set data source for video file: ${videoFile.path}", e)
-//            // Handle the error gracefully
-//        } finally {
-//            retriever.release()
-//        }
-
-        thumbnailImageView.setImageBitmap(thumbnail)
-        videoDuration.text = milliSecondsToTimer(time!!) + " min"
+//        thumbnailImageView.setImageBitmap(thumbnail)
+//        videoDuration.text = milliSecondsToTimer(time!!) + " min"
         titleTextView.text = videoFile.nameWithoutExtension
 
         videoPlayer.setOnClickListener {
