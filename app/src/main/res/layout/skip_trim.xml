@@ -40,7 +40,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/fredokaregular"
-                android:text="Trim"
+                android:text="Skip Trim"
                 android:textColor="@color/white"
                 android:textSize="@dimen/_14sdp" />
 
@@ -50,7 +50,7 @@
                 android:layout_marginTop="@dimen/_8sdp"
                 android:layout_marginBottom="@dimen/_8sdp"
                 android:fontFamily="@font/fredokaregular"
-                android:text="Would you like to trim the Video?"
+                android:text="Would you like to skip Trim?"
                 android:textColor="#919191"
                 android:textSize="@dimen/_11sdp" />
 
@@ -84,7 +84,7 @@
                     android:fontFamily="@font/fredokaregular"
                     android:gravity="center"
                     android:padding="@dimen/_4sdp"
-                    android:text="Trim"
+                    android:text="Yes"
                     android:textColor="#FFC114"
                     android:textSize="@dimen/_14sdp" />
 

@@ -6,10 +6,12 @@ import android.content.Intent
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.View
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
@@ -55,11 +57,17 @@ class TrimVideoActivity : AppCompatActivity() {
 
     private val mHandler = Handler(Looper.getMainLooper())
 
+    private var mediaPlayer: MediaPlayer? = null
+
     private val mUpdateTimeTask: Runnable = object : Runnable {
         override fun run() {
-            if (binding.trimVideoView.currentPosition >= (mEndPosition * 1000)) {
-                binding.trimVideoView.seekTo(mStartPosition * 1000)
-                binding.trimVideoView.start()
+            if (mediaPlayer?.currentPosition!! >= (mEndPosition * 1000)) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    mediaPlayer?.seekTo((mStartPosition * 1000).toLong(), MediaPlayer.SEEK_CLOSEST)
+                } else {
+                    mediaPlayer?.seekTo(mStartPosition * 1000)
+                }
+                mediaPlayer?.start()
             }
             binding.seekBar.progress =
                 binding.trimVideoView.currentPosition - (mStartPosition * 1000)
@@ -74,6 +82,18 @@ class TrimVideoActivity : AppCompatActivity() {
 
         videoUri = intent.getStringExtra("VideoUri")
         type = intent.getIntExtra(Constants.TYPE, 0)
+
+        if (isFromTrim) {
+            binding.skipBtn.visibility = View.GONE
+        } else {
+            binding.skipBtn.visibility = View.VISIBLE
+        }
+
+        binding.skipBtn.setOnClickListener {
+
+            mHandler.removeCallbacks(mUpdateTimeTask)
+            showSkipTrimDialog()
+        }
 
         binding.backBtn.setOnClickListener {
             exitDialog()
@@ -91,14 +111,35 @@ class TrimVideoActivity : AppCompatActivity() {
 
         binding.timeLineView.post {
             setBitmap(videoUri!!)
-            binding.trimVideoView.setVideoURI(Uri.parse(videoUri))
         }
 
         binding.trimVideoView.setOnPreparedListener { mp: MediaPlayer? ->
+
+            this.mediaPlayer = mp
+
             mp?.let {
                 onVideoPrepared()
             }
+
+            if (mediaPlayer?.currentPosition!! >= (mEndPosition * 1000)) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    mediaPlayer?.seekTo((mStartPosition * 1000).toLong(), MediaPlayer.SEEK_CLOSEST)
+                } else {
+                    mediaPlayer?.seekTo(mStartPosition * 1000)
+                }
+            }
         }
+
+        binding.trimVideoView.setOnCompletionListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                mediaPlayer?.seekTo((mStartPosition * 1000).toLong(), MediaPlayer.SEEK_CLOSEST)
+            } else {
+                mediaPlayer?.seekTo(mStartPosition * 1000)
+            }
+            binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
+        }
+
+        binding.trimVideoView.setVideoURI(Uri.parse(videoUri))
 
         binding.timeLineBar.addOnRangeSeekBarListener(object : OnRangeSeekBarChangeListener {
             override fun onCreate(
@@ -106,6 +147,7 @@ class TrimVideoActivity : AppCompatActivity() {
                 index: Int,
                 value: Float
             ) {
+                Log.d("timeLineBar", "onCreate: ")
             }
 
             override fun onSeek(
@@ -113,6 +155,8 @@ class TrimVideoActivity : AppCompatActivity() {
                 index: Int,
                 value: Float
             ) {
+                Log.d("timeLineBar", "onSeek: ")
+
                 onSeekThumbs(index, value)
             }
 
@@ -121,10 +165,9 @@ class TrimVideoActivity : AppCompatActivity() {
                 index: Int,
                 value: Float
             ) {
+                Log.d("timeLineBar", "onSeekStart: ")
+
                 mHandler.removeCallbacks(mUpdateTimeTask)
-                binding.seekBar.progress = mStartPosition
-                binding.trimVideoView.seekTo(mStartPosition * 1000)
-                updateProgressBar()
             }
 
             override fun onSeekStop(
@@ -132,6 +175,8 @@ class TrimVideoActivity : AppCompatActivity() {
                 index: Int,
                 value: Float
             ) {
+                Log.d("timeLineBar", "onSeekStop: ")
+
             }
         })
 
@@ -139,16 +184,21 @@ class TrimVideoActivity : AppCompatActivity() {
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {}
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {
-
-//                binding.seekBar.progress = mStartPosition
-//                binding.trimVideoView.seekTo(mStartPosition * 1000)
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
-                binding.trimVideoView.seekTo(binding.seekBar.progress + mStartPosition)
-//                binding.seekBar.progress = mStartPosition
-//                binding.trimVideoView.seekTo(mStartPosition * 1000 + seekBar.progress)
-
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    mediaPlayer?.seekTo(
+                        (seekBar.progress + (mStartPosition * 1000)).toLong(),
+                        MediaPlayer.SEEK_CLOSEST
+                    )
+                } else {
+                    mediaPlayer?.seekTo(
+                        seekBar.progress + (mStartPosition * 1000)
+                    )
+                }
+                binding.trimVideoView.pause()
+                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
             }
         })
 
@@ -181,8 +231,6 @@ class TrimVideoActivity : AppCompatActivity() {
             outputFile = createTrimmedFile().absolutePath
 
             val durationSeconds = (mEndPosition - mStartPosition)
-
-            Log.d("TIMESTAMP", "startTrimming: $mStartPosition, $mEndPosition, $durationSeconds")
 
             trimVideo(
                 this,
@@ -238,6 +286,34 @@ class TrimVideoActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    private fun showSkipTrimDialog() {
+        val dialog = Dialog(this, R.style.FullScreenDialogStyle)
+        dialog.setContentView(R.layout.skip_trim)
+
+        val noBtn = dialog.findViewById<TextView>(R.id.noBtn)
+        val yesBtn = dialog.findViewById<TextView>(R.id.yesBtn)
+
+        yesBtn.setOnClickListener {
+            trimFilePath = videoUri!!
+            mainCachedFile =
+                createCacheCopy(this, trimFilePath)
+                    .toString()
+            playVideo = videoUri!!
+
+            val intent = Intent(this, EditorActivity::class.java)
+            intent.putExtra("VideoUri", videoUri)
+            intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
+            startActivity(intent)
+            dialog.dismiss()
+            finish()
+        }
+
+        noBtn.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
     private fun exitDialog() {
         val dialog = Dialog(this, R.style.FullScreenDialogStyle)
         dialog.setContentView(R.layout.exit_dialog)
@@ -247,6 +323,7 @@ class TrimVideoActivity : AppCompatActivity() {
 
         yesBtn.setOnClickListener {
             finish()
+            mHandler.removeCallbacks(mUpdateTimeTask)
             dialog.dismiss()
         }
 
@@ -261,15 +338,16 @@ class TrimVideoActivity : AppCompatActivity() {
     }
 
     private fun onSeekThumbs(index: Int, value: Float) {
+
+        binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
+        binding.trimVideoView.pause()
+
         when (index) {
             BarThumb.LEFT -> {
-                Log.d("BarThumb", "onSeekThumbs: Left $value")
                 mStartPosition = (mDuration * (value / 100)).toInt()
                 binding.startTime.text = milliSecondsToTimer(((mStartPosition * 1000).toLong()))
             }
             BarThumb.RIGHT -> {
-                Log.d("BarThumb", "onSeekThumbs: Right $value")
-
                 mEndPosition = (mDuration * (value / 100)).toInt()
                 binding.endTime.text = milliSecondsToTimer(((mEndPosition * 1000).toLong()))
             }
@@ -277,24 +355,18 @@ class TrimVideoActivity : AppCompatActivity() {
         binding.totalDurationTextView.text =
             milliSecondsToTimer((mEndPosition - mStartPosition) * 1000L)
 
-        Log.d("mStartPosition", "onSeekThumbs: mStartPosition $mStartPosition")
-
-        binding.trimVideoView.seekTo((mStartPosition * 1000))
-
         binding.seekBar.max = (mEndPosition - mStartPosition) * 1000
-        binding.seekBar.progress = mStartPosition * 1000
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mediaPlayer?.seekTo((mStartPosition * 1000).toLong(), MediaPlayer.SEEK_CLOSEST)
+        } else {
+            mediaPlayer?.seekTo(mStartPosition * 1000)
+        }
+        binding.seekBar.progress = 0
 
-        var mStart: String = mStartPosition.toString() + ""
-        if (mStartPosition < 10) mStart = "0$mStartPosition"
-        mStart.toInt() / 60
-        mStart.toInt() % 60
-        var mEnd: String = mEndPosition.toString() + ""
-        if (mEndPosition < 10) mEnd = "0$mEndPosition"
-        mEnd.toInt() / 60
-        mEnd.toInt() % 60
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         exitDialog()
     }
@@ -308,10 +380,11 @@ class TrimVideoActivity : AppCompatActivity() {
         binding.totalDurationTextView.text = milliSecondsToTimer(mDuration * 1000L)
         setSeekBarPosition()
 
-        // Start video playback and seekbar update
-        binding.trimVideoView.seekTo(mStartPosition * 1000)
-        binding.trimVideoView.start()
-        binding.playPauseButton.setImageResource(R.drawable.baseline_pause)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mediaPlayer?.seekTo((mStartPosition * 1000).toLong(), MediaPlayer.SEEK_CLOSEST)
+        } else {
+            mediaPlayer?.seekTo(mStartPosition * 1000)
+        }
         updateProgressBar()
     }
 
@@ -325,15 +398,6 @@ class TrimVideoActivity : AppCompatActivity() {
 
         binding.timeLineBar.initMaxWidth()
         binding.seekBar.max = mDuration * 1000
-
-        var mStart = mStartPosition.toString() + ""
-        if (mStartPosition < 10) mStart = "0$mStartPosition"
-        mStart.toInt() / 60
-        mStart.toInt() % 60
-        var mEnd = mEndPosition.toString() + ""
-        if (mEndPosition < 10) mEnd = "0$mEndPosition"
-        mEnd.toInt() / 60
-        mEnd.toInt() % 60
     }
 
     private fun timeLineSet(mDuration: Int) {
@@ -366,6 +430,7 @@ class TrimVideoActivity : AppCompatActivity() {
             Config.printLastCommandOutput(Log.INFO)
             when (returnCode) {
                 Config.RETURN_CODE_SUCCESS -> {
+                    mHandler.removeCallbacks(mUpdateTimeTask)
                     progressDialog.dismiss()
                     trimFilePath = str
                     mainCachedFile =
@@ -417,4 +482,11 @@ class TrimVideoActivity : AppCompatActivity() {
             finish()
         }
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaPlayer?.release()
+        mediaPlayer = null
+    }
+
 }
