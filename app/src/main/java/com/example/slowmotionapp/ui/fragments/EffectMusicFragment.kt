@@ -505,27 +505,19 @@ class EffectMusicFragment : Fragment() {
 
                     progressDialog.dismiss()
 
-                    filterPosition = 0
+                    if (wannaGoBack) {
 
-                    if (MusicApplied) {
-                        Log.d("HELLOJIMMY", "showFullScreenDialog: want to Add Music")
-
-                        audioVideoMixer()
-                    } else {
-                        if (wannaGoBack) {
-
-                            Log.d("HELLOJIMMY", "showFullScreenDialog: Wanna Go Back")
+                        Log.d("HELLOJIMMY", "showFullScreenDialog: Wanna Go Back")
 
 
-                            wannaGoBackCheckViewModel.postValue(true)
+                        wannaGoBackCheckViewModel.postValue(true)
 
-                            requireActivity().runOnUiThread {
-                                sharedViewModel.enhanced(false)
-                            }
-                            wannaGoBack = false
-                        } else {
-                            saveEditedVideo(requireContext())
+                        requireActivity().runOnUiThread {
+                            sharedViewModel.enhanced(false)
                         }
+                        wannaGoBack = false
+                    } else {
+                        saveEditedVideo(requireContext())
                     }
 
                     progressDialog.dismiss()

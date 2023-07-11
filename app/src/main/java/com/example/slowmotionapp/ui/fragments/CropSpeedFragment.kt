@@ -25,8 +25,11 @@ import com.example.slowmotionapp.R
 import com.example.slowmotionapp.customviews.CustomWaitingDialog
 import com.example.slowmotionapp.databinding.FragmentCropSpeedBinding
 import com.example.slowmotionapp.effects.EPlayerView
+import com.example.slowmotionapp.effects.FilterType
 import com.example.slowmotionapp.interfaces.MyListener
+import com.example.slowmotionapp.ui.activities.MainActivity
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.backSave
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.filterPosition
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.musicReady
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.myMusicUri
@@ -275,7 +278,7 @@ class CropSpeedFragment : Fragment(), MyListener {
 
         sharedViewModel.stopAllMusic.observe(viewLifecycleOwner) { newValue ->
             if (newValue) {
-                audioPlayer?.reset()
+                audioPlayer?.pause()
             }
         }
 
@@ -628,7 +631,8 @@ class CropSpeedFragment : Fragment(), MyListener {
             0 -> {
                 Config.printLastCommandOutput(Log.INFO)
                 Config.enableStatisticsCallback {
-                    val percentage = ((it.time.toFloat() / (videoDuration * 1000).toFloat()) * 100).toInt()
+                    val percentage =
+                        ((it.time.toFloat() / (videoDuration * 1000).toFloat()) * 100).toInt()
                     progressDialog.setText("Rotated $percentage%")
                 }
             }
@@ -905,8 +909,6 @@ class CropSpeedFragment : Fragment(), MyListener {
 
             sharedViewModel.enhanced(true)
             sharedViewModel.stopAllMusic(true)
-
-            player!!.release()
 
             dialog.dismiss()
         }

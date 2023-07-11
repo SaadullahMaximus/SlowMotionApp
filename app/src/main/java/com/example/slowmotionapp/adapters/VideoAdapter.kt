@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -77,14 +78,12 @@ class VideoAdapter(val context: Context, private val videos: MutableList<File>) 
         threeDots.setOnClickListener {
             playVideo = videoFile.path
 
-            val popupMenu = PopupMenu(context, threeDots)
-
-            // Inflating popup menu from popup_menu.xml file
+            val popupMenu = PopupMenu(context, threeDots, Gravity.BOTTOM, 0, R.style.PopupMenuStyle)
             popupMenu.menuInflater.inflate(
                 R.menu.three_dots_clicked,
                 popupMenu.menu
             )
-            popupMenu.setOnMenuItemClickListener {  // Toast message on menu item clicked
+            popupMenu.setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.editItem -> {
                         context.editVideo(videoFile.path)
@@ -123,7 +122,7 @@ class VideoAdapter(val context: Context, private val videos: MutableList<File>) 
         position: Int
     ) {
         videos.removeAt(position)
-        if (videos.isEmpty()){
+        if (videos.isEmpty()) {
             callback.onFunctionCalled()
         }
         notifyItemRemoved(position)

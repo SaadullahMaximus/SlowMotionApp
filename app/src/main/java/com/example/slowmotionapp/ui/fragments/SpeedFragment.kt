@@ -303,9 +303,6 @@ class SpeedFragment : Fragment() {
                     try {
                         File(str).delete()
                         deleteFromGallery(str, requireContext())
-                        Toast.makeText(
-                            requireContext(), "Error Creating Video", Toast.LENGTH_LONG
-                        ).show()
                     } catch (th: Throwable) {
                         th.printStackTrace()
                     }
@@ -314,9 +311,6 @@ class SpeedFragment : Fragment() {
                     try {
                         File(str).delete()
                         deleteFromGallery(str, requireContext())
-                        Toast.makeText(
-                            requireContext(), "Error Creating Video", Toast.LENGTH_LONG
-                        ).show()
                     } catch (th: Throwable) {
                         th.printStackTrace()
                     }
