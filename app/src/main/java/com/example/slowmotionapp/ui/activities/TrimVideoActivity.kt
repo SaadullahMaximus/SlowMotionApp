@@ -93,6 +93,8 @@ class TrimVideoActivity : AppCompatActivity() {
 
         binding.skipBtn.setOnClickListener {
             singleClick {
+                binding.trimVideoView.pause()
+                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
                 mHandler.removeCallbacks(mUpdateTimeTask)
                 showSkipTrimDialog()
             }
@@ -100,6 +102,8 @@ class TrimVideoActivity : AppCompatActivity() {
 
         binding.backBtn.setOnClickListener {
             singleClick {
+                binding.trimVideoView.pause()
+                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
                 exitDialog()
             }
         }
@@ -390,6 +394,8 @@ class TrimVideoActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
+        binding.trimVideoView.pause()
+        binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
         exitDialog()
     }
 

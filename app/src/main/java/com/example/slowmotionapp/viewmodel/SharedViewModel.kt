@@ -15,6 +15,8 @@ class SharedViewModel : ViewModel() {
 
     val cropSelected: MutableLiveData<Int> = MutableLiveData()
 
+    val animateKnob: MutableLiveData<Int> = MutableLiveData()
+
     val startCrop: MutableLiveData<Boolean> = MutableLiveData()
 
     val fragmentA: MutableLiveData<Boolean> = MutableLiveData()
@@ -49,6 +51,10 @@ class SharedViewModel : ViewModel() {
 
     fun cropSelected(newValue: Int) {
         cropSelected.value = newValue
+    }
+
+    fun animateKnob(newValue: Int) {
+        animateKnob.value = newValue
     }
 
     fun startCrop(newValue: Boolean) {

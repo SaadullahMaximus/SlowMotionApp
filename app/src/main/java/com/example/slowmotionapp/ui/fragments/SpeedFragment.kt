@@ -39,6 +39,11 @@ class SpeedFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
+
+        sharedViewModel.animateKnob.observe(viewLifecycleOwner) { newValue ->
+            animateKnob(newValue.toFloat())
+        }
+
     }
 
     override fun onCreateView(

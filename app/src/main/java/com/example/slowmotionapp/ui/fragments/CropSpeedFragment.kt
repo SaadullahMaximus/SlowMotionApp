@@ -582,6 +582,7 @@ class CropSpeedFragment : Fragment(), MyListener {
             FFmpeg.cancel()
         }
         progressDialog.show()
+        progressDialog.setText("Please wait")
 
         val ffmpegCommand: String = commandsGenerator(strArr)
         FFmpeg.executeAsync(
@@ -594,6 +595,9 @@ class CropSpeedFragment : Fragment(), MyListener {
                     progressDialog.dismiss()
                     mainCachedFile = str
                     sharedViewModel.setVideoUri(str)
+
+                    sharedViewModel.animateKnob(700)
+
                     when (valueCheck) {
                         1 -> {
                             cropViewDisplay()
@@ -620,12 +624,15 @@ class CropSpeedFragment : Fragment(), MyListener {
             }
         }
 
-        Config.printLastCommandOutput(Log.INFO)
-        Config.enableStatisticsCallback {
-            val percentage = ((it.time.toFloat() / (videoDuration * 1000).toFloat()) * 100).toInt()
-            progressDialog.setText("Rotated $percentage%")
+        when (valueCheck) {
+            0 -> {
+                Config.printLastCommandOutput(Log.INFO)
+                Config.enableStatisticsCallback {
+                    val percentage = ((it.time.toFloat() / (videoDuration * 1000).toFloat()) * 100).toInt()
+                    progressDialog.setText("Rotated $percentage%")
+                }
+            }
         }
-
     }
 
     override fun onDestroy() {
@@ -966,9 +973,6 @@ class CropSpeedFragment : Fragment(), MyListener {
         playerRestart()
 
         Log.d("HELLOJIMMY", "showFullScreenDialog: playerReset")
-
-
-//        binding.videoView.setVideoURI(Uri.parse(mainCachedFile))
 
         wannaGoBackCheckViewModel.postValue(false)
 

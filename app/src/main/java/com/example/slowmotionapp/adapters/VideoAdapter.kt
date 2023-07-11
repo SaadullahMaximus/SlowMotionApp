@@ -8,23 +8,30 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
 import com.example.slowmotionapp.ui.activities.PlayerActivity
+import com.example.slowmotionapp.utils.Utils.deleteVideoFile
+import com.example.slowmotionapp.utils.Utils.editVideo
 import com.example.slowmotionapp.utils.Utils.milliSecondsToTimer
+import com.example.slowmotionapp.utils.Utils.refreshGallery
+import com.example.slowmotionapp.utils.Utils.shareVideo
+import com.example.slowmotionapp.utils.Utils.showRenameDialog
 import com.google.android.exoplayer2.util.Log
 import java.io.File
+
 
 class VideoAdapter(val context: Context, private val videos: MutableList<File>) :
     RecyclerView.Adapter<VideoAdapter.VideoViewHolder>() {
 
-    private var videoItemClickListener: VideoItemClickListener? = null
+    private lateinit var callback: AdapterCallback
 
-    fun setVideoItemClickListener(listener: VideoItemClickListener) {
-        videoItemClickListener = listener
+    fun setAdapterCallback(callback: AdapterCallback) {
+        this.callback = callback
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
@@ -41,22 +48,20 @@ class VideoAdapter(val context: Context, private val videos: MutableList<File>) 
         val threeDots: ImageView = holder.itemView.findViewById(R.id.threeDots)
 
         val retriever = MediaMetadataRetriever()
-//        retriever.setDataSource(context, Uri.parse(videoFile.path))
-//
-//        val thumbnail = retriever.frameAtTime
-//        val time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong()
-
-//        retriever.release()
 
         try {
             retriever.setDataSource(context, Uri.parse(videoFile.path))
-            // Proceed with extracting metadata or further processing
             val thumbnail = retriever.frameAtTime
-            val time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong()
+            val time =
+                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong()
             thumbnailImageView.setImageBitmap(thumbnail)
             videoDuration.text = milliSecondsToTimer(time!!) + " min"
         } catch (e: Exception) {
-            Log.e("MetadataRetriever", "Failed to set data source for video file: ${videoFile.path}", e)
+            Log.e(
+                "MetadataRetriever",
+                "Failed to set data source for video file: ${videoFile.path}",
+                e
+            )
             // Handle the error gracefully
         } finally {
             retriever.release()
@@ -71,7 +76,39 @@ class VideoAdapter(val context: Context, private val videos: MutableList<File>) 
 
         threeDots.setOnClickListener {
             playVideo = videoFile.path
-            videoItemClickListener?.onButtonClicked(videoFile.path, position)
+
+            val popupMenu = PopupMenu(context, threeDots)
+
+            // Inflating popup menu from popup_menu.xml file
+            popupMenu.menuInflater.inflate(
+                R.menu.three_dots_clicked,
+                popupMenu.menu
+            )
+            popupMenu.setOnMenuItemClickListener {  // Toast message on menu item clicked
+                when (it.itemId) {
+                    R.id.editItem -> {
+                        context.editVideo(videoFile.path)
+                    }
+                    R.id.shareItem -> {
+                        context.shareVideo(videoFile.path)
+                    }
+                    R.id.renameItem -> {
+                        context.showRenameDialog(videoFile.path) {
+                            notifyItemChanged(position)
+                        }
+                    }
+                    R.id.deleteItem -> {
+                        deleteVideoFile(videoFile.path)
+                        deleteItem(position)
+                        notifyItemChanged(position)
+                        refreshGallery(videoFile.path, context)
+                    }
+                }
+
+                true
+            }
+            popupMenu.show()
+
         }
 
     }
@@ -82,21 +119,19 @@ class VideoAdapter(val context: Context, private val videos: MutableList<File>) 
 
     class VideoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
-    fun deleteItem(
-        position: Int, action: (() -> Unit)? = null
+    private fun deleteItem(
+        position: Int
     ) {
         videos.removeAt(position)
-
-        if (videos.isEmpty()) {
-            action!!.invoke()
+        if (videos.isEmpty()){
+            callback.onFunctionCalled()
         }
-
         notifyItemRemoved(position)
     }
 
-    interface VideoItemClickListener {
-        fun onButtonClicked(videoPath: String, position: Int)
-    }
 
+    interface AdapterCallback {
+        fun onFunctionCalled()
+    }
 
 }
