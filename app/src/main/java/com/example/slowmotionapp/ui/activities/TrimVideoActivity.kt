@@ -52,6 +52,8 @@ class TrimVideoActivity : AppCompatActivity() {
     private var mDuration = 0
     private var mEndPosition = 0
 
+    private var videoDuration = 0
+
     private lateinit var file: File
     private lateinit var outputFile: String
 
@@ -90,13 +92,16 @@ class TrimVideoActivity : AppCompatActivity() {
         }
 
         binding.skipBtn.setOnClickListener {
-
-            mHandler.removeCallbacks(mUpdateTimeTask)
-            showSkipTrimDialog()
+            singleClick {
+                mHandler.removeCallbacks(mUpdateTimeTask)
+                showSkipTrimDialog()
+            }
         }
 
         binding.backBtn.setOnClickListener {
-            exitDialog()
+            singleClick {
+                exitDialog()
+            }
         }
 
         binding.btnDone.setOnClickListener {
@@ -232,6 +237,8 @@ class TrimVideoActivity : AppCompatActivity() {
 
             val durationSeconds = (mEndPosition - mStartPosition)
 
+            videoDuration = durationSeconds * 1000
+
             trimVideo(
                 this,
                 arrayOf(
@@ -276,12 +283,16 @@ class TrimVideoActivity : AppCompatActivity() {
         val yesBtn = dialog.findViewById<TextView>(R.id.yesBtn)
 
         yesBtn.setOnClickListener {
-            startTrimming()
-            dialog.dismiss()
+            singleClick {
+                startTrimming()
+                dialog.dismiss()
+            }
         }
 
         noBtn.setOnClickListener {
-            dialog.dismiss()
+            singleClick {
+                dialog.dismiss()
+            }
         }
         dialog.show()
     }
@@ -294,6 +305,9 @@ class TrimVideoActivity : AppCompatActivity() {
         val yesBtn = dialog.findViewById<TextView>(R.id.yesBtn)
 
         yesBtn.setOnClickListener {
+
+            mediaPlayer = null
+            binding.trimVideoView.pause()
 
             trimFilePath = if (type == Constants.RECORD_VIDEO) {
                 File(convertContentUriToFilePath(videoUri!!)).toString()
@@ -309,8 +323,8 @@ class TrimVideoActivity : AppCompatActivity() {
             val intent = Intent(this, EditorActivity::class.java)
             intent.putExtra("VideoUri", trimFilePath)
             intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
-            startActivity(intent)
             dialog.dismiss()
+            startActivity(intent)
             finish()
         }
 
@@ -330,6 +344,8 @@ class TrimVideoActivity : AppCompatActivity() {
         yesBtn.setOnClickListener {
             finish()
             mHandler.removeCallbacks(mUpdateTimeTask)
+            mediaPlayer = null
+            binding.trimVideoView.pause()
             dialog.dismiss()
         }
 
@@ -428,12 +444,14 @@ class TrimVideoActivity : AppCompatActivity() {
             FFmpeg.cancel()
         }
         progressDialog.show()
+        progressDialog.setText("Trimmed 0%")
 
         val ffmpegCommand: String = commandsGenerator(strArr)
+
         FFmpeg.executeAsync(
             ffmpegCommand
         ) { _, returnCode ->
-            Config.printLastCommandOutput(Log.INFO)
+
             when (returnCode) {
                 Config.RETURN_CODE_SUCCESS -> {
                     mHandler.removeCallbacks(mUpdateTimeTask)
@@ -473,9 +491,21 @@ class TrimVideoActivity : AppCompatActivity() {
                 }
             }
         }
+
+        Config.printLastCommandOutput(Log.INFO)
+        Config.enableStatisticsCallback {
+            val percentage = ((it.time.toFloat() / videoDuration.toFloat()) * 100).toInt()
+            Log.d("percentage", "trimVideo:${it.time} $videoDuration $percentage")
+            progressDialog.setText("Trimmed $percentage%")
+        }
+
     }
 
     private fun switchActivity(videoPath: String) {
+
+        mediaPlayer = null
+        binding.trimVideoView.pause()
+
         if (isFromTrim) {
             isFromTrim = false
             startActivity(Intent(this, PlayerActivity::class.java))

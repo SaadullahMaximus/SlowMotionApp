@@ -62,8 +62,6 @@ class VideoAdapter(val context: Context, private val videos: MutableList<File>) 
             retriever.release()
         }
 
-//        thumbnailImageView.setImageBitmap(thumbnail)
-//        videoDuration.text = milliSecondsToTimer(time!!) + " min"
         titleTextView.text = videoFile.nameWithoutExtension
 
         videoPlayer.setOnClickListener {

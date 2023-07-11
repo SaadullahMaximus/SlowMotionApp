@@ -70,7 +70,7 @@
                     android:fontFamily="@font/fredokaregular"
                     android:gravity="center"
                     android:padding="@dimen/_4sdp"
-                    android:text="No"
+                    android:text="Yes"
                     android:textColor="@color/white"
                     android:textSize="@dimen/_14sdp" />
 

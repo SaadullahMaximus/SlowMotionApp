@@ -15,6 +15,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.work.*
 import com.example.slowmotionapp.adapters.Mp3StoreAdapter
 import com.example.slowmotionapp.databinding.FragmentMusicBinding
@@ -42,6 +43,8 @@ class MusicFragment : Fragment() {
 
     private lateinit var sharedViewModel: SharedViewModel
 
+    private lateinit var recyclerView: RecyclerView
+
     companion object {
         var appliedMusicPosition = -1
     }
@@ -62,11 +65,18 @@ class MusicFragment : Fragment() {
             super.onAvailable(network)
             // Internet connection is available
             viewModel.fetchMp3Stores()
+            recyclerView.post { // Run the UI-related code on the main thread
+                recyclerView.visibility = View.VISIBLE
+            }
         }
 
         override fun onLost(network: Network) {
             super.onLost(network)
             // Internet connection is lost
+            Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT).show()
+            recyclerView.post { // Run the UI-related code on the main thread
+                recyclerView.visibility = View.GONE
+            }
         }
     }
 
@@ -92,18 +102,9 @@ class MusicFragment : Fragment() {
             }
         }
 
-        // Check network connectivity and display toast if internet is not available
-        if (!isNetworkAvailable()) {
-            Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT).show()
-        }
-
         val connectivityManager =
             requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-
-
         connectivityManager.registerDefaultNetworkCallback(networkCallback)
-
 
     }
 
@@ -116,6 +117,8 @@ class MusicFragment : Fragment() {
 
         _binding = FragmentMusicBinding.inflate(inflater, container, false)
 
+        recyclerView = binding.recyclerView
+
         workManager = WorkManager.getInstance(requireContext())
 
         mp3StoreAdapter = Mp3StoreAdapter(emptyList(), { link, position ->
@@ -124,10 +127,18 @@ class MusicFragment : Fragment() {
 
             binding.recyclerView.layoutManager?.scrollToPosition(position)
 
-            mp = MediaPlayer()
+            if (!isNetworkAvailable()) {
+                Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT)
+                    .show()
+                binding.recyclerView.visibility = View.GONE
+                mp3StoreAdapter.dialogDismiss()
+            } else {
 
-            mp?.setDataSource(link)
-            mp?.prepareAsync()
+                mp = MediaPlayer()
+
+                mp?.setDataSource(link)
+                mp?.prepareAsync()
+            }
 
             mp?.setOnPreparedListener {
                 it.start()
@@ -178,7 +189,6 @@ class MusicFragment : Fragment() {
             Log.d("OBSERVER", "onCreateView: $it")
             Log.d("OBSERVER", "onCreateView: ${it.size}")
             mp3StoreAdapter.setData(it)
-            binding.recyclerView.visibility = View.VISIBLE
         }
 
         viewModel.error.observe(requireActivity()) {

@@ -269,6 +269,9 @@ class SpeedFragment : Fragment() {
     }
 
     private fun executeFFMPEG(strArr: Array<String>, str: String) {
+
+        sharedViewModel.musicSelectPauseEveryThing(true)
+
         sharedViewModel.pauseVideo(true)
         val progressDialog = CustomWaitingDialog(requireContext())
         progressDialog.setCloseButtonClickListener {
@@ -276,6 +279,8 @@ class SpeedFragment : Fragment() {
             FFmpeg.cancel()
         }
         progressDialog.show()
+        progressDialog.setText("Please wait")
+
         val ffmpegCommand: String = commandsGenerator(strArr)
         FFmpeg.executeAsync(
             ffmpegCommand

@@ -330,6 +330,8 @@ object Utils {
             return cacheFile
         } catch (e: Exception) {
             e.printStackTrace()
+            android.util.Log.d("mainCachedFile", "catch: $mainCachedFile")
+
             return null
         }
     }
@@ -358,6 +360,9 @@ object Utils {
             .setMediaSourceFactory(ProgressiveMediaSource.Factory(dataSourceFactory))
             .build()
         player!!.addMediaItem(MediaItem.fromUri(Uri.parse(mainCachedFile)))
+
+        android.util.Log.d("mainCachedFile", "setUpSimpleExoPlayer: $mainCachedFile")
+
         player!!.prepare()
     }
 

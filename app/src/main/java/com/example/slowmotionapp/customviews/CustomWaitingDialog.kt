@@ -9,11 +9,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.Window
 import android.widget.ImageView
+import android.widget.TextView
 import com.example.slowmotionapp.R
 
 class CustomWaitingDialog(context: Context) : Dialog(context) {
 
     private var closeButtonClickListener: (() -> Unit)? = null
+    private var textView: TextView
 
     init {
         requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -32,9 +34,16 @@ class CustomWaitingDialog(context: Context) : Dialog(context) {
             closeButtonClickListener?.invoke()
             dismiss()
         }
+
+        textView = contentView.findViewById(R.id.progressCount)
     }
 
     fun setCloseButtonClickListener(listener: () -> Unit) {
         closeButtonClickListener = listener
     }
+
+    fun setText(text: String) {
+        textView.text = text
+    }
 }
+
