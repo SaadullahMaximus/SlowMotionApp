@@ -64,4 +64,9 @@ class EditorActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    override fun onPause() {
+        super.onPause()
+        sharedViewModel.musicSelectPauseEveryThing(true)
+    }
+
 }

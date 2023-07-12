@@ -197,6 +197,7 @@ class EffectMusicFragment : Fragment() {
 
         binding.myMusicConstraint.setOnClickListener {
             sharedViewModel.stopAllMusic(true)
+            sharedViewModel.musicSelectPauseEveryThing(true)
             singleClick {
                 openAudioFiles(Constants.PERMISSION_AUDIO)
             }

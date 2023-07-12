@@ -24,6 +24,7 @@ import com.example.slowmotionapp.utils.Utils.createCacheTempFile
 import com.example.slowmotionapp.utils.Utils.deleteFromGallery
 import com.example.slowmotionapp.utils.Utils.getVideoDuration
 import com.example.slowmotionapp.utils.Utils.player
+import com.example.slowmotionapp.utils.Utils.singleClick
 import com.example.slowmotionapp.viewmodel.SharedViewModel
 import java.io.File
 
@@ -70,17 +71,19 @@ class SpeedFragment : Fragment() {
         })
 
         binding.btnOk.setOnClickListener {
-            if (knobFinalValue != 7) {
-                val tempPath = createCacheTempFile(requireContext())
-                videoMotionCommand(tempPath, knobFinalValue)
+            singleClick {
+                if (knobFinalValue != 7) {
+                    val tempPath = createCacheTempFile(requireContext())
+                    videoMotionCommand(tempPath, knobFinalValue)
 
-                handleKnobStopMoving(7)
-            } else {
-                Toast.makeText(
-                    requireContext(),
-                    "Please move slider first",
-                    Toast.LENGTH_SHORT
-                ).show()
+                    handleKnobStopMoving(7)
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        "Please move slider first",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
 
@@ -301,6 +304,7 @@ class SpeedFragment : Fragment() {
                 }
                 Config.RETURN_CODE_CANCEL -> {
                     try {
+                        animateKnob(700F)
                         File(str).delete()
                         deleteFromGallery(str, requireContext())
                     } catch (th: Throwable) {

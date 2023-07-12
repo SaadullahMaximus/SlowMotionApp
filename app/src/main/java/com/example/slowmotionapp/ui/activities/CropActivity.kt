@@ -78,7 +78,7 @@ class CropActivity : AppCompatActivity() {
     private var u = 0
     private var v = 0
 
-    private var cropVideoDuration: String? = null
+    private var cropVideoDuration: Int? = null
 
     private var ag = 0
     private var ah = 0
@@ -359,7 +359,7 @@ class CropActivity : AppCompatActivity() {
                 }
             }
         }
-        cropVideoDuration = getVideoDuration(this, mainCachedFile).toString()
+        cropVideoDuration = getVideoDuration(this, mainCachedFile)
 
         cropOutputFilePath = createCroppedFile().toString()
 
@@ -380,7 +380,7 @@ class CropActivity : AppCompatActivity() {
                     "-ss",
                     "0",
                     "-t",
-                    cropVideoDuration!!,
+                    cropVideoDuration.toString(),
                     "-i",
                     file.toString(),
                     "-strict",
@@ -402,7 +402,7 @@ class CropActivity : AppCompatActivity() {
                     "-ss",
                     "0",
                     "-t",
-                    cropVideoDuration!!,
+                    cropVideoDuration.toString(),
                     cropOutputFilePath!!
                 ), cropOutputFilePath!!
             )
@@ -423,6 +423,7 @@ class CropActivity : AppCompatActivity() {
             FFmpeg.cancel()
         }
         progressDialog.show()
+        progressDialog.setText("Cropped 0%")
 
         binding.imageViewFree.setImageResource(R.drawable.crop_unselect)
         binding.imageView11.setImageResource(R.drawable.crop_unselect)
@@ -469,6 +470,18 @@ class CropActivity : AppCompatActivity() {
                 }
             }
         }
+
+        Config.printLastCommandOutput(Log.INFO)
+        Config.enableStatisticsCallback {
+            val percentage =
+                ((it.time.toFloat() / (cropVideoDuration!! * 1000).toFloat()) * 100).toInt()
+            if (percentage in 0..100) {
+                progressDialog.setText("Cropped $percentage%")
+            } else {
+                progressDialog.setText("Please wait")
+            }
+        }
+
     }
 
 

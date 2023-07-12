@@ -25,11 +25,8 @@ import com.example.slowmotionapp.R
 import com.example.slowmotionapp.customviews.CustomWaitingDialog
 import com.example.slowmotionapp.databinding.FragmentCropSpeedBinding
 import com.example.slowmotionapp.effects.EPlayerView
-import com.example.slowmotionapp.effects.FilterType
 import com.example.slowmotionapp.interfaces.MyListener
-import com.example.slowmotionapp.ui.activities.MainActivity
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.backSave
-import com.example.slowmotionapp.ui.activities.MainActivity.Companion.filterPosition
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.musicReady
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.myMusicUri
@@ -263,6 +260,9 @@ class CropSpeedFragment : Fragment(), MyListener {
                 }
 
                 binding.playPauseButton2.setImageResource(R.drawable.baseline_play_arrow)
+
+                sharedViewModel.musicSelectPauseEveryThing(false)
+
             }
         }
 
@@ -477,12 +477,14 @@ class CropSpeedFragment : Fragment(), MyListener {
 
         binding.rotateRight.setOnClickListener {
             singleClick {
+                sharedViewModel.musicSelectPauseEveryThing(true)
                 rotateVideoCommand(1)
             }
         }
 
         binding.rotateLeft.setOnClickListener {
             singleClick {
+                sharedViewModel.musicSelectPauseEveryThing(true)
                 rotateVideoCommand(2)
             }
         }
@@ -610,6 +612,7 @@ class CropSpeedFragment : Fragment(), MyListener {
                 }
                 Config.RETURN_CODE_CANCEL -> {
                     try {
+                        progressDialog.setText("Please wait")
                         File(str).delete()
                         deleteFromGallery(str, requireContext())
                     } catch (th: Throwable) {
@@ -633,7 +636,11 @@ class CropSpeedFragment : Fragment(), MyListener {
                 Config.enableStatisticsCallback {
                     val percentage =
                         ((it.time.toFloat() / (videoDuration * 1000).toFloat()) * 100).toInt()
-                    progressDialog.setText("Rotated $percentage%")
+                    if (percentage in 0..100) {
+                        progressDialog.setText("Rotated $percentage%")
+                    } else {
+                        progressDialog.setText("Please wait")
+                    }
                 }
             }
         }
@@ -916,13 +923,6 @@ class CropSpeedFragment : Fragment(), MyListener {
         btnNo.setOnClickListener {
             backSave = false
             wannaGoBack = true
-
-//            val intent = Intent(requireContext(), EditorActivity::class.java)
-//            intent.putExtra("VideoUri", mainCachedFile)
-//            intent.putExtra(Constants.TYPE, Constants.RECORD_VIDEO)
-//            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-//            requireContext().startActivity(intent)
-//            requireActivity().finish()
 
             wannaGoBackCheckViewModel.postValue(true)
 

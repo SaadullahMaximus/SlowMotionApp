@@ -61,6 +61,10 @@ class TrimVideoActivity : AppCompatActivity() {
 
     private var mediaPlayer: MediaPlayer? = null
 
+    private var progressInitialized = false
+
+    private lateinit var progressDialog: CustomWaitingDialog
+
     private val mUpdateTimeTask: Runnable = object : Runnable {
         override fun run() {
             if (mediaPlayer?.currentPosition!! >= (mEndPosition * 1000)) {
@@ -84,6 +88,8 @@ class TrimVideoActivity : AppCompatActivity() {
 
         videoUri = intent.getStringExtra("VideoUri")
         type = intent.getIntExtra(Constants.TYPE, 0)
+
+        Log.d("videoUri", "onCreate: $videoUri")
 
         if (isFromTrim) {
             binding.skipBtn.visibility = View.GONE
@@ -398,11 +404,9 @@ class TrimVideoActivity : AppCompatActivity() {
         binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
         exitDialog()
     }
-
     private fun setBitmap(mVideoUri: String) {
         binding.timeLineView.setVideo(Uri.parse(mVideoUri))
     }
-
     private fun onVideoPrepared() {
         mDuration = binding.trimVideoView.duration / 1000
         binding.totalDurationTextView.text = milliSecondsToTimer(mDuration * 1000L)
@@ -415,7 +419,6 @@ class TrimVideoActivity : AppCompatActivity() {
         }
         updateProgressBar()
     }
-
     private fun setSeekBarPosition() {
         mStartPosition = 0
         mEndPosition = mDuration
@@ -427,12 +430,10 @@ class TrimVideoActivity : AppCompatActivity() {
         binding.timeLineBar.initMaxWidth()
         binding.seekBar.max = mDuration * 1000
     }
-
     private fun timeLineSet(mDuration: Int) {
         binding.endTime.text = milliSecondsToTimer((mDuration * 1000).toLong())
         timeLineNumbersSet(mDuration)
     }
-
     private fun timeLineNumbersSet(mDuration: Int) {
         val parts = mDuration / 6.0
         val decimalFormat = DecimalFormat("#.0")
@@ -442,14 +443,15 @@ class TrimVideoActivity : AppCompatActivity() {
         binding.tv4.text = decimalFormat.format(parts * 4)
         binding.tv5.text = decimalFormat.format(parts * 5)
     }
-
     private fun trimVideo(context: Context, strArr: Array<String>, str: String) {
-        val progressDialog = CustomWaitingDialog(this)
+
+        progressDialog = CustomWaitingDialog(this)
         progressDialog.setCloseButtonClickListener {
             progressDialog.dismiss()
             FFmpeg.cancel()
         }
         progressDialog.show()
+        progressInitialized = true
         progressDialog.setText("Trimmed 0%")
 
         val ffmpegCommand: String = commandsGenerator(strArr)
@@ -461,7 +463,6 @@ class TrimVideoActivity : AppCompatActivity() {
             when (returnCode) {
                 Config.RETURN_CODE_SUCCESS -> {
                     mHandler.removeCallbacks(mUpdateTimeTask)
-                    progressDialog.dismiss()
                     trimFilePath = str
                     mainCachedFile =
                         createCacheCopy(this, trimFilePath)
@@ -471,6 +472,8 @@ class TrimVideoActivity : AppCompatActivity() {
                 }
                 Config.RETURN_CODE_CANCEL -> {
                     try {
+                        Log.d("Canceled", "trimVideo: Canceled")
+                        progressDialog.setText("Trimmed 0%")
                         File(str).delete()
                         deleteFromGallery(str, context)
                     } catch (th: Throwable) {
@@ -502,9 +505,21 @@ class TrimVideoActivity : AppCompatActivity() {
         Config.enableStatisticsCallback {
             val percentage = ((it.time.toFloat() / videoDuration.toFloat()) * 100).toInt()
             Log.d("percentage", "trimVideo:${it.time} $videoDuration $percentage")
-            progressDialog.setText("Trimmed $percentage%")
+            if (percentage in 0..100) {
+                progressDialog.setText("Trimmed $percentage%")
+            } else {
+                progressDialog.setText("Please wait")
+            }
         }
 
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        if (progressInitialized) {
+            progressDialog.dismiss()
+            progressInitialized = false
+        }
     }
 
     private fun switchActivity(videoPath: String) {

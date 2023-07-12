@@ -134,6 +134,8 @@ class MusicFragment : Fragment() {
                 mp3StoreAdapter.dialogDismiss()
             } else {
 
+                sharedViewModel.musicSelectPauseEveryThing(true)
+
                 mp = MediaPlayer()
 
                 mp?.setDataSource(link)
@@ -159,12 +161,14 @@ class MusicFragment : Fragment() {
             mp3StoreAdapter.setCurrentMediaPlayer(mp)
 
         }, { link, position ->
+            sharedViewModel.musicSelectPauseEveryThing(true)
             mp?.stop()
             mp?.reset()
             appliedMusicPosition = position
             binding.recyclerView.adapter = mp3StoreAdapter
             startDownloadWork(link)
         }, {
+            sharedViewModel.musicSelectPauseEveryThing(true)
             mp?.stop()
             mp?.reset()
         })

@@ -239,6 +239,7 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
             mp4Composer?.cancel()
         }
         progressDialog.show()
+        progressDialog.setText("Please wait")
 
         Log.d("VideoRes", "saveVideoWithFilter: Apply Filter")
 
@@ -250,6 +251,9 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
             .fillMode(FillMode.PRESERVE_ASPECT_FIT).filter(filter)
             .listener(object : Mp4Composer.Listener {
                 override fun onProgress(progress: Double) {
+                    this@EffectActivity.runOnUiThread {
+                        progressDialog.setText("Filter Applied ${(progress * 100).toInt()}%")
+                    }
                 }
 
                 override fun onCompleted() {
