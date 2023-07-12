@@ -35,6 +35,7 @@ import com.example.slowmotionapp.interfaces.MyListener
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.backSave
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.renamedName
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.tempCacheName
 import com.example.slowmotionapp.ui.activities.PlayerActivity
 import com.example.slowmotionapp.ui.activities.TrimVideoActivity
@@ -525,12 +526,14 @@ object Utils {
         val btnCancel = dialog.findViewById<TextView>(R.id.cancelBtn)
 
         btnOk.setOnClickListener {
-            val text = fileName.text.toString() + ".mp4"
+            val text = fileName.text.trim().toString() + ".mp4"
             if (text.isNotEmpty()) {
+                android.util.Log.d("RENAME", "showRenameDialog: $text")
                 val parentDirectory = File(videoPath).parentFile
                 val newFileName = getUniqueFileName(parentDirectory!!, text)
 
                 val renamedFile = File(parentDirectory, newFileName)
+                renamedName = renamedFile
                 File(videoPath).renameTo(renamedFile)
 
                 val runnable = Runnable {

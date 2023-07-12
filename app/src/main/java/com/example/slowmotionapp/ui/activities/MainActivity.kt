@@ -94,6 +94,8 @@ class MainActivity : AppCompatActivity() {
         var wannaGoBackCheckViewModel: MutableLiveData<Boolean> = MutableLiveData(false)
 
         var knobFinalValue = 7
+
+        lateinit var renamedName: File
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -46,7 +46,7 @@ class SavedTrimFragment : Fragment(), VideoAdapter.AdapterCallback {
     }
 
     private fun adapterSet() {
-        videoAdapter = VideoAdapter(requireContext(), trimmedFiles, 3)
+        videoAdapter = VideoAdapter(requireContext(), trimmedFiles)
         videoAdapter.setAdapterCallback(this)
         binding.recyclerView.apply {
             layoutManager = GridLayoutManager(requireContext(), 3)

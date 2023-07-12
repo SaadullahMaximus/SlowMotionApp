@@ -43,7 +43,7 @@ class SavedCropFragment : Fragment(), VideoAdapter.AdapterCallback {
     }
 
     private fun adapterSet() {
-        videoAdapter = VideoAdapter(requireContext(), croppedFiles, 1)
+        videoAdapter = VideoAdapter(requireContext(), croppedFiles)
         videoAdapter.setAdapterCallback(this)
         binding.recyclerView.apply {
             layoutManager = GridLayoutManager(requireContext(), 3)
