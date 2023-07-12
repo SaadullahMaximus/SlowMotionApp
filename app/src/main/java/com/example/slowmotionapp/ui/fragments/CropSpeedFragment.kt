@@ -241,7 +241,7 @@ class CropSpeedFragment : Fragment(), MyListener {
 
         wannaGoBackCheckViewModel.observe(viewLifecycleOwner) {
             if (it) {
-                Log.d("HELLOJIMMY", "showFullScreenDialog: Go Back Simmon")
+                Log.d("HELLOJIMMY", "showFullScreenDialog: Go Back")
                 fragmentSwap()
             }
         }
@@ -497,10 +497,8 @@ class CropSpeedFragment : Fragment(), MyListener {
                 player?.pause()
                 binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
                 if (enhanced) {
-                    Log.d("BAWA", "onCreateView: BAWA IF")
                     sharedViewModel.enhanced(true)
                 } else {
-                    Log.d("BAWA", "onCreateView: BAWA ELSE")
                     backSave = false
                     saveEditedVideo(requireContext())
                 }

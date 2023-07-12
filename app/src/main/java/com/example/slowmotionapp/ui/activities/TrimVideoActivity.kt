@@ -158,17 +158,13 @@ class TrimVideoActivity : AppCompatActivity() {
 
         binding.timeLineBar.addOnRangeSeekBarListener(object : OnRangeSeekBarChangeListener {
             override fun onCreate(
-                customRangeSeekBarNew: CustomRangeSeekBar,
-                index: Int,
-                value: Float
+                customRangeSeekBarNew: CustomRangeSeekBar, index: Int, value: Float
             ) {
                 Log.d("timeLineBar", "onCreate: ")
             }
 
             override fun onSeek(
-                customRangeSeekBarNew: CustomRangeSeekBar,
-                index: Int,
-                value: Float
+                customRangeSeekBarNew: CustomRangeSeekBar, index: Int, value: Float
             ) {
                 Log.d("timeLineBar", "onSeek: ")
 
@@ -176,9 +172,7 @@ class TrimVideoActivity : AppCompatActivity() {
             }
 
             override fun onSeekStart(
-                customRangeSeekBarNew: CustomRangeSeekBar,
-                index: Int,
-                value: Float
+                customRangeSeekBarNew: CustomRangeSeekBar, index: Int, value: Float
             ) {
                 Log.d("timeLineBar", "onSeekStart: ")
 
@@ -186,9 +180,7 @@ class TrimVideoActivity : AppCompatActivity() {
             }
 
             override fun onSeekStop(
-                customRangeSeekBarNew: CustomRangeSeekBar,
-                index: Int,
-                value: Float
+                customRangeSeekBarNew: CustomRangeSeekBar, index: Int, value: Float
             ) {
                 Log.d("timeLineBar", "onSeekStop: ")
 
@@ -250,8 +242,7 @@ class TrimVideoActivity : AppCompatActivity() {
             videoDuration = durationSeconds * 1000
 
             trimVideo(
-                this,
-                arrayOf(
+                this, arrayOf(
                     "-ss",
                     formatCSeconds(mStartPosition.toLong())!!,
                     "-y",
@@ -272,16 +263,14 @@ class TrimVideoActivity : AppCompatActivity() {
                     "-strict",
                     "-2",
                     outputFile
-                ),
-                outputFile
+                ), outputFile
             )
 
 
         } catch (e: Throwable) {
-            Objects.requireNonNull(Thread.getDefaultUncaughtExceptionHandler())
-                .uncaughtException(
-                    Thread.currentThread(), e
-                )
+            Objects.requireNonNull(Thread.getDefaultUncaughtExceptionHandler()).uncaughtException(
+                Thread.currentThread(), e
+            )
         }
     }
 
@@ -325,9 +314,7 @@ class TrimVideoActivity : AppCompatActivity() {
                 File(videoUri!!).toString()
             }
 
-            mainCachedFile =
-                createCacheCopy(this, trimFilePath)
-                    .toString()
+            mainCachedFile = createCacheCopy(this, trimFilePath).toString()
             playVideo = trimFilePath
 
             val intent = Intent(this, EditorActivity::class.java)
@@ -404,9 +391,11 @@ class TrimVideoActivity : AppCompatActivity() {
         binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
         exitDialog()
     }
+
     private fun setBitmap(mVideoUri: String) {
         binding.timeLineView.setVideo(Uri.parse(mVideoUri))
     }
+
     private fun onVideoPrepared() {
         mDuration = binding.trimVideoView.duration / 1000
         binding.totalDurationTextView.text = milliSecondsToTimer(mDuration * 1000L)
@@ -419,6 +408,7 @@ class TrimVideoActivity : AppCompatActivity() {
         }
         updateProgressBar()
     }
+
     private fun setSeekBarPosition() {
         mStartPosition = 0
         mEndPosition = mDuration
@@ -430,10 +420,12 @@ class TrimVideoActivity : AppCompatActivity() {
         binding.timeLineBar.initMaxWidth()
         binding.seekBar.max = mDuration * 1000
     }
+
     private fun timeLineSet(mDuration: Int) {
         binding.endTime.text = milliSecondsToTimer((mDuration * 1000).toLong())
         timeLineNumbersSet(mDuration)
     }
+
     private fun timeLineNumbersSet(mDuration: Int) {
         val parts = mDuration / 6.0
         val decimalFormat = DecimalFormat("#.0")
@@ -443,6 +435,7 @@ class TrimVideoActivity : AppCompatActivity() {
         binding.tv4.text = decimalFormat.format(parts * 4)
         binding.tv5.text = decimalFormat.format(parts * 5)
     }
+
     private fun trimVideo(context: Context, strArr: Array<String>, str: String) {
 
         progressDialog = CustomWaitingDialog(this)
@@ -464,9 +457,7 @@ class TrimVideoActivity : AppCompatActivity() {
                 Config.RETURN_CODE_SUCCESS -> {
                     mHandler.removeCallbacks(mUpdateTimeTask)
                     trimFilePath = str
-                    mainCachedFile =
-                        createCacheCopy(this, trimFilePath)
-                            .toString()
+                    mainCachedFile = createCacheCopy(this, trimFilePath).toString()
                     playVideo = str
                     switchActivity(str)
                 }
@@ -480,16 +471,14 @@ class TrimVideoActivity : AppCompatActivity() {
                         th.printStackTrace()
                     }
                     Log.i(
-                        Config.TAG,
-                        "Async command execution cancelled by user."
+                        Config.TAG, "Async command execution cancelled by user."
                     )
                 }
                 else -> {
                     try {
                         File(str).delete()
                         deleteFromGallery(str, context)
-                        Toast.makeText(context, "Error Creating Video", Toast.LENGTH_SHORT)
-                            .show()
+                        Toast.makeText(context, "Error Creating Video", Toast.LENGTH_SHORT).show()
                     } catch (th: Throwable) {
                         th.printStackTrace()
                     }

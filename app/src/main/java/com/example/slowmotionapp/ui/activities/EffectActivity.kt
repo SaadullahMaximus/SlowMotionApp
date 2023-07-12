@@ -283,6 +283,7 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
             FFmpeg.cancel()
         }
         progressDialog.show()
+        progressDialog.setText("Please wait")
 
         val ffmpegCommand: String = Utils.commandsGenerator(command)
 

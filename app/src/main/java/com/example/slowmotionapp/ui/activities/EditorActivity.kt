@@ -34,7 +34,6 @@ class EditorActivity : AppCompatActivity() {
             .add(R.id.fragment_container, CropSpeedFragment() as Fragment)
             .commit()
 
-
         // Fetch the videoUri from the intent
         videoUri = intent.getStringExtra("VideoUri")
         mainCachedFile = videoUri!!
