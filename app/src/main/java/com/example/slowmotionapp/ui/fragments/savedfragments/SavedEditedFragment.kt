@@ -43,7 +43,7 @@ class SavedEditedFragment : Fragment(), VideoAdapter.AdapterCallback {
 
 
     private fun adapterSet() {
-        videoAdapter = VideoAdapter(requireContext(), editedFiles)
+        videoAdapter = VideoAdapter(requireContext(), editedFiles, 2)
         videoAdapter.setAdapterCallback(this)
         binding.recyclerView.apply {
             layoutManager = GridLayoutManager(requireContext(), 3)

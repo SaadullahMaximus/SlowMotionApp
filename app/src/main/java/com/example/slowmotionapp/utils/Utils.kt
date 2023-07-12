@@ -538,7 +538,7 @@ object Utils {
                 }
 
                 // Post the runnable with the specified delay
-                handler.postDelayed(runnable, 100)
+                handler.postDelayed(runnable, 1)
             } else {
                 Toast.makeText(this, "Please enter a valid name!", Toast.LENGTH_SHORT).show()
             }

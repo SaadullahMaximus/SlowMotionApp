@@ -294,11 +294,13 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
             when (returnCode) {
                 Config.RETURN_CODE_SUCCESS -> {
                     progressDialog.dismiss()
+                    Config.resetStatistics()
                     mainCachedFile = outputFilePath
                     applyFilter()
                 }
                 Config.RETURN_CODE_CANCEL -> {
                     progressDialog.dismiss()
+                    Config.resetStatistics()
                     try {
                         File(outputFilePath).delete()
                         Utils.deleteFromGallery(outputFilePath, this)

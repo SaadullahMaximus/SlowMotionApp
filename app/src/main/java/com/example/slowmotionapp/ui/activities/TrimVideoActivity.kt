@@ -465,6 +465,7 @@ class TrimVideoActivity : AppCompatActivity() {
                     try {
                         Log.d("Canceled", "trimVideo: Canceled")
                         progressDialog.setText("Trimmed 0%")
+                        Config.resetStatistics()
                         File(str).delete()
                         deleteFromGallery(str, context)
                     } catch (th: Throwable) {
@@ -507,6 +508,7 @@ class TrimVideoActivity : AppCompatActivity() {
         super.onRestart()
         if (progressInitialized) {
             progressDialog.dismiss()
+            Config.resetStatistics()
             progressInitialized = false
         }
     }

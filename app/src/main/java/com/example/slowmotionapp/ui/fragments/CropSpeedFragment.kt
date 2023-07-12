@@ -598,7 +598,7 @@ class CropSpeedFragment : Fragment(), MyListener {
                     progressDialog.dismiss()
                     mainCachedFile = str
                     sharedViewModel.setVideoUri(str)
-
+                    Config.resetStatistics()
                     sharedViewModel.animateKnob(700)
 
                     when (valueCheck) {
@@ -610,6 +610,7 @@ class CropSpeedFragment : Fragment(), MyListener {
                 }
                 Config.RETURN_CODE_CANCEL -> {
                     try {
+                        Config.resetStatistics()
                         progressDialog.setText("Please wait")
                         File(str).delete()
                         deleteFromGallery(str, requireContext())

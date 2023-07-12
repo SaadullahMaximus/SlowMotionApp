@@ -301,8 +301,10 @@ class SpeedFragment : Fragment() {
                     mainCachedFile = str
                     updateVideoUri(str)
                     animateKnob(700F)
+                    Config.resetStatistics()
                 }
                 Config.RETURN_CODE_CANCEL -> {
+                    Config.resetStatistics()
                     try {
                         animateKnob(700F)
                         File(str).delete()
