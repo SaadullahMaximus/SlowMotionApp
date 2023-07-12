@@ -12,7 +12,7 @@
         android:fontFamily="@font/fredokaregular"
         android:text="Speed"
         android:layout_marginBottom="@dimen/_2sdp"
-        android:textColor="@color/baseColor"
+        android:textColor="@color/white"
         android:textSize="@dimen/_15sdp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

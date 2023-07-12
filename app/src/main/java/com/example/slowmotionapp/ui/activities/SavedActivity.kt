@@ -3,6 +3,7 @@ package com.example.slowmotionapp.ui.activities
 import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -15,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
+import androidx.viewpager.widget.ViewPager
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.constants.Constants.Companion.VIDEO_LIMIT
@@ -69,8 +71,43 @@ class SavedActivity : AppCompatActivity() {
         val tab3: TabLayout.Tab? = binding.tabLayout.getTabAt(2)
 
         tab1?.customView = createTabView("Edited")
+
+        binding.tabLayout.getTabAt(0)?.customView?.findViewById<TextView>(R.id.tabText)
+            ?.setTextColor(resources.getColor(R.color.baseColor))
+
         tab2?.customView = createTabView("Trimmed")
         tab3?.customView = createTabView("Cropped")
+
+        binding.viewpager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            override fun onPageScrolled(
+                position: Int,
+                positionOffset: Float,
+                positionOffsetPixels: Int
+            ) {
+            }
+
+            override fun onPageSelected(position: Int) {
+                // Set the title color for the selected position
+                for (i in 0 until viewPagerAdapter.count) {
+                    val title = viewPagerAdapter.getPageTitle(i) as? String
+                    val textView =
+                        binding.tabLayout.getTabAt(i)?.customView?.findViewById<TextView>(R.id.tabText)
+                    if (title != null && textView != null) {
+                        if (i == position) {
+                            // Set the selected title color to yellow
+                            textView.setTextColor(resources.getColor(R.color.baseColor))
+                        } else {
+                            // Set other titles to white
+                            textView.setTextColor(Color.WHITE)
+                        }
+                    }
+                }
+            }
+
+            override fun onPageScrollStateChanged(state: Int) {
+                // Not used in this example
+            }
+        })
 
         binding.backBtn.setOnClickListener {
             finish()
