@@ -8,43 +8,64 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
 
     <application
         android:allowBackup="true"
         android:extractNativeLibs="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
         android:theme="@style/Theme.SlowMotionApp"
         tools:targetApi="31">
         <activity
-            android:name=".ui.activities.EffectActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.activities.PlayerActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.activities.CropActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.activities.TrimVideoActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.activities.SavedActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.activities.EditorActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.activities.MainActivity"
-            android:exported="true">
+            android:name=".ui.activities.PreSplashActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/splashScreenTheme">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
+        <activity
+            android:name=".ui.activities.SettingsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.activities.EffectActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.activities.PlayerActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.activities.CropActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.activities.TrimVideoActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.activities.SavedActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.activities.EditorActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.activities.MainActivity"
+            android:exported="true"
+            android:screenOrientation="portrait" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

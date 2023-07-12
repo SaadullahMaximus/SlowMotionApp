@@ -20,6 +20,7 @@
         android:layout_width="@dimen/_25sdp"
         android:layout_height="@dimen/_25sdp"
         android:layout_marginTop="@dimen/_20sdp"
+        android:padding="@dimen/_2sdp"
         android:src="@drawable/ic_undo"
         app:layout_constraintEnd_toStartOf="@+id/rotateRight"
         app:layout_constraintStart_toEndOf="@+id/backBtn"
@@ -30,6 +31,7 @@
         android:layout_width="@dimen/_25sdp"
         android:layout_height="@dimen/_25sdp"
         android:layout_marginTop="@dimen/_20sdp"
+        android:padding="@dimen/_2sdp"
         android:src="@drawable/ic_redo"
         app:layout_constraintEnd_toStartOf="@+id/linearLayoutBtnContainer"
         app:layout_constraintStart_toEndOf="@+id/rotateLeft"
@@ -39,7 +41,7 @@
         android:id="@+id/saveBtn"
         style="@style/CustomButtonStyle"
         android:layout_width="@dimen/_50sdp"
-        android:layout_height="@dimen/_27sdp"
+        android:layout_height="@dimen/_30sdp"
         android:layout_marginTop="@dimen/_20sdp"
         android:layout_marginEnd="@dimen/_10sdp"
         android:background="@drawable/background_rounded_corners"
@@ -49,18 +51,22 @@
         android:paddingEnd="@dimen/_4sdp"
         android:paddingBottom="@dimen/_3sdp"
         android:text="Save"
+        android:textAllCaps="false"
         android:textColor="@color/black"
         android:textSize="@dimen/_9sdp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/frameLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:id="@+id/linearLayoutBtnContainer"
         android:layout_width="@dimen/_80sdp"
-        android:layout_height="@dimen/_27sdp"
+        android:layout_height="@dimen/_30sdp"
         android:layout_marginTop="@dimen/_20sdp"
         android:layout_marginEnd="@dimen/_10sdp"
         android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/frameLayout"
         app:layout_constraintEnd_toStartOf="@+id/saveBtn"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -73,8 +79,10 @@
             android:background="@drawable/background_rounded_corners"
             android:fontFamily="@font/fredokamedium"
             android:text="Enhance"
+            android:textAllCaps="false"
             android:textColor="@color/black"
-            android:textSize="@dimen/_9sdp" />
+            android:textSize="@dimen/_9sdp"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/backTextBtn"
@@ -84,8 +92,10 @@
             android:background="@drawable/background_rounded_corners"
             android:fontFamily="@font/fredokamedium"
             android:text="Back"
+            android:textAllCaps="false"
             android:textColor="@color/black"
             android:textSize="@dimen/_9sdp"
+            android:textStyle="bold"
             android:visibility="gone" />
 
     </LinearLayout>
@@ -94,27 +104,24 @@
         android:id="@+id/frameLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="@dimen/_5sdp"
-        android:layout_marginBottom="@dimen/_8sdp"
-        app:layout_constraintBottom_toTopOf="@id/playPauseButton"
+        android:layout_marginTop="@dimen/_9sdp"
+        app:layout_constraintBottom_toTopOf="@+id/totalDurationTextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/linearLayoutBtnContainer">
+        app:layout_constraintTop_toBottomOf="@+id/backBtn">
 
         <FrameLayout
             android:id="@+id/layout_movie_wrapper"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:visibility="gone" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
 
         <VideoView
             android:id="@+id/videoView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:layout_marginTop="@dimen/_8sdp"
-            android:layout_marginBottom="@dimen/_8sdp" />
+            android:visibility="gone" />
 
         <com.edmodo.cropper.CropImageView
             android:id="@+id/cropperView"
@@ -131,18 +138,24 @@
         android:id="@+id/playPauseButton"
         android:layout_width="@dimen/_20sdp"
         android:layout_height="@dimen/_20sdp"
-        android:layout_marginStart="@dimen/_40sdp"
+        android:layout_marginStart="@dimen/_65sdp"
+        android:layout_marginTop="@dimen/_3sdp"
+        android:layout_marginBottom="@dimen/_3sdp"
         android:src="@drawable/baseline_play_arrow"
+        android:visibility="invisible"
+        app:layout_constraintTop_toBottomOf="@id/frameLayout"
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
         android:id="@+id/playPauseButton2"
-        android:visibility="gone"
         android:layout_width="@dimen/_20sdp"
         android:layout_height="@dimen/_20sdp"
-        android:layout_marginStart="@dimen/_40sdp"
+        android:layout_marginStart="@dimen/_65sdp"
+        android:layout_marginTop="@dimen/_3sdp"
+        android:layout_marginBottom="@dimen/_3sdp"
         android:src="@drawable/baseline_play_arrow"
+        app:layout_constraintTop_toBottomOf="@id/frameLayout"
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -152,15 +165,16 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_10sdp"
-        android:layout_marginTop="@dimen/_24sdp"
+        android:layout_marginTop="@dimen/_3sdp"
         android:layout_marginEnd="@dimen/_10sdp"
-        android:layout_marginBottom="@dimen/_20sdp"
+        android:layout_marginBottom="@dimen/_3sdp"
         android:progressDrawable="@drawable/custom_seekbar_progress"
         android:thumb="@drawable/custom_seekbar_thumb"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
         app:layout_constraintEnd_toStartOf="@+id/totalDurationTextView"
         app:layout_constraintStart_toEndOf="@+id/playPauseButton"
-        app:layout_constraintTop_toBottomOf="@id/frameLayout" />
+        app:layout_constraintTop_toBottomOf="@id/frameLayout"/>
 
     <SeekBar
         android:id="@+id/seekBar2"
@@ -168,36 +182,36 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_10sdp"
-        android:layout_marginTop="@dimen/_24sdp"
-        android:layout_marginEnd="@dimen/_40sdp"
-        android:layout_marginBottom="@dimen/_20sdp"
+        android:layout_marginTop="@dimen/_3sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
+        android:layout_marginBottom="@dimen/_3sdp"
         android:progressDrawable="@drawable/custom_seekbar_progress"
         android:thumb="@drawable/custom_seekbar_thumb"
-        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/totalDurationTextView"
         app:layout_constraintStart_toEndOf="@+id/playPauseButton2"
-        app:layout_constraintTop_toBottomOf="@id/frameLayout" />
+        app:layout_constraintTop_toBottomOf="@id/frameLayout"/>
 
     <TextView
         android:id="@+id/totalDurationTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/seekBar"
-        android:layout_marginEnd="@dimen/_40sdp"
+        android:layout_marginTop="@dimen/_3sdp"
+        android:layout_marginEnd="@dimen/_50sdp"
+        android:layout_marginBottom="@dimen/_3sdp"
         android:fontFamily="@font/fredokalight"
         android:text="@string/_00_00_"
-        android:textColor="@color/white"
-        android:textSize="@dimen/_14sdp"
+        android:textColor="@color/baseColor"
+        android:textSize="@dimen/_11sdp"
+        app:layout_constraintTop_toBottomOf="@id/frameLayout"
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/frameLayout" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <FrameLayout
         android:id="@+id/fragment_container_main"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_180sdp"
-        android:layout_marginTop="@dimen/_8sdp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

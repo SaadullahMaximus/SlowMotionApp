@@ -14,6 +14,8 @@ class SharedViewModel : ViewModel() {
 
     val cropSelected: MutableLiveData<Int> = MutableLiveData()
 
+    val animateKnob: MutableLiveData<Int> = MutableLiveData()
+
     val startCrop: MutableLiveData<Boolean> = MutableLiveData()
 
     val fragmentA: MutableLiveData<Boolean> = MutableLiveData()
@@ -27,6 +29,12 @@ class SharedViewModel : ViewModel() {
     val enhanced: MutableLiveData<Boolean> = MutableLiveData()
 
     val downloadedMusic: MutableLiveData<String> = MutableLiveData()
+
+    val stopAllMusic: MutableLiveData<Boolean> = MutableLiveData()
+
+    val musicSelectPauseEveryThing: MutableLiveData<Boolean> = MutableLiveData()
+
+    val crossClick: MutableLiveData<Boolean> = MutableLiveData()
 
     fun setVideoUri(path: String) {
         _videoPath.value = path
@@ -42,6 +50,10 @@ class SharedViewModel : ViewModel() {
 
     fun cropSelected(newValue: Int) {
         cropSelected.value = newValue
+    }
+
+    fun animateKnob(newValue: Int) {
+        animateKnob.value = newValue
     }
 
     fun startCrop(newValue: Boolean) {
@@ -70,6 +82,18 @@ class SharedViewModel : ViewModel() {
 
     fun downloadMusicPath(newValue: String) {
         downloadedMusic.value = newValue
+    }
+
+    fun stopAllMusic(newValue: Boolean) {
+        stopAllMusic.value = newValue
+    }
+
+    fun musicSelectPauseEveryThing(newValue: Boolean) {
+        musicSelectPauseEveryThing.value = newValue
+    }
+
+    fun crossClick(newValue: Boolean) {
+        crossClick.value = newValue
     }
 
 }

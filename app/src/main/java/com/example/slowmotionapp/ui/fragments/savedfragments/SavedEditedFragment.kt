@@ -8,27 +8,53 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.slowmotionapp.adapters.VideoAdapter
 import com.example.slowmotionapp.databinding.FragmentSavedEditedBinding
-import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.croppedFiles
-import com.example.slowmotionapp.utils.Utils
+import com.example.slowmotionapp.ui.activities.SavedActivity
+import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.editedFiles
 
-class SavedEditedFragment : Fragment() {
+class SavedEditedFragment : Fragment(), VideoAdapter.AdapterCallback {
 
     private var _binding: FragmentSavedEditedBinding? = null
     private val binding get() = _binding!!
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        val videoAdapter =
-            VideoAdapter(requireContext(), croppedFiles)
+    private lateinit var videoAdapter: VideoAdapter
 
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentSavedEditedBinding.inflate(inflater, container, false)
+
+        if (editedFiles.isNotEmpty()) {
+
+            binding.recyclerView.visibility = View.VISIBLE
+
+            binding.lottieAnimationView.visibility = View.GONE
+            binding.btnCreateNew.visibility = View.GONE
+            binding.title.visibility = View.GONE
+            adapterSet()
+
+        }
+
+        binding.btnCreateNew.setOnClickListener {
+            (activity as? SavedActivity)?.openGallery()
+        }
+
+        return binding.root
+    }
+
+
+    private fun adapterSet() {
+        videoAdapter = VideoAdapter(requireContext(), editedFiles)
+        videoAdapter.setAdapterCallback(this)
         binding.recyclerView.apply {
             layoutManager = GridLayoutManager(requireContext(), 3)
             adapter = videoAdapter
         }
+    }
 
-        return binding.root
+    override fun onFunctionCalled() {
+        binding.recyclerView.visibility = View.GONE
+        binding.lottieAnimationView.visibility = View.VISIBLE
+        binding.btnCreateNew.visibility = View.VISIBLE
+        binding.title.visibility = View.VISIBLE
     }
 }

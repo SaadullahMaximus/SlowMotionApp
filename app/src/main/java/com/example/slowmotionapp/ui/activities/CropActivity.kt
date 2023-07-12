@@ -1,7 +1,7 @@
 package com.example.slowmotionapp.ui.activities
 
 import android.annotation.SuppressLint
-import android.app.ProgressDialog
+import android.app.Dialog
 import android.content.Intent
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
@@ -14,6 +14,7 @@ import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.SeekBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.arthenica.mobileffmpeg.Config
@@ -21,11 +22,17 @@ import com.arthenica.mobileffmpeg.FFmpeg
 import com.edmodo.cropper.cropwindow.edge.Edge
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
+import com.example.slowmotionapp.customviews.CustomWaitingDialog
 import com.example.slowmotionapp.databinding.ActivityCropBinding
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.trimOrCrop
 import com.example.slowmotionapp.utils.Utils
+import com.example.slowmotionapp.utils.Utils.commandsGenerator
+import com.example.slowmotionapp.utils.Utils.createCroppedFile
+import com.example.slowmotionapp.utils.Utils.deleteFromGallery
+import com.example.slowmotionapp.utils.Utils.getScreenWidth
+import com.example.slowmotionapp.utils.Utils.getVideoDuration
 import java.io.File
 
 class CropActivity : AppCompatActivity() {
@@ -36,6 +43,8 @@ class CropActivity : AppCompatActivity() {
     private var type: Int = 0
 
     private val mHandler = Handler(Looper.getMainLooper())
+
+    private var cropSelected = false
 
     private var mStartPosition = 0
     private var mDuration = 0
@@ -69,7 +78,7 @@ class CropActivity : AppCompatActivity() {
     private var u = 0
     private var v = 0
 
-    private var cropVideoDuration: String? = null
+    private var cropVideoDuration: Int? = null
 
     private var ag = 0
     private var ah = 0
@@ -78,18 +87,29 @@ class CropActivity : AppCompatActivity() {
 
     private var screenWidth = 0
 
+    private lateinit var file: File
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCropBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        screenWidth = Utils.getScreenWidth()
 
         // Fetch the videoUri from the intent
         videoUri = intent.getStringExtra("VideoUri")
         type = intent.getIntExtra(Constants.TYPE, 0)
 
+        file = if (type == Constants.RECORD_VIDEO) {
+            File(Utils.convertContentUriToFilePath(videoUri!!))
+        } else {
+            File(videoUri!!)
+        }
+
+        binding.videoView.setVideoURI(Uri.parse(videoUri))
+
         mainCachedFile = videoUri!!
+
+        screenWidth = getScreenWidth()
 
         val layoutParams = binding.frameLayout.layoutParams
         layoutParams.width = screenWidth
@@ -97,8 +117,6 @@ class CropActivity : AppCompatActivity() {
         binding.frameLayout.layoutParams = layoutParams
 
         cropViewDisplay()
-
-        binding.videoView.setVideoURI(Uri.parse(videoUri))
 
         binding.videoView.setOnPreparedListener { mediaPlayer: MediaPlayer? ->
             mediaPlayer?.let {
@@ -112,60 +130,21 @@ class CropActivity : AppCompatActivity() {
         binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {}
             override fun onStartTrackingTouch(seekBar: SeekBar) {
-                mHandler.removeCallbacks(mUpdateTimeTask)
                 binding.seekBar.max = mTimeVideo * 1000
                 binding.seekBar.progress = 0
                 binding.videoView.seekTo(mStartPosition * 1000)
-                binding.videoView.pause()
-                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   --->  " + mStartPosition * 1000 + " <-----> " + seekBar.progress + " <-----> " + binding.seekBar.progress
-                )
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   --->  " + mDuration * 1000 + " <-----> " + binding.seekBar.progress
-                )
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   --->  " + (mStartPosition * 1000 - binding.seekBar.progress)
-                )
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   --->  " + (mDuration * 1000 - binding.seekBar.progress)
-                )
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   mVideoView--->  " + binding.videoView.duration
-                )
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   seekBar--->  " + seekBar.progress
-                )
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   mStartPosition--->  " + mStartPosition * 1000
-                )
-                Log.d(
-                    "onStopTrackingTouch",
-                    "onStopTrackingTouch: 123123123   mEndPosition--->  " + mEndPosition * 1000
-                )
-
-                mHandler.removeCallbacks(mUpdateTimeTask)
-
                 binding.videoView.seekTo(mStartPosition * 1000 + seekBar.progress)
                 binding.totalDurationTextView.text =
                     milliSecondsToTimer(binding.seekBar.progress.toLong())
-
             }
         })
 
         binding.backBtn.setOnClickListener {
             trimOrCrop = false
-            finish()
+            exitDialog()
         }
 
         binding.playPauseButton.setOnClickListener {
@@ -185,6 +164,8 @@ class CropActivity : AppCompatActivity() {
             binding.imageView11.setImageResource(R.drawable.crop_unselect)
             binding.imageViewPortrait.setImageResource(R.drawable.crop_unselect)
             binding.imageViewLandScape.setImageResource(R.drawable.crop_unselect)
+
+            cropSelected = true
         }
         binding.btn11.setOnClickListener {
             cropSelect(2)
@@ -194,6 +175,8 @@ class CropActivity : AppCompatActivity() {
             binding.imageView11.setImageResource(R.drawable.crop_select)
             binding.imageViewPortrait.setImageResource(R.drawable.crop_unselect)
             binding.imageViewLandScape.setImageResource(R.drawable.crop_unselect)
+
+            cropSelected = true
         }
         binding.btnPortrait.setOnClickListener {
             cropSelect(3)
@@ -203,6 +186,8 @@ class CropActivity : AppCompatActivity() {
             binding.imageView11.setImageResource(R.drawable.crop_unselect)
             binding.imageViewPortrait.setImageResource(R.drawable.crop_select)
             binding.imageViewLandScape.setImageResource(R.drawable.crop_unselect)
+
+            cropSelected = true
         }
         binding.btnLandScape.setOnClickListener {
             cropSelect(4)
@@ -212,6 +197,8 @@ class CropActivity : AppCompatActivity() {
             binding.imageView11.setImageResource(R.drawable.crop_unselect)
             binding.imageViewPortrait.setImageResource(R.drawable.crop_unselect)
             binding.imageViewLandScape.setImageResource(R.drawable.crop_select)
+
+            cropSelected = true
         }
 
         binding.btnCancel.setOnClickListener {
@@ -220,22 +207,81 @@ class CropActivity : AppCompatActivity() {
             binding.imageViewPortrait.setImageResource(R.drawable.crop_unselect)
             binding.imageViewLandScape.setImageResource(R.drawable.crop_unselect)
             binding.cropView.visibility = View.GONE
+
+            cropSelected = false
         }
         binding.btnOk.setOnClickListener {
-            binding.imageViewFree.setImageResource(R.drawable.crop_unselect)
-            binding.imageView11.setImageResource(R.drawable.crop_unselect)
-            binding.imageViewPortrait.setImageResource(R.drawable.crop_unselect)
-            binding.imageViewLandScape.setImageResource(R.drawable.crop_unselect)
-            if (binding.videoView.isPlaying) {
-                binding.videoView.pause()
-                binding.videoView.seekTo(0)
-                binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
+            if (cropSelected) {
+                cropSelected = false
+                getDimension()
+                startCrop()
+            } else {
+                Toast.makeText(this, "Please select Crop aspect ratio.", Toast.LENGTH_SHORT).show()
             }
-            getDimension()
-            startCrop()
+
         }
 
     }
+
+    private fun cropViewDisplay() {
+        val mediaMetadataRetriever = MediaMetadataRetriever()
+        mediaMetadataRetriever.setDataSource(this, Uri.parse(mainCachedFile))
+
+        keyCodeR = Integer.valueOf(mediaMetadataRetriever.extractMetadata(18)!!).toInt()
+        keyCodeQ = Integer.valueOf(mediaMetadataRetriever.extractMetadata(19)!!).toInt()
+        keyCodeW = Integer.valueOf(mediaMetadataRetriever.extractMetadata(24)!!).toInt()
+
+
+        val layoutParams = binding.cropView.layoutParams as FrameLayout.LayoutParams
+
+        if (keyCodeW == 90 || keyCodeW == 270) {
+            if (keyCodeR >= keyCodeQ) {
+                if (keyCodeR >= screenWidth) {
+                    layoutParams.height = screenWidth
+                    layoutParams.width =
+                        (screenWidth.toFloat() / (keyCodeR.toFloat() / keyCodeQ.toFloat())).toInt()
+                } else {
+                    layoutParams.width = screenWidth
+                    layoutParams.height =
+                        (keyCodeQ.toFloat() * (screenWidth.toFloat() / keyCodeR.toFloat())).toInt()
+                }
+            } else if (keyCodeQ >= screenWidth) {
+                layoutParams.width = screenWidth
+                layoutParams.height =
+                    (screenWidth.toFloat() / (keyCodeQ.toFloat() / keyCodeR.toFloat())).toInt()
+            } else {
+                layoutParams.width =
+                    (keyCodeR.toFloat() * (screenWidth.toFloat() / keyCodeQ.toFloat())).toInt()
+                layoutParams.height = screenWidth
+            }
+        } else if (keyCodeR >= keyCodeQ) {
+            if (keyCodeR >= screenWidth) {
+                layoutParams.width = screenWidth
+                layoutParams.height =
+                    (screenWidth.toFloat() / (keyCodeR.toFloat() / keyCodeQ.toFloat())).toInt()
+            } else {
+                layoutParams.width = screenWidth
+                layoutParams.height =
+                    (keyCodeQ.toFloat() * (screenWidth.toFloat() / keyCodeR.toFloat())).toInt()
+            }
+        } else if (keyCodeQ >= screenWidth) {
+            layoutParams.width =
+                (screenWidth.toFloat() / (keyCodeQ.toFloat() / keyCodeR.toFloat())).toInt()
+            layoutParams.height = screenWidth
+        } else {
+            layoutParams.width =
+                (keyCodeR.toFloat() * (screenWidth.toFloat() / keyCodeQ.toFloat())).toInt()
+            layoutParams.height = screenWidth
+        }
+        binding.cropView.layoutParams = layoutParams
+
+        binding.cropView.setImageBitmap(
+            Bitmap.createBitmap(
+                layoutParams.width, layoutParams.height, Bitmap.Config.ARGB_8888
+            )
+        )
+    }
+
 
     private fun getDimension() {
         if (keyCodeW == 90 || keyCodeW == 270) {
@@ -313,10 +359,9 @@ class CropActivity : AppCompatActivity() {
                 }
             }
         }
-        cropVideoDuration =
-            Utils.getVideoDuration(this, mainCachedFile).toString()
+        cropVideoDuration = getVideoDuration(this, mainCachedFile)
 
-        cropOutputFilePath = Utils.createCroppedFile().toString()
+        cropOutputFilePath = createCroppedFile().toString()
 
         try {
             val sb = java.lang.StringBuilder()
@@ -328,15 +373,16 @@ class CropActivity : AppCompatActivity() {
             sb.append(o)
             sb.append(":y=")
             sb.append(p)
+
             executeFFMPEG(
                 arrayOf(
                     "-y",
                     "-ss",
                     "0",
                     "-t",
-                    cropVideoDuration!!,
+                    cropVideoDuration.toString(),
                     "-i",
-                    mainCachedFile,
+                    file.toString(),
                     "-strict",
                     "experimental",
                     "-vf",
@@ -356,7 +402,7 @@ class CropActivity : AppCompatActivity() {
                     "-ss",
                     "0",
                     "-t",
-                    cropVideoDuration!!,
+                    cropVideoDuration.toString(),
                     cropOutputFilePath!!
                 ), cropOutputFilePath!!
             )
@@ -371,22 +417,29 @@ class CropActivity : AppCompatActivity() {
     }
 
     private fun executeFFMPEG(strArr: Array<String>, str: String) {
-        val progressDialog =
-            ProgressDialog(this, R.style.CustomDialog)
-        progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
-        progressDialog.isIndeterminate = true
-        progressDialog.setCancelable(false)
-        progressDialog.setMessage("Please Wait")
+        val progressDialog = CustomWaitingDialog(this)
+        progressDialog.setCloseButtonClickListener {
+            progressDialog.dismiss()
+            FFmpeg.cancel()
+        }
         progressDialog.show()
-        val ffmpegCommand: String = Utils.commandsGenerator(strArr)
+        progressDialog.setText("Cropped 0%")
+
+        binding.imageViewFree.setImageResource(R.drawable.crop_unselect)
+        binding.imageView11.setImageResource(R.drawable.crop_unselect)
+        binding.imageViewPortrait.setImageResource(R.drawable.crop_unselect)
+        binding.imageViewLandScape.setImageResource(R.drawable.crop_unselect)
+
+        if (binding.videoView.isPlaying) {
+            binding.videoView.pause()
+            binding.videoView.seekTo(0)
+            binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
+        }
+
+        val ffmpegCommand: String = commandsGenerator(strArr)
         FFmpeg.executeAsync(
             ffmpegCommand
         ) { _, returnCode ->
-            Log.d(
-                "TAG",
-                String.format("FFMPEG process exited with rc %d.", returnCode)
-            )
-            Log.d("TAG", "FFMPEG process output:")
             Config.printLastCommandOutput(Log.INFO)
             progressDialog.dismiss()
             when (returnCode) {
@@ -397,28 +450,19 @@ class CropActivity : AppCompatActivity() {
                     finish()
                 }
                 Config.RETURN_CODE_CANCEL -> {
-                    Log.d("FFMPEFailure", str)
                     try {
                         File(str).delete()
-                        Utils.deleteFromGallery(str, this)
-                        Toast.makeText(
-                            this,
-                            "Unable to Crop",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        deleteFromGallery(str, this)
                     } catch (th: Throwable) {
                         th.printStackTrace()
                     }
                 }
                 else -> {
-                    Log.d("FFMPEFailure", str)
                     try {
                         File(str).delete()
-                        Utils.deleteFromGallery(str, this)
+                        deleteFromGallery(str, this)
                         Toast.makeText(
-                            this,
-                            "Please Try Again",
-                            Toast.LENGTH_LONG
+                            this, "Please Try Again $returnCode", Toast.LENGTH_LONG
                         ).show()
                     } catch (th: Throwable) {
                         th.printStackTrace()
@@ -426,74 +470,20 @@ class CropActivity : AppCompatActivity() {
                 }
             }
         }
-    }
 
-    private fun updateVideoUri(path: String) {
-        binding.videoView.setVideoURI(Uri.parse(path))
-    }
-
-    private fun cropViewDisplay() {
-        val mediaMetadataRetriever = MediaMetadataRetriever()
-        mediaMetadataRetriever.setDataSource(mainCachedFile)
-
-        keyCodeR = Integer.valueOf(mediaMetadataRetriever.extractMetadata(18)!!).toInt()
-        keyCodeQ = Integer.valueOf(mediaMetadataRetriever.extractMetadata(19)!!).toInt()
-        keyCodeW = Integer.valueOf(mediaMetadataRetriever.extractMetadata(24)!!).toInt()
-
-
-        val layoutParams = binding.cropView.layoutParams as FrameLayout.LayoutParams
-
-        Log.d("KEYCODE", "cropViewDisplay: $keyCodeR $keyCodeQ $keyCodeW $screenWidth")
-
-        if (keyCodeW == 90 || keyCodeW == 270) {
-            if (keyCodeR >= keyCodeQ) {
-                if (keyCodeR >= screenWidth) {
-                    layoutParams.height = screenWidth
-                    layoutParams.width =
-                        (screenWidth.toFloat() / (keyCodeR.toFloat() / keyCodeQ.toFloat())).toInt()
-                } else {
-                    layoutParams.width = screenWidth
-                    layoutParams.height =
-                        (keyCodeQ.toFloat() * (screenWidth.toFloat() / keyCodeR.toFloat())).toInt()
-                }
-            } else if (keyCodeQ >= screenWidth) {
-                layoutParams.width = screenWidth
-                layoutParams.height =
-                    (screenWidth.toFloat() / (keyCodeQ.toFloat() / keyCodeR.toFloat())).toInt()
+        Config.printLastCommandOutput(Log.INFO)
+        Config.enableStatisticsCallback {
+            val percentage =
+                ((it.time.toFloat() / (cropVideoDuration!! * 1000).toFloat()) * 100).toInt()
+            if (percentage in 0..100) {
+                progressDialog.setText("Cropped $percentage%")
             } else {
-                layoutParams.width =
-                    (keyCodeR.toFloat() * (screenWidth.toFloat() / keyCodeQ.toFloat())).toInt()
-                layoutParams.height = screenWidth
+                progressDialog.setText("Please wait")
             }
-        } else if (keyCodeR >= keyCodeQ) {
-            if (keyCodeR >= screenWidth) {
-                layoutParams.width = screenWidth
-                layoutParams.height =
-                    (screenWidth.toFloat() / (keyCodeR.toFloat() / keyCodeQ.toFloat())).toInt()
-            } else {
-                layoutParams.width = screenWidth
-                layoutParams.height =
-                    (keyCodeQ.toFloat() * (screenWidth.toFloat() / keyCodeR.toFloat())).toInt()
-            }
-        } else if (keyCodeQ >= screenWidth) {
-            layoutParams.width =
-                (screenWidth.toFloat() / (keyCodeQ.toFloat() / keyCodeR.toFloat())).toInt()
-            layoutParams.height = screenWidth
-        } else {
-            layoutParams.width =
-                (keyCodeR.toFloat() * (screenWidth.toFloat() / keyCodeQ.toFloat())).toInt()
-            layoutParams.height = screenWidth
         }
-        binding.cropView.layoutParams = layoutParams
 
-        binding.cropView.setImageBitmap(
-            Bitmap.createBitmap(
-                layoutParams.width,
-                layoutParams.height,
-                Bitmap.Config.ARGB_8888
-            )
-        )
     }
+
 
     private fun cropSelect(newValue: Int) {
         when (newValue) {
@@ -529,7 +519,7 @@ class CropActivity : AppCompatActivity() {
         } else {
             binding.totalDurationTextView.text = milliSecondsToTimer(
                 binding.seekBar.progress.toLong()
-            ) + ""
+            )
             updateProgressBar()
         }
     }
@@ -569,8 +559,7 @@ class CropActivity : AppCompatActivity() {
         @SuppressLint("SetTextI18n")
         override fun run() {
             if (binding.seekBar.progress >= binding.seekBar.max) {
-                binding.seekBar.progress =
-                    binding.videoView.currentPosition - mStartPosition * 1000
+                binding.seekBar.progress = binding.videoView.currentPosition - mStartPosition * 1000
                 binding.totalDurationTextView.text = milliSecondsToTimer(
                     binding.seekBar.progress.toLong()
                 ) + ""
@@ -580,8 +569,7 @@ class CropActivity : AppCompatActivity() {
                 binding.totalDurationTextView.text = "00:00"
                 binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
             } else {
-                binding.seekBar.progress =
-                    binding.videoView.currentPosition - mStartPosition * 1000
+                binding.seekBar.progress = binding.videoView.currentPosition - mStartPosition * 1000
                 binding.totalDurationTextView.text = milliSecondsToTimer(
                     binding.seekBar.progress.toLong()
                 ) + ""
@@ -624,8 +612,27 @@ class CropActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
+        exitDialog()
         trimOrCrop = false
     }
+
+    private fun exitDialog() {
+        val dialog = Dialog(this, R.style.FullScreenDialogStyle)
+        dialog.setContentView(R.layout.exit_dialog)
+
+        val noBtn = dialog.findViewById<TextView>(R.id.noBtn)
+        val yesBtn = dialog.findViewById<TextView>(R.id.yesBtn)
+
+        yesBtn.setOnClickListener {
+            finish()
+            dialog.dismiss()
+        }
+
+        noBtn.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
 
 }

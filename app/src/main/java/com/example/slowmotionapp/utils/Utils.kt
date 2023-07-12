@@ -1,17 +1,35 @@
 package com.example.slowmotionapp.utils
 
 import android.app.Activity
+import android.app.Dialog
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.media.MediaExtractor
+import android.media.MediaFormat
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
 import android.provider.MediaStore
-import android.util.Log
+import android.provider.OpenableColumns
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.TextPaint
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.view.View
+import android.widget.EditText
+import android.widget.TextView
+import android.widget.Toast
+import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.interfaces.MyListener
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.backSave
@@ -19,22 +37,25 @@ import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCached
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.tempCacheName
 import com.example.slowmotionapp.ui.activities.PlayerActivity
+import com.example.slowmotionapp.ui.activities.TrimVideoActivity
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.google.android.exoplayer2.util.Log
 import com.google.android.exoplayer2.util.Util
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 object Utils {
 
     var player: ExoPlayer? = null
+
+    val handler = Handler(Looper.getMainLooper())
 
     private val filepath =
         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
@@ -51,7 +72,16 @@ object Utils {
         this.listener = listener
     }
 
-    fun fetchVideosFromDirectory(dir: File): List<File> {
+    private var mLastClickTime = 0L
+    fun singleClick(listener: () -> Unit) {
+        if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) { // 1000 = 1second
+            return
+        }
+        mLastClickTime = SystemClock.elapsedRealtime()
+        listener.invoke()
+    }
+
+    fun fetchVideosFromDirectory(dir: File): MutableList<File> {
         val videosList = mutableListOf<File>()
 
         if (dir.exists() && dir.isDirectory) {
@@ -63,6 +93,7 @@ object Utils {
                         videosList.add(file)
                     }
                 }
+                videosList.reverse()
             }
         }
 
@@ -107,7 +138,6 @@ object Utils {
         )
         val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
 
-
         // Create the "Edited" directory if it doesn't exist
         if (!editedDir.exists()) {
             editedDir.mkdirs()
@@ -137,10 +167,10 @@ object Utils {
             // Delete the original file from the cache directory
             videoFile.delete()
             if (backSave) {
+                backSave = false
                 mainCachedFile = destinationFile.toString()
                 // Call the listener function
                 listener?.onUtilityFunctionCalled()
-                backSave = false
             } else {
                 playVideo = destinationFile.toString()
                 context.startActivity(Intent(context, PlayerActivity::class.java))
@@ -196,10 +226,10 @@ object Utils {
         }
     }
 
-
     fun getFileExtension(filePath: String): String {
         return filePath.substring(filePath.lastIndexOf("."))
     }
+
 
     fun getVideoDuration(context: Context, file: File): Long {
         val retriever = MediaMetadataRetriever()
@@ -210,13 +240,8 @@ object Utils {
         return timeInMillis
     }
 
-    fun convertDurationInMin(duration: Long): Long {
-        val minutes = TimeUnit.MILLISECONDS.toMinutes(duration)
-        return if (minutes > 0) {
-            minutes
-        } else {
-            0
-        }
+    fun convertDurationInSec(duration: Long): Long {
+        return duration / 1000
     }
 
     fun getMediaDuration(context: Context?, uriOfFile: Uri?): Int {
@@ -271,7 +296,7 @@ object Utils {
         query.close()
     }
 
-    private fun refreshGallery(str: String?, context: Context) {
+    fun refreshGallery(str: String?, context: Context) {
         val intent = Intent("android.intent.action.MEDIA_SCANNER_SCAN_FILE")
         intent.data = Uri.fromFile(File(str!!))
         context.sendBroadcast(intent)
@@ -305,6 +330,8 @@ object Utils {
             return cacheFile
         } catch (e: Exception) {
             e.printStackTrace()
+            android.util.Log.d("mainCachedFile", "catch: $mainCachedFile")
+
             return null
         }
     }
@@ -320,11 +347,7 @@ object Utils {
     }
 
     fun getScreenWidth(): Int {
-        val screenWidth = Resources.getSystem().displayMetrics.widthPixels
-
-        Log.d("screenWidth", "getScreenWidth: $screenWidth")
-
-        return screenWidth
+        return Resources.getSystem().displayMetrics.widthPixels
     }
 
     fun setUpSimpleExoPlayer(context: Context) {
@@ -337,8 +360,10 @@ object Utils {
             .setMediaSourceFactory(ProgressiveMediaSource.Factory(dataSourceFactory))
             .build()
         player!!.addMediaItem(MediaItem.fromUri(Uri.parse(mainCachedFile)))
+
+        android.util.Log.d("mainCachedFile", "setUpSimpleExoPlayer: $mainCachedFile")
+
         player!!.prepare()
-        Log.d("EXOPLAYER", "onCreateView: setUpSimpleExoPlayer")
     }
 
     fun getVideoSize(context: Context, uri: Uri): Pair<Int, Int>? {
@@ -384,18 +409,242 @@ object Utils {
         return finalTimerString
     }
 
-    fun getAudioFilePathFromUri(context: Context, uri: Uri): String? {
+    fun getAudioFilePath(context: Context, uri: Uri): String? {
         var filePath: String? = null
-        val projection = arrayOf(MediaStore.Audio.Media.DATA)
-        val cursor = context.contentResolver.query(uri, projection, null, null, null)
-        cursor?.use {
-            if (it.moveToFirst()) {
-                val columnIndex = it.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
-                filePath = it.getString(columnIndex)
+
+        val contentResolver: ContentResolver = context.contentResolver
+        val projection = arrayOf(MediaStore.MediaColumns.DISPLAY_NAME)
+
+        contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val displayNameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                val fileName = cursor.getString(displayNameIndex)
+                val cacheDir = context.cacheDir
+
+                val file = File(cacheDir, fileName)
+                val inputStream = contentResolver.openInputStream(uri)
+                if (inputStream != null) {
+                    file.copyInputStreamToFile(inputStream)
+                    filePath = file.path
+                }
             }
         }
+
         return filePath
     }
 
+    private fun File.copyInputStreamToFile(inputStream: java.io.InputStream) {
+        this.outputStream().use { fileOut ->
+            inputStream.copyTo(fileOut)
+        }
+    }
+
+    fun deleteVideoFile(filePath: String) {
+        val videoFile = File(filePath)
+        if (videoFile.exists()) {
+            videoFile.delete()
+        }
+    }
+
+    fun openURL(context: Context) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(Constants.PRIVACY_URL))
+        context.startActivity(intent)
+    }
+
+    fun makeTextLink(
+        textView: TextView,
+        str: String,
+        underlined: Boolean,
+        color: Int?,
+        action: (() -> Unit)? = null
+    ) {
+        val spannableString = SpannableString(textView.text)
+        val textColor = color ?: textView.currentTextColor
+        val clickableSpan = object : ClickableSpan() {
+            override fun onClick(textView: View) {
+                action?.invoke()
+            }
+
+            override fun updateDrawState(drawState: TextPaint) {
+                super.updateDrawState(drawState)
+                drawState.isUnderlineText = underlined
+                drawState.color = textColor
+            }
+        }
+        var index = spannableString.indexOf(str)
+        if (index == -1) {
+            index = 0
+        }
+        spannableString.setSpan(
+            clickableSpan,
+            index,
+            index + str.length,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        textView.text = spannableString
+        textView.movementMethod = LinkMovementMethod.getInstance()
+        textView.highlightColor = Color.TRANSPARENT
+    }
+
+    fun Context.shareVideo(videoPath: String) {
+        // Create the intent
+
+        // Create the intent
+        val shareIntent = Intent(Intent.ACTION_SEND)
+        shareIntent.type = "video/*"
+
+        // Set the path of the video file
+
+        // Set the path of the video file
+        val videoUri = Uri.parse(videoPath)
+        shareIntent.putExtra(Intent.EXTRA_STREAM, videoUri)
+
+        // Optionally, you can set a subject for the shared video
+
+        // Optionally, you can set a subject for the shared video
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Shared Video")
+
+        // Set the video description
+        shareIntent.putExtra(
+            Intent.EXTRA_TEXT,
+            "Create  slow-motion videos effortlessly with our amazing app. Download it from the Play Store: https://play.google.com/store/apps/details?id=$packageName"
+
+        )
+
+        // Start the activity for sharing
+        startActivity(Intent.createChooser(shareIntent, "Share Video"))
+
+    }
+
+    fun Context.showRenameDialog(videoPath: String, action: () -> Unit) {
+        val dialog = Dialog(this, R.style.FullScreenDialogStyle)
+        dialog.setContentView(R.layout.rename_dialog)
+
+        val fileName = dialog.findViewById<EditText>(R.id.fileName)
+        val btnOk = dialog.findViewById<TextView>(R.id.okBtn)
+        val btnCancel = dialog.findViewById<TextView>(R.id.cancelBtn)
+
+        btnOk.setOnClickListener {
+            val text = fileName.text.toString() + ".mp4"
+            if (text.isNotEmpty()) {
+                val parentDirectory = File(videoPath).parentFile
+                val newFileName = getUniqueFileName(parentDirectory!!, text)
+
+                val renamedFile = File(parentDirectory, newFileName)
+                File(videoPath).renameTo(renamedFile)
+
+                val runnable = Runnable {
+                    action.invoke()
+                }
+
+                // Post the runnable with the specified delay
+                handler.postDelayed(runnable, 100)
+            } else {
+                Toast.makeText(this, "Please enter a valid name!", Toast.LENGTH_SHORT).show()
+            }
+            dialog.dismiss()
+        }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun getUniqueFileName(directory: File, fileName: String): String {
+        var uniqueFileName = fileName
+        var counter = 1
+        val extension = getFileNameExtension(fileName)
+
+        while (File(directory, uniqueFileName).exists()) {
+            uniqueFileName = "${getFileNameWithoutExtension(fileName)} ($counter).$extension"
+            counter++
+        }
+
+        return uniqueFileName
+    }
+
+    private fun getFileNameExtension(fileName: String): String {
+        val dotIndex = fileName.lastIndexOf(".")
+        if (dotIndex == -1 || dotIndex == fileName.length - 1) {
+            return ""
+        }
+        return fileName.substring(dotIndex + 1)
+    }
+
+    private fun getFileNameWithoutExtension(fileName: String): String {
+        val dotIndex = fileName.lastIndexOf(".")
+        if (dotIndex == -1) {
+            return fileName
+        }
+        return fileName.substring(0, dotIndex)
+    }
+
+    fun Context.editVideo(videoPath: String) {
+        val uri = Uri.parse(videoPath)
+        val intent = Intent(this, TrimVideoActivity::class.java)
+        intent.putExtra("VideoUri", playVideo)
+        intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
+        intent.putExtra(
+            "VideoDuration",
+            getMediaDuration(this, uri)
+        )
+        startActivity(intent)
+    }
+
+    fun formatCSeconds(timeInSeconds: Long): String? {
+        val hours = timeInSeconds / 3600
+        val secondsLeft = timeInSeconds - hours * 3600
+        val minutes = secondsLeft / 60
+        val seconds = secondsLeft - minutes * 60
+        var formattedTime = ""
+        if (hours < 10) formattedTime += "0"
+        formattedTime += "$hours:"
+        if (minutes < 10) formattedTime += "0"
+        formattedTime += "$minutes:"
+        if (seconds < 10) formattedTime += "0"
+        formattedTime += seconds
+        return formattedTime
+    }
+
+    fun logVideoBitrate(videoFilePath: String) {
+        try {
+            val extractor = MediaExtractor()
+            extractor.setDataSource(videoFilePath)
+
+            val videoTrackIndex = selectVideoTrack(extractor)
+            if (videoTrackIndex >= 0) {
+                extractor.selectTrack(videoTrackIndex)
+
+                val format = extractor.getTrackFormat(videoTrackIndex)
+                val bitrate = format.getInteger(MediaFormat.KEY_BIT_RATE)
+
+                Log.d("VideoRes", "Video Bitrate: $bitrate")
+            }
+        } catch (e: Exception) {
+            Log.d("VideoRes", "Video Bitrate: Error")
+            e.printStackTrace()
+        }
+    }
+
+    private fun selectVideoTrack(extractor: MediaExtractor): Int {
+        val trackCount = extractor.trackCount
+        for (i in 0 until trackCount) {
+            val format = extractor.getTrackFormat(i)
+            val mime = format.getString(MediaFormat.KEY_MIME)
+            if (mime?.startsWith("video/") == true) {
+                return i
+            }
+        }
+        return -1
+    }
+
+    fun Context.getVideoThumbnail(videoFilePath: String): Bitmap? {
+        val retriever = MediaMetadataRetriever()
+        retriever.setDataSource(this, Uri.parse(videoFilePath))
+
+        return retriever.getFrameAtTime(0, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+    }
 
 }

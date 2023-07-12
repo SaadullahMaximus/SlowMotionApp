@@ -11,6 +11,9 @@ import com.example.slowmotionapp.R
 import com.example.slowmotionapp.databinding.ActivityPlayerBinding
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
 import com.example.slowmotionapp.utils.Utils.milliSecondsToTimer
+import com.example.slowmotionapp.utils.Utils.shareVideo
+import com.example.slowmotionapp.utils.Utils.singleClick
+import java.io.File
 
 class PlayerActivity : AppCompatActivity() {
 
@@ -24,6 +27,7 @@ class PlayerActivity : AppCompatActivity() {
     private var visible = true
 
     private var duration: Int = 0
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +44,8 @@ class PlayerActivity : AppCompatActivity() {
 
         binding.videoView.setVideoURI(Uri.parse(playVideo))
 
+        binding.videoName.text = File(playVideo).name
+
         binding.videoView.setOnPreparedListener { mediaPlayer ->
             duration = mediaPlayer.duration
             binding.seekBar.max = duration
@@ -52,6 +58,7 @@ class PlayerActivity : AppCompatActivity() {
         progressUpdateRunnable = Runnable {
             updateSeekBarProgress()
         }
+
         handler.postDelayed(progressUpdateRunnable, 100)
 
         binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -76,7 +83,7 @@ class PlayerActivity : AppCompatActivity() {
             }
         })
 
-        binding.videoView.setOnClickListener {
+        binding.overlayLayoutPlayer.setOnClickListener {
             if (visible) {
                 hideViews()
             } else {
@@ -99,7 +106,10 @@ class PlayerActivity : AppCompatActivity() {
         binding.videoView.setOnCompletionListener {
             binding.seekBar.progress = 0
             binding.videoView.seekTo(0)
-            binding.playBtn.setImageResource(R.drawable.baseline_play_arrow)
+            binding.videoView.start()
+            showViews()
+            handler.removeCallbacks(hideViewsRunnable)
+            handler.postDelayed(hideViewsRunnable, 5000)
         }
 
         binding.forwardBtn.setOnClickListener {
@@ -121,6 +131,14 @@ class PlayerActivity : AppCompatActivity() {
                 binding.videoView.seekTo(newPosition)
                 binding.seekBar.progress = newPosition
                 binding.currentTime.text = milliSecondsToTimer(newPosition.toLong())
+            }
+        }
+
+        binding.shareBtn.setOnClickListener {
+            binding.playBtn.setImageResource(R.drawable.baseline_play_arrow)
+            binding.videoView.pause()
+            singleClick {
+                shareVideo(playVideo)
             }
         }
 
@@ -159,7 +177,6 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
         finish()
     }
 }

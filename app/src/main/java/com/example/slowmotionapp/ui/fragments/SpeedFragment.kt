@@ -1,7 +1,6 @@
 package com.example.slowmotionapp.ui.fragments
 
 import android.animation.ValueAnimator
-import android.app.ProgressDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,15 +12,19 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.arthenica.mobileffmpeg.Config
 import com.arthenica.mobileffmpeg.FFmpeg
-import com.example.slowmotionapp.R
+import com.example.slowmotionapp.customviews.CustomWaitingDialog
 import com.example.slowmotionapp.customviews.KnobView
 import com.example.slowmotionapp.databinding.FragmentSpeedBinding
 import com.example.slowmotionapp.extras.VideoPlayerState
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.knobFinalValue
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.knobPosition
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
-import com.example.slowmotionapp.ui.activities.MainActivity.Companion.tempCacheName
-import com.example.slowmotionapp.utils.Utils
+import com.example.slowmotionapp.utils.Utils.commandsGenerator
+import com.example.slowmotionapp.utils.Utils.createCacheTempFile
+import com.example.slowmotionapp.utils.Utils.deleteFromGallery
 import com.example.slowmotionapp.utils.Utils.getVideoDuration
+import com.example.slowmotionapp.utils.Utils.player
+import com.example.slowmotionapp.utils.Utils.singleClick
 import com.example.slowmotionapp.viewmodel.SharedViewModel
 import java.io.File
 
@@ -34,18 +37,19 @@ class SpeedFragment : Fragment() {
     private var videoPlayerState: VideoPlayerState = VideoPlayerState()
 
     private lateinit var sharedViewModel: SharedViewModel
-
-    // Get a reference to the shared ViewModel
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
+
+        sharedViewModel.animateKnob.observe(viewLifecycleOwner) { newValue ->
+            animateKnob(newValue.toFloat())
+        }
+
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        // Inflate the layout for this fragment
         _binding = FragmentSpeedBinding.inflate(inflater, container, false)
 
         videoPlayerState.setFilename(mainCachedFile)
@@ -59,13 +63,29 @@ class SpeedFragment : Fragment() {
             override fun onKnobPositionChanged(knobValue: Int) {
                 // Handle the knob value change here
                 // You can display it in a TextView or perform any other actions
-                Log.d("Knob", "onKnobPositionChanged: $knobValue")
             }
 
             override fun onKnobStopped(knobValue: Int) {
                 handleKnobStopMoving(knobValue)
             }
         })
+
+        binding.btnOk.setOnClickListener {
+            singleClick {
+                if (knobFinalValue != 7) {
+                    val tempPath = createCacheTempFile(requireContext())
+                    videoMotionCommand(tempPath, knobFinalValue)
+
+                    handleKnobStopMoving(7)
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        "Please move slider first",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
 
 
 
@@ -74,28 +94,59 @@ class SpeedFragment : Fragment() {
 
     private fun handleKnobStopMoving(knobValue: Int) {
         // Handle the event when the user stops moving the knob
-        Log.d("Saad", "handleKnobStopMoving: Stop Moving")
-
-        knobPosition = knobValue * 100F
-        Log.d("Saad", "handleKnobStopMoving: FileName $tempCacheName")
-        Log.d("Saad", "handleKnobStopMoving: KnobValue $knobValue")
-        val tempPath = Utils.createCacheTempFile(requireContext())
-        videoSpeedChange(tempPath, knobValue)
+        videoSpeedChange(knobValue)
     }
 
-    private fun videoSpeedChange(tempPath: String, knobValue: Int) {
-        videoMotionCommand(tempPath, knobValue)
+    private fun videoSpeedChange(knobValue: Int) {
+
+        knobFinalValue = knobValue
+
+        when (knobValue) {
+            1 -> {
+                player?.setPlaybackSpeed(0.1f)
+            }
+            2 -> {
+                player?.setPlaybackSpeed(0.25f)
+            }
+            3 -> {
+                player?.setPlaybackSpeed(0.40f)
+            }
+            4 -> {
+                player?.setPlaybackSpeed(0.55f)
+            }
+            5 -> {
+                player?.setPlaybackSpeed(0.70f)
+            }
+            6 -> {
+                player?.setPlaybackSpeed(0.85f)
+            }
+            7 -> {
+                player?.setPlaybackSpeed(1f)
+            }
+            8 -> {
+                player?.setPlaybackSpeed(1.3f)
+            }
+            9 -> {
+                player?.setPlaybackSpeed(1.6f)
+            }
+            10 -> {
+                player?.setPlaybackSpeed(2f)
+            }
+            11 -> {
+                player?.setPlaybackSpeed(2.3f)
+            }
+            12 -> {
+                player?.setPlaybackSpeed(2.6f)
+            }
+            13 -> {
+                player?.setPlaybackSpeed(3f)
+            }
+        }
     }
 
     private fun videoMotionCommand(path: String, value: Int) {
         val strArr: Array<String>
         var str = ""
-
-        val valueOf: String = java.lang.String.valueOf(this.videoPlayerState.getStart() / 1000)
-        java.lang.String.valueOf(this.videoPlayerState.getStop() / 1000)
-
-
-        val filename: String = mainCachedFile
 
         var f2 = 0.0f
         when (value) {
@@ -139,9 +190,6 @@ class SpeedFragment : Fragment() {
                 f2 = 0.333f
             }
         }
-
-        val valueOf2: String = java.lang.String.valueOf(this.videoPlayerState.getDuration() * f2)
-        Log.d("valueOf2", "videoMotionCommand: $valueOf2 value $value")
 
         when (value) {
             1 -> {
@@ -187,16 +235,21 @@ class SpeedFragment : Fragment() {
         }
 
         try {
+
+            Log.d("HelloWorld", "videoMotionCommand: $value, $f2, $str")
+
             val sb = StringBuilder()
+
             sb.append("setpts=")
             sb.append(f2)
             sb.append("*PTS")
+
             strArr = arrayOf(
                 "-y",
                 "-ss",
-                valueOf,
+                "0",
                 "-i",
-                filename,
+                mainCachedFile,
                 "-filter:v",
                 sb.toString(),
                 "-filter:a",
@@ -208,11 +261,9 @@ class SpeedFragment : Fragment() {
                 "-strict",
                 "experimental",
                 "-t",
-                valueOf2,
+                (getVideoDuration(requireContext(), mainCachedFile) * f2).toString(),
                 path
             )
-
-
             executeFFMPEG(strArr, path)
         } catch (unused: Exception) {
             val file = File(path)
@@ -226,56 +277,44 @@ class SpeedFragment : Fragment() {
     }
 
     private fun executeFFMPEG(strArr: Array<String>, str: String) {
+
+        sharedViewModel.musicSelectPauseEveryThing(true)
+
         sharedViewModel.pauseVideo(true)
-        val progressDialog =
-            ProgressDialog(requireContext(), R.style.CustomDialog)
-        progressDialog.window!!.setBackgroundDrawableResource(R.color.transparent)
-        progressDialog.isIndeterminate = true
-        progressDialog.setCancelable(false)
-        progressDialog.setMessage("Please Wait")
+        val progressDialog = CustomWaitingDialog(requireContext())
+        progressDialog.setCloseButtonClickListener {
+            progressDialog.dismiss()
+            FFmpeg.cancel()
+        }
         progressDialog.show()
-        val ffmpegCommand: String = Utils.commandsGenerator(strArr)
+        progressDialog.setText("Please wait")
+
+        val ffmpegCommand: String = commandsGenerator(strArr)
         FFmpeg.executeAsync(
             ffmpegCommand
         ) { _, returnCode ->
-            Log.d(
-                "TAG",
-                String.format("FFMPEG process exited with rc %d.", returnCode)
-            )
-            Log.d("TAG", "FFMPEG process output:")
+
             Config.printLastCommandOutput(Log.INFO)
-            progressDialog.dismiss()
             when (returnCode) {
                 Config.RETURN_CODE_SUCCESS -> {
                     progressDialog.dismiss()
-                    Toast.makeText(requireContext(), "Success", Toast.LENGTH_SHORT).show()
                     mainCachedFile = str
                     updateVideoUri(str)
+                    animateKnob(700F)
                 }
                 Config.RETURN_CODE_CANCEL -> {
-                    Log.d("FFMPEFailure", str)
                     try {
+                        animateKnob(700F)
                         File(str).delete()
-                        Utils.deleteFromGallery(str, requireContext())
-                        Toast.makeText(
-                            requireContext(),
-                            "Error Creating Video",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        deleteFromGallery(str, requireContext())
                     } catch (th: Throwable) {
                         th.printStackTrace()
                     }
                 }
                 else -> {
-                    Log.d("FFMPEFailure", str)
                     try {
                         File(str).delete()
-                        Utils.deleteFromGallery(str, requireContext())
-                        Toast.makeText(
-                            requireContext(),
-                            "Error Creating Video",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        deleteFromGallery(str, requireContext())
                     } catch (th: Throwable) {
                         th.printStackTrace()
                     }
@@ -306,4 +345,5 @@ class SpeedFragment : Fragment() {
     private fun updateVideoUri(path: String) {
         sharedViewModel.setVideoUri(path)
     }
+
 }

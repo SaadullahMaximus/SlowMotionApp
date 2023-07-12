@@ -1,0 +1,97 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center">
+
+    <FrameLayout
+        android:id="@+id/overlay_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#2E2E2E"
+        app:cardCornerRadius="@dimen/_9sdp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="@dimen/_200sdp"
+            android:layout_height="wrap_content"
+            android:background="#2E2E2E"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/_25sdp"
+            android:paddingTop="@dimen/_25sdp"
+            android:paddingEnd="@dimen/_25sdp"
+            android:paddingBottom="@dimen/_10sdp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/fredokaregular"
+                android:text="@string/permissions"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_14sdp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginBottom="@dimen/_8sdp"
+                android:fontFamily="@font/fredokaregular"
+                android:text="Permissions are necessary to perform actions"
+                android:textColor="#919191"
+                android:textSize="@dimen/_12sdp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/noBtn"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_8sdp"
+                    android:layout_marginBottom="@dimen/_8sdp"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/fredokaregular"
+                    android:gravity="center"
+                    android:padding="@dimen/_4sdp"
+                    android:text="@string/not_now"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/_14sdp" />
+
+                <TextView
+                    android:id="@+id/yesBtn"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_8sdp"
+                    android:layout_marginBottom="@dimen/_8sdp"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/fredokaregular"
+                    android:gravity="center"
+                    android:padding="@dimen/_4sdp"
+                    android:text="OK"
+                    android:textColor="#FFC114"
+                    android:textSize="@dimen/_14sdp" />
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

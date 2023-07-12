@@ -2,9 +2,6 @@ package com.example.slowmotionapp.effects
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.media.ThumbnailUtils
-import android.provider.MediaStore
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.customviews.CircularImageView
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
+import com.example.slowmotionapp.utils.Utils.getVideoThumbnail
 import jp.co.cyberagent.android.gpuimage.GPUImage
 import jp.co.cyberagent.android.gpuimage.GPUImageToneCurveFilter
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +22,8 @@ import kotlinx.coroutines.withContext
 class FilterAdapter(
     private val values: List<FilterType>,
     private val listener: OnItemClickListener,
-    private val lifecycleScope: LifecycleCoroutineScope
+    private val lifecycleScope: LifecycleCoroutineScope,
+    private val context: Context
 ) : RecyclerView.Adapter<FilterAdapter.ViewHolder>() {
 
     interface OnItemClickListener {
@@ -54,10 +53,7 @@ class FilterAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
         lifecycleScope.launch(Dispatchers.Default) {
-            val bitmap = ThumbnailUtils.createVideoThumbnail(
-                mainCachedFile,
-                MediaStore.Video.Thumbnails.MICRO_KIND
-            )
+            val bitmap = context.getVideoThumbnail(mainCachedFile)
 
             val filteredBitmap = applyFilterAsync(bitmap!!, holder.itemView.context)
 
@@ -80,7 +76,6 @@ class FilterAdapter(
             val gpuFilter = GPUImageToneCurveFilter()
 
             val inputFilter = context.assets.open(("acv/tone_cuver_sample.acv"))
-            Log.d("FILTER", "applyFilterAsync: $inputFilter")
 
             gpuFilter.setFromCurveFileInputStream(inputFilter)
             inputFilter.close()

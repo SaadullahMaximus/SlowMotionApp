@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Gradient belt -->
+    <item>
+        <shape android:shape="oval">
+            <gradient
+                android:type="radial"
+                android:gradientRadius="80%"
+                android:centerX="50%"
+                android:centerY="50%"
+                android:startColor="#FFFF00"
+                android:endColor="#FFFFFF"
+                />
+        </shape>
+    </item>
+
+    <!-- White circle -->
+    <item
+        android:bottom="10dp"
+        android:left="10dp"
+        android:right="10dp"
+        android:top="10dp">
+        <shape android:shape="oval">
+            <solid android:color="#FFFFFF" />
+        </shape>
+    </item>
+
+</layer-list>
+
+
+
+

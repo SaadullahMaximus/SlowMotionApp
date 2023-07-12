@@ -7,16 +7,38 @@
     android:background="@color/black"
     tools:context=".ui.activities.PlayerActivity">
 
-    <VideoView
-        android:id="@+id/videoView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_17sdp"
-        android:layout_marginBottom="@dimen/_19sdp"
+    <FrameLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/_5sdp"
+        android:layout_marginBottom="@dimen/_8sdp"
         app:layout_constraintBottom_toTopOf="@id/seekBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/videoName" />
+        app:layout_constraintTop_toBottomOf="@id/videoName">
+
+        <VideoView
+            android:id="@+id/videoView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/_17sdp"
+            android:layout_marginBottom="@dimen/_19sdp" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/overlay_layout_player"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@android:color/transparent"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toTopOf="@id/seekBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/backBtn" />
 
     <ImageView
         android:id="@+id/backBtn"
@@ -30,15 +52,30 @@
 
     <TextView
         android:id="@+id/videoName"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_17sdp"
         android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginEnd="@dimen/_17sdp"
+        android:ellipsize="end"
         android:fontFamily="@font/fredokaregular"
-        android:text="Video Name"
+        android:maxLines="1"
+        android:text="Video Player"
         android:textColor="@color/white"
         android:textSize="@dimen/_14sdp"
+        app:layout_constraintEnd_toStartOf="@id/shareBtn"
         app:layout_constraintStart_toEndOf="@id/backBtn"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <ImageView
+        android:id="@+id/shareBtn"
+        android:layout_width="@dimen/_20sdp"
+        android:layout_height="@dimen/_20sdp"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginEnd="@dimen/_17sdp"
+        android:src="@drawable/share_ic"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
