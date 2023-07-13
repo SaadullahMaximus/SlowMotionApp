@@ -244,12 +244,12 @@ class TrimVideoActivity : AppCompatActivity() {
             trimVideo(
                 this, arrayOf(
                     "-ss",
-                    formatCSeconds(mStartPosition.toLong())!!,
+                    formatCSeconds(mStartPosition.toLong()),
                     "-y",
                     "-i",
                     file.toString(),
                     "-t",
-                    formatCSeconds(durationSeconds.toLong())!!,
+                    formatCSeconds(durationSeconds.toLong()),
                     "-vcodec",
                     "mpeg4",
                     "-b:v",
@@ -465,6 +465,7 @@ class TrimVideoActivity : AppCompatActivity() {
                     try {
                         Log.d("Canceled", "trimVideo: Canceled")
                         progressDialog.setText("Trimmed 0%")
+                        progressDialog.dismiss()
                         Config.resetStatistics()
                         File(str).delete()
                         deleteFromGallery(str, context)
@@ -478,8 +479,9 @@ class TrimVideoActivity : AppCompatActivity() {
                 else -> {
                     try {
                         File(str).delete()
+                        progressDialog.dismiss()
+                        Config.resetStatistics()
                         deleteFromGallery(str, context)
-                        Toast.makeText(context, "Error Creating Video", Toast.LENGTH_SHORT).show()
                     } catch (th: Throwable) {
                         th.printStackTrace()
                     }
