@@ -26,7 +26,7 @@
     <string name="move_pointer_to_select_the_speed_of_video">Move pointer to select the speed</string>
     <string name="effect">Effect</string>
     <string name="content_settings">Content Settings</string>
-    <string name="click_to_crop">Click to Crop</string>
+    <string name="click_to_crop">Select aspect ratio to Preview video</string>
     <string name="_9_16">9:16</string>
     <string name="free">Free</string>
     <string name="_1_1">1:1</string>
@@ -34,11 +34,14 @@
     <string name="ok">OK</string>
     <string name="permissions">Permissions</string>
     <string name="not_now">Not now</string>
-    <string name="my_text">My studio is empty\nLet\'s create your magical videos</string>
-    <string name="my_text2">Ooops\!\!\!\nYour studio is empty</string>
+    <string name="my_text">Empty Studio?\nNo problem\! Tap \"Create Now\" and unleash the magic of cropping in your videos.</string>
+    <string name="my_text2">Empty Studio?\nNo problem\! Tap \"Create Now\" and unleash the magic of slow-motion in your videos.</string>
+    <string name="my_text3">Empty Studio?\nNo problem\! Tap \"Create Now\" and unleash the magic of trimming in your videos.</string>
 
     <string name="create_new">Create New</string>
     <string name="quick_effortless_safe"><![CDATA[Quick, Effortless & Safe]]></string>
     <string name="slow_motion">Slow-Motion</string>
     <string name="let_s_start">Let\'s Start</string>
+    <string name="gallerydialog">Ready to select video from your Gallery? Simply tap \"Proceed\"</string>
+    <string name="cameradialog">Ready to record video from your camera? Simply tap \"Proceed\"</string>
 </resources>

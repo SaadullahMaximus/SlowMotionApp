@@ -22,6 +22,7 @@
         android:layout_marginTop="@dimen/_20sdp"
         android:padding="@dimen/_2sdp"
         android:src="@drawable/ic_undo"
+        app:layout_constraintBottom_toTopOf="@id/frameLayout"
         app:layout_constraintEnd_toStartOf="@+id/rotateRight"
         app:layout_constraintStart_toEndOf="@+id/backBtn"
         app:layout_constraintTop_toTopOf="parent" />
@@ -31,8 +32,10 @@
         android:layout_width="@dimen/_25sdp"
         android:layout_height="@dimen/_25sdp"
         android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginEnd="@dimen/_30sdp"
         android:padding="@dimen/_2sdp"
         android:src="@drawable/ic_redo"
+        app:layout_constraintBottom_toTopOf="@id/frameLayout"
         app:layout_constraintEnd_toStartOf="@+id/linearLayoutBtnContainer"
         app:layout_constraintStart_toEndOf="@+id/rotateLeft"
         app:layout_constraintTop_toTopOf="parent" />
@@ -143,9 +146,9 @@
         android:layout_marginBottom="@dimen/_3sdp"
         android:src="@drawable/baseline_play_arrow"
         android:visibility="invisible"
-        app:layout_constraintTop_toBottomOf="@id/frameLayout"
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/frameLayout" />
 
     <ImageView
         android:id="@+id/playPauseButton2"
@@ -155,9 +158,9 @@
         android:layout_marginTop="@dimen/_3sdp"
         android:layout_marginBottom="@dimen/_3sdp"
         android:src="@drawable/baseline_play_arrow"
-        app:layout_constraintTop_toBottomOf="@id/frameLayout"
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/frameLayout" />
 
     <SeekBar
         android:id="@+id/seekBar"
@@ -174,7 +177,7 @@
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
         app:layout_constraintEnd_toStartOf="@+id/totalDurationTextView"
         app:layout_constraintStart_toEndOf="@+id/playPauseButton"
-        app:layout_constraintTop_toBottomOf="@id/frameLayout"/>
+        app:layout_constraintTop_toBottomOf="@id/frameLayout" />
 
     <SeekBar
         android:id="@+id/seekBar2"
@@ -190,7 +193,7 @@
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
         app:layout_constraintEnd_toStartOf="@+id/totalDurationTextView"
         app:layout_constraintStart_toEndOf="@+id/playPauseButton2"
-        app:layout_constraintTop_toBottomOf="@id/frameLayout"/>
+        app:layout_constraintTop_toBottomOf="@id/frameLayout" />
 
     <TextView
         android:id="@+id/totalDurationTextView"
@@ -204,9 +207,9 @@
         android:text="@string/_00_00_"
         android:textColor="@color/baseColor"
         android:textSize="@dimen/_11sdp"
-        app:layout_constraintTop_toBottomOf="@id/frameLayout"
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/frameLayout" />
 
     <FrameLayout
         android:id="@+id/fragment_container_main"

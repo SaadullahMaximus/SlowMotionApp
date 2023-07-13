@@ -86,7 +86,7 @@ class SettingsActivity : AppCompatActivity() {
         val emailIntent = Intent(Intent.ACTION_SENDTO)
         emailIntent.data = Uri.parse("mailto:")
         emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf("maximustoolsapp@gmail.com"))
-        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Slow-Motion Video Maker")
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Feedback | ${getString(R.string.app_name)}")
 
         try {
             startActivity(Intent.createChooser(emailIntent, "Contact Us"))
@@ -105,7 +105,7 @@ class SettingsActivity : AppCompatActivity() {
         shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Check out this app!")
         shareIntent.putExtra(
             Intent.EXTRA_TEXT,
-            "Create  slow-motion videos effortlessly with our amazing app. Download it from the Play Store: https://play.google.com/store/apps/details?id=$packageName"
+            "Effortlessly create mesmerizing slow-motion videos with our exceptional app. Unlock the power of captivating visuals by downloading it from the Play Store today: https://play.google.com/store/apps/details?id=$packageName"
         )
 
         val chooserIntent = Intent.createChooser(shareIntent, "Share $appName")

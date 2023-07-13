@@ -251,7 +251,7 @@
             android:layout_weight="1.5"
             android:fontFamily="@font/fredokaregular"
             android:gravity="center"
-            android:text="@string/ok"
+            android:text="Crop"
             android:textAllCaps="true"
             android:textColor="@color/baseColor"
             android:textSize="@dimen/_13sdp" />

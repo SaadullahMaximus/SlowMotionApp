@@ -51,7 +51,7 @@
                 android:layout_marginBottom="@dimen/_20sdp"
                 android:fontFamily="@font/fredokalight"
                 android:gravity="center"
-                android:text="You are going to pick video from your gallery."
+                android:text="@string/gallerydialog"
                 android:textColor="#FFC80B"
                 android:textSize="@dimen/_12sdp" />
 

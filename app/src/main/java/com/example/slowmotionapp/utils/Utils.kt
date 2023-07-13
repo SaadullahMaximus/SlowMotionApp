@@ -499,7 +499,10 @@ object Utils {
         shareIntent.putExtra(Intent.EXTRA_STREAM, videoUri)
 
         // Optionally, you can set a subject for the shared video
-        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Shared Video")
+        shareIntent.putExtra(
+            Intent.EXTRA_SUBJECT,
+            "Sharing Video from ${getString(R.string.app_name)}"
+        )
 
         // Set the video description
         shareIntent.putExtra(

@@ -10,10 +10,10 @@
     <TextView
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"        android:layout_margin="@dimen/_10sdp"
-
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/_10sdp"
         android:fontFamily="@font/fredokaregular"
-        android:text="Click to Crop"
+        android:text="@string/click_to_crop"
         android:textColor="@color/white"
         android:textSize="@dimen/_12sdp"
         app:layout_constraintStart_toStartOf="parent"

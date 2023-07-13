@@ -51,7 +51,7 @@
                 android:layout_marginBottom="@dimen/_20sdp"
                 android:fontFamily="@font/fredokalight"
                 android:gravity="center"
-                android:text="You are going to record video from your camera."
+                android:text="@string/cameradialog"
                 android:textColor="#FFC80B"
                 android:textSize="@dimen/_12sdp" />
 
