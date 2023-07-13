@@ -541,7 +541,7 @@ object Utils {
             val inputText = fileName.text.trim().toString()
             if (inputText.isNotEmpty()) {
                 // Restrict input to 50 characters
-                val limitedText = inputText.take(50)
+                val limitedText = inputText.take(100)
 
                 // Remove special characters using regular expression
                 val sanitizedText = limitedText.replace("[^a-zA-Z\\d ]".toRegex(), "")

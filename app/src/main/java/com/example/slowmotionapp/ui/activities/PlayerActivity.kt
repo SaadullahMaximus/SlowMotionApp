@@ -4,6 +4,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.TextUtils
 import android.view.View
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
@@ -45,6 +46,10 @@ class PlayerActivity : AppCompatActivity() {
         binding.videoView.setVideoURI(Uri.parse(playVideo))
 
         binding.videoName.text = File(playVideo).name
+        binding.videoName.isSelected = true
+        binding.videoName.isSingleLine = true
+        binding.videoName.ellipsize = TextUtils.TruncateAt.MARQUEE
+        binding.videoName.marqueeRepeatLimit = -1
 
         binding.videoView.setOnPreparedListener { mediaPlayer ->
             duration = mediaPlayer.duration
