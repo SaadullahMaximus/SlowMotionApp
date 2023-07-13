@@ -28,10 +28,6 @@ import com.example.slowmotionapp.ui.fragments.savedfragments.SavedEditedFragment
 import com.example.slowmotionapp.ui.fragments.savedfragments.SavedTrimFragment
 import com.example.slowmotionapp.utils.Utils
 import com.example.slowmotionapp.utils.Utils.convertDurationInSec
-import com.example.slowmotionapp.utils.Utils.croppedDir
-import com.example.slowmotionapp.utils.Utils.editedDir
-import com.example.slowmotionapp.utils.Utils.fetchVideosFromDirectory
-import com.example.slowmotionapp.utils.Utils.trimmedDir
 import com.google.android.material.tabs.TabLayout
 import java.io.File
 
@@ -40,23 +36,12 @@ class SavedActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySavedBinding
     private var masterVideoFile: File? = null
 
-
-    companion object {
-        var croppedFiles = fetchVideosFromDirectory(croppedDir)
-        var editedFiles = fetchVideosFromDirectory(editedDir)
-        var trimmedFiles = fetchVideosFromDirectory(trimmedDir)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySavedBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         val viewPagerAdapter = ViewPagerSetter(supportFragmentManager)
-
-        croppedFiles = fetchVideosFromDirectory(croppedDir)
-        editedFiles = fetchVideosFromDirectory(editedDir)
-        trimmedFiles = fetchVideosFromDirectory(trimmedDir)
 
         viewPagerAdapter.addFragment(SavedEditedFragment(), "Edited")
         viewPagerAdapter.addFragment(SavedTrimFragment(), "Trimmed")

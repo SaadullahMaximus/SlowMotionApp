@@ -9,7 +9,13 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.example.slowmotionapp.adapters.VideoAdapter
 import com.example.slowmotionapp.databinding.FragmentSavedTrimBinding
 import com.example.slowmotionapp.ui.activities.SavedActivity
-import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.trimmedFiles
+import com.example.slowmotionapp.utils.Utils.fetchVideosFromDirectory
+import com.example.slowmotionapp.utils.Utils.trimmedDir
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
 class SavedTrimFragment : Fragment(), VideoAdapter.AdapterCallback {
 
@@ -18,24 +24,40 @@ class SavedTrimFragment : Fragment(), VideoAdapter.AdapterCallback {
 
     private lateinit var videoAdapter: VideoAdapter
 
-
+    private val trimmedFiles = mutableListOf<File>()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSavedTrimBinding.inflate(inflater, container, false)
 
-        if (trimmedFiles.isNotEmpty()) {
 
-            binding.recyclerView.visibility = View.VISIBLE
+        binding.recyclerView.visibility = View.GONE
+        binding.lottieAnimationView.visibility = View.VISIBLE
+        binding.btnCreateNew.visibility = View.VISIBLE
+        binding.title.visibility = View.VISIBLE
 
-            binding.lottieAnimationView.visibility = View.GONE
-            binding.btnCreateNew.visibility = View.GONE
-            binding.title.visibility = View.GONE
+        trimmedFiles.clear()
 
-            adapterSet()
+        // Fetch data asynchronously
+        GlobalScope.launch(Dispatchers.IO) {
+            trimmedFiles.addAll(fetchVideosFromDirectory(trimmedDir))
 
+            // Switch back to the main thread to update UI
+            withContext(Dispatchers.Main) {
+                if (trimmedFiles.isNotEmpty()) {
+                    binding.recyclerView.visibility = View.VISIBLE
+                    binding.lottieAnimationView.visibility = View.GONE
+                    binding.btnCreateNew.visibility = View.GONE
+                    binding.title.visibility = View.GONE
+
+                    adapterSet()
+                } else {
+                    binding.lottieAnimationView.visibility = View.VISIBLE
+                    binding.btnCreateNew.visibility = View.VISIBLE
+                    binding.title.visibility = View.VISIBLE
+                }
+            }
         }
-
 
         binding.btnCreateNew.setOnClickListener {
             (activity as? SavedActivity)?.openGallery()
@@ -60,5 +82,10 @@ class SavedTrimFragment : Fragment(), VideoAdapter.AdapterCallback {
         binding.lottieAnimationView.visibility = View.VISIBLE
         binding.btnCreateNew.visibility = View.VISIBLE
         binding.title.visibility = View.VISIBLE
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
