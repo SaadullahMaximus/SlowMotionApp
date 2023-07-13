@@ -29,6 +29,7 @@ import android.view.View
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.FileProvider
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.interfaces.MyListener
@@ -494,7 +495,13 @@ object Utils {
         shareIntent.type = "video/*"
 
         // Set the path of the video file
-        val videoUri = Uri.parse(videoPath)
+        val videoFile = File(videoPath)
+        val videoUri = FileProvider.getUriForFile(
+            this,
+            "$packageName.provider",
+            videoFile
+        )
+
         shareIntent.putExtra(Intent.EXTRA_STREAM, videoUri)
 
         // Optionally, you can set a subject for the shared video
@@ -505,8 +512,18 @@ object Utils {
             Intent.EXTRA_TEXT,
             "Create slow-motion videos effortlessly with our amazing app. Download it from the Play Store: https://play.google.com/store/apps/details?id=$packageName"
         )
+
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+        // Grant persistent URI permission to the receiving app
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+        // Create a chooser to display the available sharing options
+        val chooser = Intent.createChooser(shareIntent, "Share Video")
+        chooser.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+
         // Start the activity for sharing
-        startActivity(Intent.createChooser(shareIntent, "Share Video"))
+        startActivity(chooser)
     }
 
     fun Context.showRenameDialog(videoPath: String, action: () -> Unit) {
