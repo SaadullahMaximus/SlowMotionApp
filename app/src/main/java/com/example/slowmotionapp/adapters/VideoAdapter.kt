@@ -15,25 +15,21 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.renamedName
 import com.example.slowmotionapp.ui.activities.PlayerActivity
-import com.example.slowmotionapp.utils.Utils.croppedDir
 import com.example.slowmotionapp.utils.Utils.deleteVideoFile
 import com.example.slowmotionapp.utils.Utils.editVideo
-import com.example.slowmotionapp.utils.Utils.editedDir
-import com.example.slowmotionapp.utils.Utils.fetchVideosFromDirectory
 import com.example.slowmotionapp.utils.Utils.milliSecondsToTimer
 import com.example.slowmotionapp.utils.Utils.refreshGallery
 import com.example.slowmotionapp.utils.Utils.shareVideo
 import com.example.slowmotionapp.utils.Utils.showRenameDialog
-import com.example.slowmotionapp.utils.Utils.trimmedDir
 import com.google.android.exoplayer2.util.Log
 import java.io.File
 
 
 class VideoAdapter(
     val context: Context,
-    private var videos: MutableList<File>,
-    private val type: Int
+    private var videos: MutableList<File>
 ) :
     RecyclerView.Adapter<VideoAdapter.VideoViewHolder>() {
 
@@ -102,17 +98,7 @@ class VideoAdapter(
                     R.id.renameItem -> {
                         context.showRenameDialog(videoFile.path) {
                             notifyItemChanged(position)
-                            when (type) {
-                                1 -> {
-                                    videos = fetchVideosFromDirectory(croppedDir)
-                                }
-                                2 -> {
-                                    videos = fetchVideosFromDirectory(editedDir)
-                                }
-                                3 -> {
-                                    videos = fetchVideosFromDirectory(trimmedDir)
-                                }
-                            }
+                            videos[position] = renamedName
                         }
                     }
                     R.id.deleteItem -> {

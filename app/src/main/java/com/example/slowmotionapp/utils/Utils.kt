@@ -488,19 +488,14 @@ object Utils {
     }
 
     fun Context.shareVideo(videoPath: String) {
-        // Create the intent
 
         // Create the intent
         val shareIntent = Intent(Intent.ACTION_SEND)
         shareIntent.type = "video/*"
 
         // Set the path of the video file
-
-        // Set the path of the video file
         val videoUri = Uri.parse(videoPath)
         shareIntent.putExtra(Intent.EXTRA_STREAM, videoUri)
-
-        // Optionally, you can set a subject for the shared video
 
         // Optionally, you can set a subject for the shared video
         shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Shared Video")
@@ -508,13 +503,10 @@ object Utils {
         // Set the video description
         shareIntent.putExtra(
             Intent.EXTRA_TEXT,
-            "Create  slow-motion videos effortlessly with our amazing app. Download it from the Play Store: https://play.google.com/store/apps/details?id=$packageName"
-
+            "Create slow-motion videos effortlessly with our amazing app. Download it from the Play Store: https://play.google.com/store/apps/details?id=$packageName"
         )
-
         // Start the activity for sharing
         startActivity(Intent.createChooser(shareIntent, "Share Video"))
-
     }
 
     fun Context.showRenameDialog(videoPath: String, action: () -> Unit) {
@@ -596,7 +588,7 @@ object Utils {
         startActivity(intent)
     }
 
-    fun formatCSeconds(timeInSeconds: Long): String? {
+    fun formatCSeconds(timeInSeconds: Long): String {
         val hours = timeInSeconds / 3600
         val secondsLeft = timeInSeconds - hours * 3600
         val minutes = secondsLeft / 60

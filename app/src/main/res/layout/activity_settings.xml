@@ -193,7 +193,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/_18sdp"
                     android:fontFamily="@font/fredokaregular"
-                    android:text="Policy"
+                    android:text="Privacy Policy"
                     android:textColor="#AFAFAF"
                     android:textSize="@dimen/_11sdp"
                     app:layout_constraintBottom_toBottomOf="parent"

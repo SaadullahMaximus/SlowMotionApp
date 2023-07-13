@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
+import android.widget.RatingBar
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -165,9 +166,14 @@ class SettingsActivity : AppCompatActivity() {
         dialog.setContentView(view)
 
         val rateUs = view.findViewById<Button>(R.id.rateUs)
+        val ratingBar = view.findViewById<RatingBar>(R.id.ratingBar)
 
         rateUs.setOnClickListener {
-            openPlayStoreForRating()
+            if (ratingBar.rating > 3) {
+                openPlayStoreForRating()
+            } else {
+                Toast.makeText(this, "Thank you for your Feedback.", Toast.LENGTH_SHORT).show()
+            }
             dialog.dismiss()
         }
 
