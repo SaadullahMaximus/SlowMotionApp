@@ -1,5 +1,6 @@
 package com.example.slowmotionapp.adapters
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.media.MediaMetadataRetriever
@@ -14,9 +15,14 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.slowmotionapp.R
+import com.example.slowmotionapp.constants.Constants
+import com.example.slowmotionapp.ui.activities.CropActivity
+import com.example.slowmotionapp.ui.activities.EffectActivity
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.isFromTrim
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.renamedName
 import com.example.slowmotionapp.ui.activities.PlayerActivity
+import com.example.slowmotionapp.ui.activities.TrimVideoActivity
 import com.example.slowmotionapp.utils.Utils.deleteVideoFile
 import com.example.slowmotionapp.utils.Utils.editVideo
 import com.example.slowmotionapp.utils.Utils.milliSecondsToTimer
@@ -106,6 +112,28 @@ class VideoAdapter(
                         deleteItem(position)
                         notifyItemChanged(position)
                         refreshGallery(videoFile.path, context)
+                    }
+                    R.id.trimItem -> {
+                        val intent = Intent(context, TrimVideoActivity::class.java)
+                        intent.putExtra("VideoUri", videoFile.path.toString())
+                        intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
+                        isFromTrim = true
+                        context.startActivity(intent)
+                        (context as Activity).finish()
+                    }
+                    R.id.cropItem -> {
+                        val intent = Intent(context, CropActivity::class.java)
+                        intent.putExtra("VideoUri", videoFile.path.toString())
+                        intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
+                        context.startActivity(intent)
+                        (context as Activity).finish()
+                    }
+                    R.id.effectItem -> {
+                        val intent = Intent(context, EffectActivity::class.java)
+                        intent.putExtra("VideoUri", videoFile.path.toString())
+                        intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
+                        context.startActivity(intent)
+                        (context as Activity).finish()
                     }
                 }
 

@@ -107,7 +107,7 @@ object Utils {
         val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
             Date()
         )
-        val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
+        val imageFileName: String = timeStamp
         val filepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
             .toString() + "/SlowMotionApp/"
         val storageDir = File("$filepath/Recordings/")
@@ -119,7 +119,7 @@ object Utils {
         val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
             Date()
         )
-        val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
+        val imageFileName: String = timeStamp
         if (!trimmedDir.exists()) trimmedDir.mkdirs()
         return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, trimmedDir)
     }
@@ -128,7 +128,7 @@ object Utils {
         val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
             Date()
         )
-        val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
+        val imageFileName: String = timeStamp
 
         if (!croppedDir.exists()) croppedDir.mkdirs()
         return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, croppedDir)
@@ -139,7 +139,7 @@ object Utils {
         val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
             Date()
         )
-        val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
+        val imageFileName: String = timeStamp
 
         // Create the "Edited" directory if it doesn't exist
         if (!editedDir.exists()) {

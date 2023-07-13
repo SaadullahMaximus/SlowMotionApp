@@ -5,6 +5,18 @@
         android:title="Edit" />
 
     <item
+        android:id="@+id/trimItem"
+        android:title="Trim" />
+
+    <item
+        android:id="@+id/cropItem"
+        android:title="Crop" />
+
+    <item
+        android:id="@+id/effectItem"
+        android:title="Effects" />
+
+    <item
         android:id="@+id/shareItem"
         android:title="Share" />
 

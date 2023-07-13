@@ -283,7 +283,7 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
             FFmpeg.cancel()
         }
         progressDialog.show()
-        progressDialog.setText("Please wait")
+        progressDialog.setText("Preparing Video")
 
         val ffmpegCommand: String = Utils.commandsGenerator(command)
 
@@ -334,6 +334,8 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
     private fun setUoGlPlayerView() {
         exoPLayerView = EPlayerView(this)
         exoPLayerView!!.setSimpleExoPlayer(player)
+
+        Log.d("mainCachedFile", "setUoGlPlayerView: $mainCachedFile")
 
         val videoSize = getVideoSize(this, Uri.parse(mainCachedFile))
         if (videoSize != null) {
