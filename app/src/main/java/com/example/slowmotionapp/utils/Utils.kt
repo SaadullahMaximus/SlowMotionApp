@@ -20,6 +20,7 @@ import android.os.Looper
 import android.os.SystemClock
 import android.provider.MediaStore
 import android.provider.OpenableColumns
+import android.text.Editable
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.TextPaint
@@ -203,8 +204,7 @@ object Utils {
         val endIndex = contentUriString.length
         return "/storage/emulated/0/Movies/SlowMotionApp/Recordings/${
             contentUriString.substring(
-                startIndex,
-                endIndex
+                startIndex, endIndex
             )
         }"
     }
@@ -359,8 +359,7 @@ object Utils {
 
         // SimpleExoPlayer
         player = ExoPlayer.Builder(context)
-            .setMediaSourceFactory(ProgressiveMediaSource.Factory(dataSourceFactory))
-            .build()
+            .setMediaSourceFactory(ProgressiveMediaSource.Factory(dataSourceFactory)).build()
         player!!.addMediaItem(MediaItem.fromUri(Uri.parse(mainCachedFile)))
 
         android.util.Log.d("mainCachedFile", "setUpSimpleExoPlayer: $mainCachedFile")
@@ -478,10 +477,7 @@ object Utils {
             index = 0
         }
         spannableString.setSpan(
-            clickableSpan,
-            index,
-            index + str.length,
-            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            clickableSpan, index, index + str.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
         textView.text = spannableString
         textView.movementMethod = LinkMovementMethod.getInstance()
@@ -497,9 +493,7 @@ object Utils {
         // Set the path of the video file
         val videoFile = File(videoPath)
         val videoUri = FileProvider.getUriForFile(
-            this,
-            "$packageName.provider",
-            videoFile
+            this, "$packageName.provider", videoFile
         )
 
         shareIntent.putExtra(Intent.EXTRA_STREAM, videoUri)
@@ -534,23 +528,44 @@ object Utils {
         val btnOk = dialog.findViewById<TextView>(R.id.okBtn)
         val btnCancel = dialog.findViewById<TextView>(R.id.cancelBtn)
 
+        fileName.text =
+            Editable.Factory.getInstance().newEditable(File(videoPath).nameWithoutExtension)
+        // Allow the user to edit the text
+        fileName.isEnabled = true
+
+
         btnOk.setOnClickListener {
-            val text = fileName.text.trim().toString() + ".mp4"
-            if (text.isNotEmpty()) {
-                android.util.Log.d("RENAME", "showRenameDialog: $text")
-                val parentDirectory = File(videoPath).parentFile
-                val newFileName = getUniqueFileName(parentDirectory!!, text)
+            val inputText = fileName.text.trim().toString()
+            if (inputText.isNotEmpty()) {
+                // Restrict input to 50 characters
+                val limitedText = inputText.take(50)
 
-                val renamedFile = File(parentDirectory, newFileName)
-                renamedName = renamedFile
-                File(videoPath).renameTo(renamedFile)
+                // Remove special characters using regular expression
+                val sanitizedText = limitedText.replace("[^a-zA-Z\\d ]".toRegex(), "")
 
-                val runnable = Runnable {
-                    action.invoke()
+                if (sanitizedText.isNotEmpty()) {
+                    val text = "$sanitizedText.mp4"
+
+                    val parentDirectory = File(videoPath).parentFile
+                    val newFileName = getUniqueFileName(parentDirectory!!, text)
+
+                    val renamedFile = File(parentDirectory, newFileName)
+                    renamedName = renamedFile
+                    File(videoPath).renameTo(renamedFile)
+
+                    val runnable = Runnable {
+                        action.invoke()
+                    }
+
+                    // Post the runnable with the specified delay
+                    handler.postDelayed(runnable, 1)
+                } else {
+                    Toast.makeText(
+                        this,
+                        "Please enter a valid name without special characters.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-
-                // Post the runnable with the specified delay
-                handler.postDelayed(runnable, 1)
             } else {
                 Toast.makeText(this, "Please enter a valid name!", Toast.LENGTH_SHORT).show()
             }
@@ -563,6 +578,7 @@ object Utils {
 
         dialog.show()
     }
+
 
     private fun getUniqueFileName(directory: File, fileName: String): String {
         var uniqueFileName = fileName
@@ -599,8 +615,7 @@ object Utils {
         intent.putExtra("VideoUri", playVideo)
         intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
         intent.putExtra(
-            "VideoDuration",
-            getMediaDuration(this, uri)
+            "VideoDuration", getMediaDuration(this, uri)
         )
         startActivity(intent)
     }
