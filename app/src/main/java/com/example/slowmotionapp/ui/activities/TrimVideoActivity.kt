@@ -58,7 +58,7 @@ class TrimVideoActivity : AppCompatActivity() {
 
     private val mHandler = Handler(Looper.getMainLooper())
 
-    private var mediaPlayer: MediaPlayer? = MediaPlayer()
+    private var mediaPlayer: MediaPlayer? = null
 
     private var progressInitialized = false
 
@@ -541,6 +541,7 @@ class TrimVideoActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         binding.trimVideoView.pause()
+        mHandler.removeCallbacks(mUpdateTimeTask)
         binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
     }
 
