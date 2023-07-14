@@ -58,7 +58,7 @@ class TrimVideoActivity : AppCompatActivity() {
 
     private val mHandler = Handler(Looper.getMainLooper())
 
-    private var mediaPlayer: MediaPlayer? = null
+    private var mediaPlayer: MediaPlayer? = MediaPlayer()
 
     private var progressInitialized = false
 
