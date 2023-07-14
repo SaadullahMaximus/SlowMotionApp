@@ -3,6 +3,7 @@ package com.example.slowmotionapp.adapters
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.view.Gravity
@@ -30,6 +31,10 @@ import com.example.slowmotionapp.utils.Utils.refreshGallery
 import com.example.slowmotionapp.utils.Utils.shareVideo
 import com.example.slowmotionapp.utils.Utils.showRenameDialog
 import com.google.android.exoplayer2.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 
@@ -58,24 +63,29 @@ class VideoAdapter(
         val videoPlayer: CardView = holder.itemView.findViewById(R.id.videoPlayer)
         val threeDots: ImageView = holder.itemView.findViewById(R.id.threeDots)
 
-        val retriever = MediaMetadataRetriever()
-
-        try {
-            retriever.setDataSource(context, Uri.parse(videoFile.path))
-            val thumbnail = retriever.frameAtTime
-            val time =
-                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong()
+        // Fetch thumbnail in a background thread using Kotlin coroutines
+        CoroutineScope(Dispatchers.Main).launch {
+            val thumbnail = withContext(Dispatchers.IO) {
+                retrieveVideoThumbnail(videoFile.path)
+            }
             thumbnailImageView.setImageBitmap(thumbnail)
-            videoDuration.text = milliSecondsToTimer(time!!) + " min"
-        } catch (e: Exception) {
-            Log.e(
-                "MetadataRetriever",
-                "Failed to set data source for video file: ${videoFile.path}",
-                e
-            )
-            // Handle the error gracefully
-        } finally {
-            retriever.release()
+
+            val retriever = MediaMetadataRetriever()
+            try {
+                retriever.setDataSource(context, Uri.parse(videoFile.path))
+                val time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                    ?.toLong()
+                videoDuration.text = milliSecondsToTimer(time!!) + " min"
+            } catch (e: Exception) {
+                Log.e(
+                    "MetadataRetriever",
+                    "Failed to set data source for video file: ${videoFile.path}",
+                    e
+                )
+                // Handle the error gracefully
+            } finally {
+                retriever.release()
+            }
         }
 
         titleTextView.text = videoFile.nameWithoutExtension
@@ -143,6 +153,19 @@ class VideoAdapter(
 
         }
 
+    }
+
+    private fun retrieveVideoThumbnail(videoPath: String): Bitmap? {
+        val retriever = MediaMetadataRetriever()
+        return try {
+            retriever.setDataSource(videoPath)
+            retriever.frameAtTime
+        } catch (e: Exception) {
+            Log.e("MetadataRetriever", "Failed to retrieve video thumbnail for path: $videoPath", e)
+            null
+        } finally {
+            retriever.release()
+        }
     }
 
     override fun getItemCount(): Int {

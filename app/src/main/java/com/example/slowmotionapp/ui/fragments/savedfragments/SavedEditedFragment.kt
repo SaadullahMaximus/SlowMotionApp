@@ -50,13 +50,13 @@ class SavedEditedFragment : Fragment(), VideoAdapter.AdapterCallback {
                     binding.btnCreateNew.visibility = View.GONE
                     binding.title.visibility = View.GONE
 
-                    adapterSet()
                 } else {
                     binding.lottieAnimationView.visibility = View.VISIBLE
                     binding.btnCreateNew.visibility = View.VISIBLE
                     binding.title.visibility = View.VISIBLE
                 }
             }
+            adapterSet()
         }
 
 
@@ -71,9 +71,11 @@ class SavedEditedFragment : Fragment(), VideoAdapter.AdapterCallback {
     private fun adapterSet() {
         videoAdapter = VideoAdapter(requireContext(), editedFiles)
         videoAdapter.setAdapterCallback(this)
-        binding.recyclerView.apply {
-            layoutManager = GridLayoutManager(requireContext(), 3)
-            adapter = videoAdapter
+        activity?.runOnUiThread {
+            binding.recyclerView.apply {
+                layoutManager = GridLayoutManager(requireContext(), 3)
+                adapter = videoAdapter
+            }
         }
     }
 
