@@ -153,6 +153,13 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
         exitDialog()
     }
 
+    override fun onPause() {
+        player?.pause()
+        binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
+        super.onPause()
+
+    }
+
     private fun exitDialog() {
         val dialog = Dialog(this, R.style.FullScreenDialogStyle)
         dialog.setContentView(R.layout.exit_dialog)
@@ -161,6 +168,7 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
         val yesBtn = dialog.findViewById<TextView>(R.id.yesBtn)
 
         yesBtn.setOnClickListener {
+            player?.pause()
             finish()
             dialog.dismiss()
         }
