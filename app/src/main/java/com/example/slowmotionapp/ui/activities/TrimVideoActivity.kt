@@ -28,6 +28,7 @@ import com.example.slowmotionapp.ui.activities.MainActivity.Companion.isFromTrim
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.trimFilePath
+import com.example.slowmotionapp.utils.AdmobADs.loadInterstitialAd3
 import com.example.slowmotionapp.utils.Utils.commandsGenerator
 import com.example.slowmotionapp.utils.Utils.convertContentUriToFilePath
 import com.example.slowmotionapp.utils.Utils.createCacheCopy
@@ -118,7 +119,10 @@ class TrimVideoActivity : AppCompatActivity() {
             singleClick {
                 binding.trimVideoView.pause()
                 binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
-                showTrimDialog()
+                loadInterstitialAd3(
+                    false,
+                    "ca-app-pub-3940256099942544/1033173712"
+                ) { showTrimDialog() }
             }
 
         }
