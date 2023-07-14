@@ -56,7 +56,7 @@
     </style>
 
     <style name="PopupMenuStyle" parent="Widget.AppCompat.PopupMenu">
-        <item name="android:popupBackground">#2E2E2E</item>
+        <item name="android:popupBackground">@drawable/my_mtrl_popupmenu_background</item>
     </style>
 
 </resources>

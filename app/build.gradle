@@ -100,6 +100,4 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:2.7.0"
 
     implementation 'com.google.android.play:core:1.10.0'
-
-    implementation 'com.github.basusingh:BeautifulProgressDialog:1.001'
 }

@@ -10,8 +10,10 @@
         android:id="@+id/backBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/_25sdp"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginStart="@dimen/_25sdp"
         android:src="@drawable/baseline_arrow_back"
+        app:layout_constraintBottom_toTopOf="@id/frameLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -19,9 +21,10 @@
         android:id="@+id/rotateLeft"
         android:layout_width="@dimen/_25sdp"
         android:layout_height="@dimen/_25sdp"
-        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginTop="@dimen/_10sdp"
         android:padding="@dimen/_2sdp"
         android:src="@drawable/ic_undo"
+        app:layout_constraintBottom_toTopOf="@id/frameLayout"
         app:layout_constraintEnd_toStartOf="@+id/rotateRight"
         app:layout_constraintStart_toEndOf="@+id/backBtn"
         app:layout_constraintTop_toTopOf="parent" />
@@ -30,9 +33,11 @@
         android:id="@+id/rotateRight"
         android:layout_width="@dimen/_25sdp"
         android:layout_height="@dimen/_25sdp"
-        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:layout_marginEnd="@dimen/_30sdp"
         android:padding="@dimen/_2sdp"
         android:src="@drawable/ic_redo"
+        app:layout_constraintBottom_toTopOf="@id/frameLayout"
         app:layout_constraintEnd_toStartOf="@+id/linearLayoutBtnContainer"
         app:layout_constraintStart_toEndOf="@+id/rotateLeft"
         app:layout_constraintTop_toTopOf="parent" />
@@ -42,7 +47,7 @@
         style="@style/CustomButtonStyle"
         android:layout_width="@dimen/_50sdp"
         android:layout_height="@dimen/_30sdp"
-        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginTop="@dimen/_10sdp"
         android:layout_marginEnd="@dimen/_10sdp"
         android:background="@drawable/background_rounded_corners"
         android:fontFamily="@font/fredokamedium"
@@ -63,7 +68,7 @@
         android:id="@+id/linearLayoutBtnContainer"
         android:layout_width="@dimen/_80sdp"
         android:layout_height="@dimen/_30sdp"
-        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginTop="@dimen/_10sdp"
         android:layout_marginEnd="@dimen/_10sdp"
         android:orientation="vertical"
         app:layout_constraintBottom_toTopOf="@id/frameLayout"
@@ -143,9 +148,9 @@
         android:layout_marginBottom="@dimen/_3sdp"
         android:src="@drawable/baseline_play_arrow"
         android:visibility="invisible"
-        app:layout_constraintTop_toBottomOf="@id/frameLayout"
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/frameLayout" />
 
     <ImageView
         android:id="@+id/playPauseButton2"
@@ -155,9 +160,9 @@
         android:layout_marginTop="@dimen/_3sdp"
         android:layout_marginBottom="@dimen/_3sdp"
         android:src="@drawable/baseline_play_arrow"
-        app:layout_constraintTop_toBottomOf="@id/frameLayout"
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/frameLayout" />
 
     <SeekBar
         android:id="@+id/seekBar"
@@ -174,7 +179,7 @@
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
         app:layout_constraintEnd_toStartOf="@+id/totalDurationTextView"
         app:layout_constraintStart_toEndOf="@+id/playPauseButton"
-        app:layout_constraintTop_toBottomOf="@id/frameLayout"/>
+        app:layout_constraintTop_toBottomOf="@id/frameLayout" />
 
     <SeekBar
         android:id="@+id/seekBar2"
@@ -190,7 +195,7 @@
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
         app:layout_constraintEnd_toStartOf="@+id/totalDurationTextView"
         app:layout_constraintStart_toEndOf="@+id/playPauseButton2"
-        app:layout_constraintTop_toBottomOf="@id/frameLayout"/>
+        app:layout_constraintTop_toBottomOf="@id/frameLayout" />
 
     <TextView
         android:id="@+id/totalDurationTextView"
@@ -204,14 +209,14 @@
         android:text="@string/_00_00_"
         android:textColor="@color/baseColor"
         android:textSize="@dimen/_11sdp"
-        app:layout_constraintTop_toBottomOf="@id/frameLayout"
         app:layout_constraintBottom_toTopOf="@+id/fragment_container_main"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/frameLayout" />
 
     <FrameLayout
         android:id="@+id/fragment_container_main"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_180sdp"
+        android:layout_height="@dimen/_170sdp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

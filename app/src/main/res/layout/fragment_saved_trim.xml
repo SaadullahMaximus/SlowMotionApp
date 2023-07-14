@@ -24,7 +24,7 @@
         android:layout_marginTop="@dimen/_4sdp"
         android:fontFamily="@font/fredokaregular"
         android:gravity="center"
-        android:text="@string/my_text2"
+        android:text="@string/my_text3"
         android:textColor="@color/white"
         android:textSize="@dimen/_13sdp"
         app:layout_constraintEnd_toEndOf="parent"

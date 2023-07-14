@@ -20,6 +20,7 @@ import android.os.Looper
 import android.os.SystemClock
 import android.provider.MediaStore
 import android.provider.OpenableColumns
+import android.text.Editable
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.TextPaint
@@ -29,12 +30,14 @@ import android.view.View
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.FileProvider
 import com.example.slowmotionapp.R
 import com.example.slowmotionapp.constants.Constants
 import com.example.slowmotionapp.interfaces.MyListener
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.backSave
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.mainCachedFile
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.playVideo
+import com.example.slowmotionapp.ui.activities.MainActivity.Companion.renamedName
 import com.example.slowmotionapp.ui.activities.MainActivity.Companion.tempCacheName
 import com.example.slowmotionapp.ui.activities.PlayerActivity
 import com.example.slowmotionapp.ui.activities.TrimVideoActivity
@@ -104,7 +107,7 @@ object Utils {
         val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
             Date()
         )
-        val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
+        val imageFileName: String = timeStamp
         val filepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
             .toString() + "/SlowMotionApp/"
         val storageDir = File("$filepath/Recordings/")
@@ -116,7 +119,7 @@ object Utils {
         val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
             Date()
         )
-        val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
+        val imageFileName: String = timeStamp
         if (!trimmedDir.exists()) trimmedDir.mkdirs()
         return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, trimmedDir)
     }
@@ -125,7 +128,7 @@ object Utils {
         val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
             Date()
         )
-        val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
+        val imageFileName: String = timeStamp
 
         if (!croppedDir.exists()) croppedDir.mkdirs()
         return File.createTempFile(imageFileName, Constants.VIDEO_FORMAT, croppedDir)
@@ -136,7 +139,7 @@ object Utils {
         val timeStamp: String = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(
             Date()
         )
-        val imageFileName: String = Constants.APP_NAME + timeStamp + "_"
+        val imageFileName: String = timeStamp
 
         // Create the "Edited" directory if it doesn't exist
         if (!editedDir.exists()) {
@@ -201,8 +204,7 @@ object Utils {
         val endIndex = contentUriString.length
         return "/storage/emulated/0/Movies/SlowMotionApp/Recordings/${
             contentUriString.substring(
-                startIndex,
-                endIndex
+                startIndex, endIndex
             )
         }"
     }
@@ -357,8 +359,7 @@ object Utils {
 
         // SimpleExoPlayer
         player = ExoPlayer.Builder(context)
-            .setMediaSourceFactory(ProgressiveMediaSource.Factory(dataSourceFactory))
-            .build()
+            .setMediaSourceFactory(ProgressiveMediaSource.Factory(dataSourceFactory)).build()
         player!!.addMediaItem(MediaItem.fromUri(Uri.parse(mainCachedFile)))
 
         android.util.Log.d("mainCachedFile", "setUpSimpleExoPlayer: $mainCachedFile")
@@ -476,10 +477,7 @@ object Utils {
             index = 0
         }
         spannableString.setSpan(
-            clickableSpan,
-            index,
-            index + str.length,
-            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            clickableSpan, index, index + str.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
         textView.text = spannableString
         textView.movementMethod = LinkMovementMethod.getInstance()
@@ -487,33 +485,42 @@ object Utils {
     }
 
     fun Context.shareVideo(videoPath: String) {
-        // Create the intent
 
         // Create the intent
         val shareIntent = Intent(Intent.ACTION_SEND)
         shareIntent.type = "video/*"
 
         // Set the path of the video file
+        val videoFile = File(videoPath)
+        val videoUri = FileProvider.getUriForFile(
+            this, "$packageName.provider", videoFile
+        )
 
-        // Set the path of the video file
-        val videoUri = Uri.parse(videoPath)
         shareIntent.putExtra(Intent.EXTRA_STREAM, videoUri)
 
         // Optionally, you can set a subject for the shared video
-
-        // Optionally, you can set a subject for the shared video
-        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Shared Video")
+        shareIntent.putExtra(
+            Intent.EXTRA_SUBJECT,
+            "Sharing Video from ${getString(R.string.app_name)}"
+        )
 
         // Set the video description
         shareIntent.putExtra(
             Intent.EXTRA_TEXT,
-            "Create  slow-motion videos effortlessly with our amazing app. Download it from the Play Store: https://play.google.com/store/apps/details?id=$packageName"
-
+            "Create slow-motion videos effortlessly with our amazing app. Download it from the Play Store: https://play.google.com/store/apps/details?id=$packageName"
         )
 
-        // Start the activity for sharing
-        startActivity(Intent.createChooser(shareIntent, "Share Video"))
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
+        // Grant persistent URI permission to the receiving app
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+        // Create a chooser to display the available sharing options
+        val chooser = Intent.createChooser(shareIntent, "Share Video")
+        chooser.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+
+        // Start the activity for sharing
+        startActivity(chooser)
     }
 
     fun Context.showRenameDialog(videoPath: String, action: () -> Unit) {
@@ -524,21 +531,44 @@ object Utils {
         val btnOk = dialog.findViewById<TextView>(R.id.okBtn)
         val btnCancel = dialog.findViewById<TextView>(R.id.cancelBtn)
 
+        fileName.text =
+            Editable.Factory.getInstance().newEditable(File(videoPath).nameWithoutExtension)
+        // Allow the user to edit the text
+        fileName.isEnabled = true
+
+
         btnOk.setOnClickListener {
-            val text = fileName.text.toString() + ".mp4"
-            if (text.isNotEmpty()) {
-                val parentDirectory = File(videoPath).parentFile
-                val newFileName = getUniqueFileName(parentDirectory!!, text)
+            val inputText = fileName.text.trim().toString()
+            if (inputText.isNotEmpty()) {
+                // Restrict input to 50 characters
+                val limitedText = inputText.take(100)
 
-                val renamedFile = File(parentDirectory, newFileName)
-                File(videoPath).renameTo(renamedFile)
+                // Remove special characters using regular expression
+                val sanitizedText = limitedText.replace("[^a-zA-Z\\d ]".toRegex(), "")
 
-                val runnable = Runnable {
-                    action.invoke()
+                if (sanitizedText.isNotEmpty()) {
+                    val text = "$sanitizedText.mp4"
+
+                    val parentDirectory = File(videoPath).parentFile
+                    val newFileName = getUniqueFileName(parentDirectory!!, text)
+
+                    val renamedFile = File(parentDirectory, newFileName)
+                    renamedName = renamedFile
+                    File(videoPath).renameTo(renamedFile)
+
+                    val runnable = Runnable {
+                        action.invoke()
+                    }
+
+                    // Post the runnable with the specified delay
+                    handler.postDelayed(runnable, 1)
+                } else {
+                    Toast.makeText(
+                        this,
+                        "Please enter a valid name without special characters.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-
-                // Post the runnable with the specified delay
-                handler.postDelayed(runnable, 100)
             } else {
                 Toast.makeText(this, "Please enter a valid name!", Toast.LENGTH_SHORT).show()
             }
@@ -551,6 +581,7 @@ object Utils {
 
         dialog.show()
     }
+
 
     private fun getUniqueFileName(directory: File, fileName: String): String {
         var uniqueFileName = fileName
@@ -587,13 +618,12 @@ object Utils {
         intent.putExtra("VideoUri", playVideo)
         intent.putExtra(Constants.TYPE, Constants.VIDEO_GALLERY)
         intent.putExtra(
-            "VideoDuration",
-            getMediaDuration(this, uri)
+            "VideoDuration", getMediaDuration(this, uri)
         )
         startActivity(intent)
     }
 
-    fun formatCSeconds(timeInSeconds: Long): String? {
+    fun formatCSeconds(timeInSeconds: Long): String {
         val hours = timeInSeconds / 3600
         val secondsLeft = timeInSeconds - hours * 3600
         val minutes = secondsLeft / 60

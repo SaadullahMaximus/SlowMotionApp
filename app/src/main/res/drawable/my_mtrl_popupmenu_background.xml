@@ -1,0 +1,14 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- White shadow shape -->
+    <stroke
+        android:width="1dp"
+        android:color="#FFFFFF"/> <!-- White color -->
+
+    <solid android:color="#2E2E2E"/>
+
+    <corners
+        android:bottomLeftRadius="8dp"
+        android:bottomRightRadius="8dp"
+        android:topLeftRadius="8dp"
+        android:topRightRadius="8dp"/>
+</shape>

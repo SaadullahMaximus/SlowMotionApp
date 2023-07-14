@@ -14,7 +14,6 @@ import android.os.Looper
 import android.provider.MediaStore
 import android.provider.Settings
 import android.view.View
-import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
@@ -49,8 +48,6 @@ class MainActivity : AppCompatActivity() {
     private var masterVideoFile: File? = null
     private var playbackPosition: Long = 0
     private var currentWindow: Int = 0
-
-    private var progressInitialized = false
 
     private lateinit var sharedViewModel: SharedViewModel
 
@@ -94,6 +91,8 @@ class MainActivity : AppCompatActivity() {
         var wannaGoBackCheckViewModel: MutableLiveData<Boolean> = MutableLiveData(false)
 
         var knobFinalValue = 7
+
+        lateinit var renamedName: File
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -227,11 +226,6 @@ class MainActivity : AppCompatActivity() {
         if (allPermissionsGranted) {
             when (requestCode) {
                 Constants.GALLERY_PERMISSION_CODE -> {
-
-                    binding.progressBar.visibility = View.VISIBLE
-                    showOverlay(true)
-                    progressInitialized = true
-
                     startActivity(Intent(this, SavedActivity::class.java))
                 }
                 Constants.VIDEO_GALLERY -> {
@@ -562,28 +556,5 @@ class MainActivity : AppCompatActivity() {
     override fun onBackPressed() {
         openExitDialog()
     }
-
-    override fun onRestart() {
-        super.onRestart()
-        if (progressInitialized) {
-            binding.progressBar.visibility = View.GONE
-            showOverlay(false)
-            progressInitialized = false
-        }
-    }
-
-    private fun showOverlay(show: Boolean) {
-        if (show) {
-            binding.overlayView.visibility = View.VISIBLE
-            window.setFlags(
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-            )
-        } else {
-            binding.overlayView.visibility = View.GONE
-            window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
-        }
-    }
-
 
 }

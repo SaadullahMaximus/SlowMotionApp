@@ -153,6 +153,13 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
         exitDialog()
     }
 
+    override fun onPause() {
+        player?.pause()
+        binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
+        super.onPause()
+
+    }
+
     private fun exitDialog() {
         val dialog = Dialog(this, R.style.FullScreenDialogStyle)
         dialog.setContentView(R.layout.exit_dialog)
@@ -161,6 +168,7 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
         val yesBtn = dialog.findViewById<TextView>(R.id.yesBtn)
 
         yesBtn.setOnClickListener {
+            player?.pause()
             finish()
             dialog.dismiss()
         }
@@ -283,6 +291,7 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
             FFmpeg.cancel()
         }
         progressDialog.show()
+        progressDialog.setText("Preparing Video")
 
         val ffmpegCommand: String = Utils.commandsGenerator(command)
 
@@ -293,11 +302,13 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
             when (returnCode) {
                 Config.RETURN_CODE_SUCCESS -> {
                     progressDialog.dismiss()
+                    Config.resetStatistics()
                     mainCachedFile = outputFilePath
                     applyFilter()
                 }
                 Config.RETURN_CODE_CANCEL -> {
                     progressDialog.dismiss()
+                    Config.resetStatistics()
                     try {
                         File(outputFilePath).delete()
                         Utils.deleteFromGallery(outputFilePath, this)
@@ -331,6 +342,8 @@ class EffectActivity : AppCompatActivity(), FilterAdapter.OnItemClickListener {
     private fun setUoGlPlayerView() {
         exoPLayerView = EPlayerView(this)
         exoPLayerView!!.setSimpleExoPlayer(player)
+
+        Log.d("mainCachedFile", "setUoGlPlayerView: $mainCachedFile")
 
         val videoSize = getVideoSize(this, Uri.parse(mainCachedFile))
         if (videoSize != null) {

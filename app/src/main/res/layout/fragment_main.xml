@@ -40,7 +40,7 @@
         style="@style/CustomTabLayout"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_20sdp"
-        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginTop="@dimen/_10sdp"
         android:background="@color/black"
         app:layout_constraintBottom_toTopOf="@id/viewpager"
         app:layout_constraintEnd_toEndOf="parent"

@@ -50,7 +50,7 @@
                 android:layout_marginTop="@dimen/_8sdp"
                 android:layout_marginBottom="@dimen/_8sdp"
                 android:fontFamily="@font/fredokaregular"
-                android:text="Video duration should be 4-240 seconds. Select a different video to continue?"
+                android:text="Video duration should be 4-7200 seconds. Select a different video to continue?"
                 android:textColor="#919191"
                 android:textSize="@dimen/_11sdp" />
 

@@ -97,7 +97,7 @@ class EffectMusicFragment : Fragment() {
         _binding = FragmentEffectMusicBinding.inflate(inflater, container, false)
 
         binding.seekBarSpeaker.progress = 50
-        binding.seekBarMusic.progress = 50
+        binding.seekBarMusic.progress = 100
 
         filterTypes = FilterType.createFilterList()
 

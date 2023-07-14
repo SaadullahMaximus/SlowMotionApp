@@ -14,7 +14,6 @@ import android.util.Log
 import android.view.View
 import android.widget.SeekBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.ahmedbadereldin.videotrimmer.customVideoViews.BarThumb
 import com.ahmedbadereldin.videotrimmer.customVideoViews.CustomRangeSeekBar
@@ -158,17 +157,13 @@ class TrimVideoActivity : AppCompatActivity() {
 
         binding.timeLineBar.addOnRangeSeekBarListener(object : OnRangeSeekBarChangeListener {
             override fun onCreate(
-                customRangeSeekBarNew: CustomRangeSeekBar,
-                index: Int,
-                value: Float
+                customRangeSeekBarNew: CustomRangeSeekBar, index: Int, value: Float
             ) {
                 Log.d("timeLineBar", "onCreate: ")
             }
 
             override fun onSeek(
-                customRangeSeekBarNew: CustomRangeSeekBar,
-                index: Int,
-                value: Float
+                customRangeSeekBarNew: CustomRangeSeekBar, index: Int, value: Float
             ) {
                 Log.d("timeLineBar", "onSeek: ")
 
@@ -176,9 +171,7 @@ class TrimVideoActivity : AppCompatActivity() {
             }
 
             override fun onSeekStart(
-                customRangeSeekBarNew: CustomRangeSeekBar,
-                index: Int,
-                value: Float
+                customRangeSeekBarNew: CustomRangeSeekBar, index: Int, value: Float
             ) {
                 Log.d("timeLineBar", "onSeekStart: ")
 
@@ -186,9 +179,7 @@ class TrimVideoActivity : AppCompatActivity() {
             }
 
             override fun onSeekStop(
-                customRangeSeekBarNew: CustomRangeSeekBar,
-                index: Int,
-                value: Float
+                customRangeSeekBarNew: CustomRangeSeekBar, index: Int, value: Float
             ) {
                 Log.d("timeLineBar", "onSeekStop: ")
 
@@ -250,15 +241,14 @@ class TrimVideoActivity : AppCompatActivity() {
             videoDuration = durationSeconds * 1000
 
             trimVideo(
-                this,
-                arrayOf(
+                this, arrayOf(
                     "-ss",
-                    formatCSeconds(mStartPosition.toLong())!!,
+                    formatCSeconds(mStartPosition.toLong()),
                     "-y",
                     "-i",
                     file.toString(),
                     "-t",
-                    formatCSeconds(durationSeconds.toLong())!!,
+                    formatCSeconds(durationSeconds.toLong()),
                     "-vcodec",
                     "mpeg4",
                     "-b:v",
@@ -272,16 +262,14 @@ class TrimVideoActivity : AppCompatActivity() {
                     "-strict",
                     "-2",
                     outputFile
-                ),
-                outputFile
+                ), outputFile
             )
 
 
         } catch (e: Throwable) {
-            Objects.requireNonNull(Thread.getDefaultUncaughtExceptionHandler())
-                .uncaughtException(
-                    Thread.currentThread(), e
-                )
+            Objects.requireNonNull(Thread.getDefaultUncaughtExceptionHandler()).uncaughtException(
+                Thread.currentThread(), e
+            )
         }
     }
 
@@ -325,9 +313,7 @@ class TrimVideoActivity : AppCompatActivity() {
                 File(videoUri!!).toString()
             }
 
-            mainCachedFile =
-                createCacheCopy(this, trimFilePath)
-                    .toString()
+            mainCachedFile = createCacheCopy(this, trimFilePath).toString()
             playVideo = trimFilePath
 
             val intent = Intent(this, EditorActivity::class.java)
@@ -404,9 +390,11 @@ class TrimVideoActivity : AppCompatActivity() {
         binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
         exitDialog()
     }
+
     private fun setBitmap(mVideoUri: String) {
         binding.timeLineView.setVideo(Uri.parse(mVideoUri))
     }
+
     private fun onVideoPrepared() {
         mDuration = binding.trimVideoView.duration / 1000
         binding.totalDurationTextView.text = milliSecondsToTimer(mDuration * 1000L)
@@ -419,6 +407,7 @@ class TrimVideoActivity : AppCompatActivity() {
         }
         updateProgressBar()
     }
+
     private fun setSeekBarPosition() {
         mStartPosition = 0
         mEndPosition = mDuration
@@ -430,10 +419,12 @@ class TrimVideoActivity : AppCompatActivity() {
         binding.timeLineBar.initMaxWidth()
         binding.seekBar.max = mDuration * 1000
     }
+
     private fun timeLineSet(mDuration: Int) {
         binding.endTime.text = milliSecondsToTimer((mDuration * 1000).toLong())
         timeLineNumbersSet(mDuration)
     }
+
     private fun timeLineNumbersSet(mDuration: Int) {
         val parts = mDuration / 6.0
         val decimalFormat = DecimalFormat("#.0")
@@ -443,6 +434,7 @@ class TrimVideoActivity : AppCompatActivity() {
         binding.tv4.text = decimalFormat.format(parts * 4)
         binding.tv5.text = decimalFormat.format(parts * 5)
     }
+
     private fun trimVideo(context: Context, strArr: Array<String>, str: String) {
 
         progressDialog = CustomWaitingDialog(this)
@@ -451,7 +443,7 @@ class TrimVideoActivity : AppCompatActivity() {
             FFmpeg.cancel()
         }
         progressDialog.show()
-        progressInitialized = true
+
         progressDialog.setText("Trimmed 0%")
 
         val ffmpegCommand: String = commandsGenerator(strArr)
@@ -462,11 +454,10 @@ class TrimVideoActivity : AppCompatActivity() {
 
             when (returnCode) {
                 Config.RETURN_CODE_SUCCESS -> {
+                    progressInitialized = true
                     mHandler.removeCallbacks(mUpdateTimeTask)
                     trimFilePath = str
-                    mainCachedFile =
-                        createCacheCopy(this, trimFilePath)
-                            .toString()
+                    mainCachedFile = createCacheCopy(this, trimFilePath).toString()
                     playVideo = str
                     switchActivity(str)
                 }
@@ -474,22 +465,23 @@ class TrimVideoActivity : AppCompatActivity() {
                     try {
                         Log.d("Canceled", "trimVideo: Canceled")
                         progressDialog.setText("Trimmed 0%")
+                        progressDialog.dismiss()
+                        Config.resetStatistics()
                         File(str).delete()
                         deleteFromGallery(str, context)
                     } catch (th: Throwable) {
                         th.printStackTrace()
                     }
                     Log.i(
-                        Config.TAG,
-                        "Async command execution cancelled by user."
+                        Config.TAG, "Async command execution cancelled by user."
                     )
                 }
                 else -> {
                     try {
                         File(str).delete()
+                        progressDialog.dismiss()
+                        Config.resetStatistics()
                         deleteFromGallery(str, context)
-                        Toast.makeText(context, "Error Creating Video", Toast.LENGTH_SHORT)
-                            .show()
                     } catch (th: Throwable) {
                         th.printStackTrace()
                     }
@@ -512,14 +504,6 @@ class TrimVideoActivity : AppCompatActivity() {
             }
         }
 
-    }
-
-    override fun onRestart() {
-        super.onRestart()
-        if (progressInitialized) {
-            progressDialog.dismiss()
-            progressInitialized = false
-        }
     }
 
     private fun switchActivity(videoPath: String) {
@@ -545,9 +529,19 @@ class TrimVideoActivity : AppCompatActivity() {
         mediaPlayer = null
     }
 
+    override fun onRestart() {
+        super.onRestart()
+        if (progressInitialized) {
+            progressDialog.dismiss()
+            Config.resetStatistics()
+            progressInitialized = false
+        }
+    }
+
     override fun onPause() {
         super.onPause()
-        mediaPlayer?.pause()
+        binding.trimVideoView.pause()
+        mHandler.removeCallbacks(mUpdateTimeTask)
         binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
     }
 

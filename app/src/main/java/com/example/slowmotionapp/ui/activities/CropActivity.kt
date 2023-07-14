@@ -447,6 +447,7 @@ class CropActivity : AppCompatActivity() {
                     progressDialog.dismiss()
                     playVideo = str
                     startActivity(Intent(this, PlayerActivity::class.java))
+                    Config.resetStatistics()
                     finish()
                 }
                 Config.RETURN_CODE_CANCEL -> {
@@ -459,6 +460,7 @@ class CropActivity : AppCompatActivity() {
                 }
                 else -> {
                     try {
+                        Config.resetStatistics()
                         File(str).delete()
                         deleteFromGallery(str, this)
                         Toast.makeText(

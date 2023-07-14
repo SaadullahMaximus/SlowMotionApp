@@ -9,7 +9,13 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.example.slowmotionapp.adapters.VideoAdapter
 import com.example.slowmotionapp.databinding.FragmentSavedEditedBinding
 import com.example.slowmotionapp.ui.activities.SavedActivity
-import com.example.slowmotionapp.ui.activities.SavedActivity.Companion.editedFiles
+import com.example.slowmotionapp.utils.Utils.editedDir
+import com.example.slowmotionapp.utils.Utils.fetchVideosFromDirectory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
 class SavedEditedFragment : Fragment(), VideoAdapter.AdapterCallback {
 
@@ -18,21 +24,41 @@ class SavedEditedFragment : Fragment(), VideoAdapter.AdapterCallback {
 
     private lateinit var videoAdapter: VideoAdapter
 
+    private val editedFiles = mutableListOf<File>()
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSavedEditedBinding.inflate(inflater, container, false)
 
-        if (editedFiles.isNotEmpty()) {
 
-            binding.recyclerView.visibility = View.VISIBLE
+        binding.recyclerView.visibility = View.GONE
+        binding.lottieAnimationView.visibility = View.VISIBLE
+        binding.btnCreateNew.visibility = View.VISIBLE
+        binding.title.visibility = View.VISIBLE
+        editedFiles.clear()
 
-            binding.lottieAnimationView.visibility = View.GONE
-            binding.btnCreateNew.visibility = View.GONE
-            binding.title.visibility = View.GONE
+        // Fetch data asynchronously
+        GlobalScope.launch(Dispatchers.IO) {
+            editedFiles.addAll(fetchVideosFromDirectory(editedDir))
+
+            // Switch back to the main thread to update UI
+            withContext(Dispatchers.Main) {
+                if (editedFiles.isNotEmpty()) {
+                    binding.recyclerView.visibility = View.VISIBLE
+                    binding.lottieAnimationView.visibility = View.GONE
+                    binding.btnCreateNew.visibility = View.GONE
+                    binding.title.visibility = View.GONE
+
+                } else {
+                    binding.lottieAnimationView.visibility = View.VISIBLE
+                    binding.btnCreateNew.visibility = View.VISIBLE
+                    binding.title.visibility = View.VISIBLE
+                }
+            }
             adapterSet()
-
         }
+
 
         binding.btnCreateNew.setOnClickListener {
             (activity as? SavedActivity)?.openGallery()
@@ -45,9 +71,11 @@ class SavedEditedFragment : Fragment(), VideoAdapter.AdapterCallback {
     private fun adapterSet() {
         videoAdapter = VideoAdapter(requireContext(), editedFiles)
         videoAdapter.setAdapterCallback(this)
-        binding.recyclerView.apply {
-            layoutManager = GridLayoutManager(requireContext(), 3)
-            adapter = videoAdapter
+        activity?.runOnUiThread {
+            binding.recyclerView.apply {
+                layoutManager = GridLayoutManager(requireContext(), 3)
+                adapter = videoAdapter
+            }
         }
     }
 
@@ -56,5 +84,10 @@ class SavedEditedFragment : Fragment(), VideoAdapter.AdapterCallback {
         binding.lottieAnimationView.visibility = View.VISIBLE
         binding.btnCreateNew.visibility = View.VISIBLE
         binding.title.visibility = View.VISIBLE
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

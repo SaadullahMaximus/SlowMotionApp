@@ -27,12 +27,28 @@
         app:layout_constraintStart_toEndOf="@+id/backBtn"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <Button
+        android:id="@+id/btnDone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
+        android:backgroundTint="#FDC005"
+        android:fontFamily="@font/fredokamedium"
+        android:paddingStart="@dimen/_13sdp"
+        android:paddingEnd="@dimen/_13sdp"
+        android:text="Next"
+        android:textColor="@color/black"
+        android:textSize="@dimen/_12sdp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/skipBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/seekBar"
-        android:layout_marginTop="@dimen/_11sdp"
+        android:layout_marginTop="@dimen/_9sdp"
         android:layout_marginEnd="@dimen/_17sdp"
         android:fontFamily="@font/fredokalight"
         android:padding="@dimen/_7sdp"
@@ -40,7 +56,7 @@
         android:textColor="@color/baseColor"
         android:textSize="@dimen/_15sdp"
         android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnDone"
         app:layout_constraintTop_toTopOf="parent" />
 
     <FrameLayout
@@ -52,7 +68,7 @@
         app:layout_constraintBottom_toTopOf="@id/playPauseButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/TVTrim">
+        app:layout_constraintTop_toBottomOf="@id/btnDone">
 
         <VideoView
             android:id="@+id/trimVideoView"
@@ -148,6 +164,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_3sdp"
         android:layout_marginEnd="@dimen/_3sdp"
+        android:layout_marginBottom="@dimen/_5sdp"
         android:background="@color/white"
         android:orientation="horizontal"
         android:paddingTop="@dimen/_4sdp"
@@ -218,43 +235,27 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_3sdp"
-        android:layout_marginTop="@dimen/_3sdp"
+        android:layout_marginTop="@dimen/_5sdp"
+        android:layout_marginBottom="@dimen/_5sdp"
         android:fontFamily="@font/fredokalight"
         android:text="@string/_00_00"
         android:textColor="#FDC005"
         android:textSize="@dimen/_12sdp"
-        app:layout_constraintBottom_toTopOf="@+id/btnDone"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/endTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_3sdp"
+        android:layout_marginTop="@dimen/_5sdp"
         android:layout_marginEnd="@dimen/_3sdp"
+        android:layout_marginBottom="@dimen/_5sdp"
         android:fontFamily="@font/fredokalight"
         android:text="@string/_00_00"
         android:textColor="#FDC005"
         android:textSize="@dimen/_12sdp"
-        app:layout_constraintBottom_toTopOf="@+id/btnDone"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <Button
-        android:id="@+id/btnDone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/_7sdp"
-        android:backgroundTint="#FDC005"
-        android:fontFamily="@font/fredokamedium"
-        android:paddingStart="@dimen/_20sdp"
-        android:paddingTop="@dimen/_7sdp"
-        android:paddingEnd="@dimen/_20sdp"
-        android:paddingBottom="@dimen/_7sdp"
-        android:text="@string/done"
-        android:textColor="@color/black"
-        android:textSize="@dimen/_12sdp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
