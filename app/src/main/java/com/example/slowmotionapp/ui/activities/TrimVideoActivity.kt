@@ -14,7 +14,6 @@ import android.util.Log
 import android.view.View
 import android.widget.SeekBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.ahmedbadereldin.videotrimmer.customVideoViews.BarThumb
 import com.ahmedbadereldin.videotrimmer.customVideoViews.CustomRangeSeekBar
@@ -444,7 +443,7 @@ class TrimVideoActivity : AppCompatActivity() {
             FFmpeg.cancel()
         }
         progressDialog.show()
-        progressInitialized = true
+
         progressDialog.setText("Trimmed 0%")
 
         val ffmpegCommand: String = commandsGenerator(strArr)
@@ -455,6 +454,7 @@ class TrimVideoActivity : AppCompatActivity() {
 
             when (returnCode) {
                 Config.RETURN_CODE_SUCCESS -> {
+                    progressInitialized = true
                     mHandler.removeCallbacks(mUpdateTimeTask)
                     trimFilePath = str
                     mainCachedFile = createCacheCopy(this, trimFilePath).toString()
@@ -506,15 +506,6 @@ class TrimVideoActivity : AppCompatActivity() {
 
     }
 
-    override fun onRestart() {
-        super.onRestart()
-        if (progressInitialized) {
-            progressDialog.dismiss()
-            Config.resetStatistics()
-            progressInitialized = false
-        }
-    }
-
     private fun switchActivity(videoPath: String) {
 
         mediaPlayer = null
@@ -538,9 +529,18 @@ class TrimVideoActivity : AppCompatActivity() {
         mediaPlayer = null
     }
 
+    override fun onRestart() {
+        super.onRestart()
+        if (progressInitialized) {
+            progressDialog.dismiss()
+            Config.resetStatistics()
+            progressInitialized = false
+        }
+    }
+
     override fun onPause() {
         super.onPause()
-        mediaPlayer?.pause()
+        binding.trimVideoView.pause()
         binding.playPauseButton.setImageResource(R.drawable.baseline_play_arrow)
     }
 
